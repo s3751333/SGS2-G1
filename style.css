@@ -7,9 +7,19 @@ header{
     background-color: blue;
     padding: 20px;
 }
-nav{
+.account{
     display: flex;
     gap: 20px;
+}
+.categories{
+
+}
+.categories ul{
+    display: flex;
+    list-style-type: none;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
 }
 a{
     text-decoration: none;
