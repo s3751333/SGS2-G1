@@ -1,11 +1,17 @@
 body{
-    background-color: red;
+    background-color: white;
 }
 header{
     display:flex; 
     justify-content: space-between;
+    background-color: blue;
+    padding: 20px;
 }
 nav{
     display: flex;
     gap: 20px;
+}
+a{
+    text-decoration: none;
+    color:red;
 }
