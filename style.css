@@ -32,5 +32,6 @@ header a img{
 }
 a{
     text-decoration: none;
-    color: black;
+    color: #7a2444;
+    font-weight: 900;
 }
