@@ -4,8 +4,17 @@ body{
 header{
     display:flex; 
     justify-content: space-between;
-    background-color: blue;
+    align-items: center;
+    background-color: #ffa8c9;
+    height: 100px;
     padding: 20px;
+    background-image: url(img/banner.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+header a img{
+    height: 50px;
 }
 .account{
     display: flex;
@@ -23,5 +32,5 @@ header{
 }
 a{
     text-decoration: none;
-    color:red;
+    color: black;
 }
