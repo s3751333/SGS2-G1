@@ -1,6 +1,5 @@
-body{
-    background-color: white;
-}
+@import url(deafault.css);
+
 header{
     display:flex; 
     justify-content: space-between;
