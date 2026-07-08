@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/sample.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="content">
+            <div class="logo">
+                <a href="./">
+                    SGS2-G1
+                </a>
+            </div>
+            <ul class="menu-list">
+                <div class="icon cancel-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+                <li><a href="./" class="nav-a-black">Home</a></li>
+                <li><a href="" class="nav-a-black">Blog</a></li>
+                <li><a href="" class="nav-a-black">Sign In/Up</a></li>
+                <li><a href="" class="nav-a-black">About Us</a></li>
+                <li><a href="" class="nav-a-black">Contact</a></li>
+                <li><a href="A" class="nav-a-black"><i class="fas fa-cart-arrow-down"></i></a></li>
+            </ul>
+            <div class="icon menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+
+
+    </main>
+
+    <script>
+        const body = document.querySelector("body");
+        const navbar = document.querySelector(".navbar");
+        const menuBtn = document.querySelector(".menu-btn");
+        const cancelBtn = document.querySelector(".cancel-btn");
+        const nav_a_black = document.querySelector(".nav-a-black");
+        menuBtn.onclick = () => {
+            navbar.classList.add("show");
+            menuBtn.classList.add("hide");
+            body.classList.add("disabled");
+            nav_a_black.classList.add("nav-a-white")
+        }
+        cancelBtn.onclick = () => {
+            body.classList.remove("disabled");
+            navbar.classList.remove("show");
+            menuBtn.classList.remove("hide");
+        }
+        window.onscroll = () => {
+            this.scrollY > 20 ? navbar.classList.add("sticky") : navbar.classList.remove("sticky");
+        }
+    </script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+</body>
+
+</html>
