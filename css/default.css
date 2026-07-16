@@ -8,6 +8,7 @@
 :root {
     --main-color: #0d6efd;
     --main-hover: #0b5ed7;
+    --delete: #dc3545;
 }
 
 body {
