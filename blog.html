@@ -11,23 +11,27 @@
 
 <body>
     <nav class="navbar">
-        <div class="content">
+        <div class="nav-container">
             <div class="logo">
-                <a href="./">SGS2-G1</a>
+                <a href="index.html">SGS2-G1</a>
             </div>
             <ul class="menu-list">
                 <div class="icon cancel-btn">
                     <i class="fas fa-times"></i>
                 </div>
-                <li><a href="index.html" class="nav-a-black">Home</a></li>
-                <li><a href="blogs.html" class="nav-a-black">Blog</a></li>
-                <li><a href="login.html" class="nav-a-black">Sign In/Up</a></li>
-                <li><a href="" class="nav-a-black">About Us</a></li>
-                <li><a href="" class="nav-a-black">Contact</a></li>
-                <li><a href="" class="nav-a-black"><i class="fas fa-cart-arrow-down"></i></a></li>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="blogs.html" class="nav-link">Blog</a></li>
+                <li><a href="products.html" class="nav-link">Shop</a></li>
+                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
             </ul>
-            <div class="icon menu-btn">
-                <i class="fas fa-bars"></i>
+            <div class="right-menu">
+                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
+                <a href="cart.html" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="icon menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </nav>
@@ -36,7 +40,7 @@
 
         <article class="blog-post">
             <h1 class="post-title">Top 5 Programming Languages to Learn in 2026</h1>
-            
+
             <div class="post-meta">
                 <span><i class="fas fa-user"></i> Published by: John Doe</span>
                 <span><i class="fas fa-calendar-alt"></i> Date: 07.01.2026</span>
@@ -48,13 +52,19 @@
             </div>
 
             <div class="post-content">
-                <p>The landscape of software development is evolving rapidly, driven by the continuous integration of cloud architectures and automation systems. As we navigate through 2026, selecting the right technologies to master can significantly impact your path as a full-stack engineer.</p>
-                <p>First on our list is JavaScript, accompanied closely by TypeScript. It remains the absolute standard for web development, powering modern single page applications and flexible backend architectures via Node.js environment frameworks.</p>
-                <p>Python continues to dominate fields involving complex data analytics and automated script execution due to its massive ecosystem of structured libraries and highly accessible syntax structure.</p>
-                <p>For systems requiring strict memory control, Go and Rust have seen a massive surge in commercial production environments, replacing legacy systems where performance efficiency is critical.</p>
+                <p>The landscape of software development is evolving rapidly, driven by the continuous integration of
+                    cloud architectures and automation systems. As we navigate through 2026, selecting the right
+                    technologies to master can significantly impact your path as a full-stack engineer.</p>
+                <p>First on our list is JavaScript, accompanied closely by TypeScript. It remains the absolute standard
+                    for web development, powering modern single page applications and flexible backend architectures via
+                    Node.js environment frameworks.</p>
+                <p>Python continues to dominate fields involving complex data analytics and automated script execution
+                    due to its massive ecosystem of structured libraries and highly accessible syntax structure.</p>
+                <p>For systems requiring strict memory control, Go and Rust have seen a massive surge in commercial
+                    production environments, replacing legacy systems where performance efficiency is critical.</p>
             </div>
 
-           <div class="author-actions">
+            <div class="author-actions">
                 <a href="blog-create.html" class="btn-action btn-edit">Edit Post</a>
                 <button class="btn-action btn-delete">Delete Post</button>
             </div>
@@ -71,7 +81,8 @@
                         <span class="comment-author">Laura</span>
                         <span class="comment-date">July 16, 2026</span>
                     </div>
-                    <p class="comment-text">Great article! Really helped with our studio project setup. JavaScript is definitely not going anywhere.</p>
+                    <p class="comment-text">Great article! Really helped with our studio project setup. JavaScript is
+                        definitely not going anywhere.</p>
                 </div>
 
                 <div class="comment-card">
@@ -79,7 +90,8 @@
                         <span class="comment-author">Tom</span>
                         <span class="comment-date">July 17, 2026</span>
                     </div>
-                    <p class="comment-text">Nice breakdown. I think Rust is worth looking into this year for performance-heavy applications.</p>
+                    <p class="comment-text">Nice breakdown. I think Rust is worth looking into this year for
+                        performance-heavy applications.</p>
                 </div>
             </div>
 
@@ -92,6 +104,9 @@
             </div>
         </section>
     </main>
+    <script src="js/navbar.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+
 </body>
 
 </html>
