@@ -52,6 +52,11 @@
     color: #ffffff;
 }
 
+.nav-link[aria-current="page"] {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
 .cart-btn {
     color: #ffffff;
     font-size: 20px;
@@ -67,6 +72,13 @@
     font-size: 22px;
     cursor: pointer;
     display: none;
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+.menu-control {
+    display: none;
 }
 
 @media (max-width: 868px) {
@@ -76,6 +88,10 @@
 
     .icon.hide {
         display: none;
+    }
+
+    .menu-control {
+        display: block;
     }
 
     .navbar .menu-list {
