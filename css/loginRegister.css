@@ -68,7 +68,7 @@
     box-shadow: 0 0 8px rgba(13, 110, 253, .2);
 }
 
-.auth-btn {
+.auth-page .auth-btn {
     width: 100%;
     padding: 12px;
     background: #0d6efd;
@@ -80,7 +80,7 @@
     transition: .3s;
 }
 
-.auth-btn:hover {
+.auth-page .auth-btn:hover {
     background: #0b5ed7;
 }
 
