@@ -1,31 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookNook</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-    <header>
-        <a href="index.html">
-            <img src="img/booknook.png" alt="booknook-logo">
-        </a>
-        <input type="search" placeholder="Search books...">
-        <nav class="account">
-            <a href="login.html">Login</a>
-            <a href="cart.html">Cart</a>
-        </nav>
-        
-    </header>
-    <nav class="categories">
-        <ul>
-            <li> <a href="vi-book.html">Vietnamese books</a></li>
-            <li><a href="en-book.html">English books</a></li>
-            <li><a href="board-game.html">Board games</a></li>
-            <li><a href="forum.html">Forum</a></li>
-        </ul>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html">SGS2-G1</a>
+            </div>
+            <ul class="menu-list">
+                <div class="icon cancel-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="blogs.html" class="nav-link">Blog</a></li>
+                <li><a href="products.html" class="nav-link">Shop</a></li>
+                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
+                <a href="cart.html" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="icon menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
     </nav>
-    
+
+    <script src="js/navbar.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+
 </body>
+
 </html>
