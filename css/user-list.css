@@ -1,5 +1,16 @@
 @import url(blog-create.css);
 
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-page {
+    min-height: 0;
+    flex: 1;
+}
+
 .user-list-container {
     max-width: 800px;
 }
