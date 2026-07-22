@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin-only list of BookNook users, account types and enabled status.">
+    <title>SGS2-G1 | User List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/user-list.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html">SGS2-G1</a>
+            </div>
+            <ul class="menu-list">
+                <li class="icon cancel-btn">
+                    <i class="fas fa-times"></i>
+                </li>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="blogs.html" class="nav-link">Blog</a></li>
+                <li><a href="products.html" class="nav-link">Shop</a></li>
+                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
+                <a href="cart.html" class="cart-btn" aria-label="Shopping cart">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="icon menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-page">
+        <div class="admin-container user-list-container">
+            <section class="admin-card">
+                <h1 class="admin-title">User List</h1>
+                <p class="admin-description">Admin-only overview of BookNook user accounts.</p>
+
+                <div class="table-wrapper">
+                    <table class="user-table">
+                        <caption>Registered users</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">User</th>
+                                <th scope="col">User Type</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Admin User</th>
+                                <td>Administrator</td>
+                                <td><span class="status enabled">Enabled</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Linh Nguyen</th>
+                                <td>Member</td>
+                                <td><span class="status enabled">Enabled</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Alex Pham</th>
+                                <td>Member</td>
+                                <td><span class="status disabled">Disabled</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Mai Hoang</th>
+                                <td>Member</td>
+                                <td><span class="status enabled">Enabled</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="forum-footer">
+        <p>&copy; 2026 SGS2-G1 BookNook</p>
+    </footer>
+
+    <script src="js/navbar.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+</body>
+
+</html>
