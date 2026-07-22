@@ -312,12 +312,6 @@ textarea:focus {
     gap: 12px;
 }
 
-.forum-footer {
-    padding: 22px;
-    background-color: #ffffff;
-    color: #6c757d;
-    text-align: center;
-}
 
 @media (max-width: 700px) {
     .page-heading,
