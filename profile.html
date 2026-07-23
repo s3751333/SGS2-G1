@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View and edit your BookNook account profile.">
+    <title>BookNook | My Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html">SGS2-G1</a>
+            </div>
+            <ul class="menu-list">
+                <div class="icon cancel-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="blogs.html" class="nav-link">Blog</a></li>
+                <li><a href="products.html" class="nav-link">Shop</a></li>
+                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
+                <a href="cart.html" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="icon menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Home</a> / My Account / Profile
+        </nav>
+
+        <div class="page-heading">
+            <h1>My Profile</h1>
+            <p>View and update your personal information.</p>
+        </div>
+
+        <div class="profile-layout">
+            <aside class="profile-card">
+                <div class="avatar-wrap">
+                    <div class="avatar-placeholder" aria-label="No profile photo set">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <button type="button" class="avatar-edit-btn" aria-label="Change profile photo">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <h2>Khoa Pham Dang Nguyen</h2>
+                <p class="member-since">Member since March 2026</p>
+
+                <nav class="profile-quick-links" aria-label="Account shortcuts">
+                    <a href="wishlist.html"><i class="fas fa-heart"></i> My Wishlist</a>
+                    <a href="cart.html"><i class="fas fa-shopping-cart"></i> My Cart</a>
+                    <a href="#account-actions"><i class="fas fa-gear"></i> Account Settings</a>
+                </nav>
+            </aside>
+
+            <div class="profile-main">
+                <section class="info-card" aria-labelledby="info-heading">
+                    <h2 id="info-heading">Personal Information</h2>
+                    <p>This information is only visible to you.</p>
+
+                    <form id="profile-form" action="profile.html" method="get">
+                        <div class="full-field">
+                            <label for="full-name">Full name</label>
+                            <input type="text" id="full-name" name="full-name" value="Khoa Pham Dang Nguyen">
+                        </div>
+
+                        <div>
+                            <label for="birthdate">Birthdate</label>
+                            <input type="date" id="birthdate" name="birthdate" value="2004-05-12">
+                        </div>
+
+                        <div>
+                            <label for="phone">Phone number</label>
+                            <input type="tel" id="phone" name="phone" value="090 123 4567">
+                        </div>
+
+                        <div class="full-field">
+                            <label for="email">Email address</label>
+                            <input type="email" id="email" name="email" value="khoa.nguyen@student.rmit.edu.vn">
+                        </div>
+
+                        <div class="full-field">
+                            <label for="address">Shipping address</label>
+                            <input type="text" id="address" name="address" value="702 Nguyen Van Linh, District 7, Ho Chi Minh City">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="reset" class="secondary-button">Cancel</button>
+                            <button type="submit" class="button">Save Changes</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="account-actions-card" id="account-actions" aria-labelledby="actions-heading">
+                    <h2 id="actions-heading">Account Settings</h2>
+                    <p>Manage your password and account access.</p>
+
+                    <div class="account-action-row">
+                        <div>
+                            <h3>Password</h3>
+                            <p>Last changed 3 months ago.</p>
+                        </div>
+                        <a href="login.html" class="secondary-button">Change Password</a>
+                    </div>
+
+                    <div class="account-action-row">
+                        <div>
+                            <h3>Log out</h3>
+                            <p>Sign out of BookNook on this device.</p>
+                        </div>
+                        <a href="login.html" class="secondary-button">Log Out</a>
+                    </div>
+
+                    <div class="account-action-row danger">
+                        <div>
+                            <h3>Delete account</h3>
+                            <p>Permanently remove your BookNook account and saved data.</p>
+                        </div>
+                        <button type="button" class="danger-button">Delete Account</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="forum-footer">
+        <p>&copy; 2026 SGS2-G1 BookNook</p>
+    </footer>
+
+    <script src="js/navbar.js" defer></script>
+</body>
+
+</html>
