@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Read and reply to a BookNook community discussion about The Little Prince.">
+    <title>BookNook | The Little Prince Discussion</title>
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/forum.css">
+    <script src="js/navbar.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html">SGS2-G1</a>
+            </div>
+            <ul class="menu-list" id="main-menu">
+                <li class="menu-control cancel-btn">
+                    <button class="icon" type="button" aria-label="Close menu">&times;</button>
+                </li>
+                <li><a class="nav-link" href="index.html">Home</a></li>
+                <li><a class="nav-link" href="products.html">Product</a></li>
+                <li><a class="nav-link" href="blogs.html">Blog</a></li>
+                <li><a class="nav-link" href="forum-main.html" aria-current="page">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a class="nav-link" href="login.html">Sign In/Up</a>
+                <a class="cart-btn" href="cart.html" aria-label="Shopping cart">Cart</a>
+                <button class="icon menu-btn" type="button" aria-label="Open menu" aria-controls="main-menu">&#9776;</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-container narrow-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="forum-main.html">Forum</a> / <a href="forum-main.html#english-books">English Books</a>
+        </nav>
+
+        <article class="discussion-card">
+            <span class="tag">English Books</span>
+            <h1>Which translation of The Little Prince should I read?</h1>
+            <p class="post-meta">Posted by <strong>Linh Nguyen</strong> on 18 July 2026</p>
+            <p>I want to read <em>The Little Prince</em> in English for the first time. I found translations by
+                Katherine Woods and Richard Howard. Which version is easier for an intermediate English learner?</p>
+            <div class="post-actions">
+                <button type="button">Edit topic</button>
+                <button type="button">Delete topic</button>
+            </div>
+        </article>
+
+        <section aria-labelledby="reply-heading">
+            <h2 id="reply-heading" class="section-title">4 replies</h2>
+            <div class="reply-list">
+                <article class="reply-card">
+                    <header class="reply-header">
+                        <strong>Alex Pham</strong>
+                        <span>18 July 2026, 10:15</span>
+                    </header>
+                    <p>Richard Howard's translation uses more modern English. I found it clearer when I first read the
+                        story.</p>
+                    <a class="reply-link" href="#reply-form">Reply</a>
+                </article>
+
+                <article class="reply-card nested-reply">
+                    <header class="reply-header">
+                        <strong>Linh Nguyen</strong>
+                        <span>18 July 2026, 11:02</span>
+                    </header>
+                    <p><strong>Replying to Alex:</strong> Thank you. Modern wording sounds better for my first reading.</p>
+                    <a class="reply-link" href="#reply-form">Reply</a>
+                </article>
+
+                <article class="reply-card">
+                    <header class="reply-header">
+                        <strong>Mai Hoang</strong>
+                        <span>18 July 2026, 14:40</span>
+                    </header>
+                    <p>Katherine Woods has a more classic style. You could read one chapter from each version before
+                        choosing.</p>
+                    <a class="reply-link" href="#reply-form">Reply</a>
+                </article>
+
+                <article class="reply-card">
+                    <header class="reply-header">
+                        <strong>Daniel Lee</strong>
+                        <span>19 July 2026, 09:20</span>
+                    </header>
+                    <p>I also recommend Richard Howard for a learner. The sentences feel direct, but the meaning is
+                        still beautiful.</p>
+                    <a class="reply-link" href="#reply-form">Reply</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="reply-form-section" aria-labelledby="reply-form-heading">
+            <h2 id="reply-form-heading">Add your reply</h2>
+            <form id="reply-form" action="forum-topic.html" method="get">
+                <label for="reply-message">Your message</label>
+                <textarea id="reply-message" name="message" rows="6" placeholder="Share a helpful answer..."
+                    required></textarea>
+                <button class="button" type="submit">Post reply</button>
+            </form>
+        </section>
+    </main>
+
+</body>
+
+</html>
