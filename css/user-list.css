@@ -56,6 +56,17 @@ body {
     font-weight: bold;
 }
 
+.user-table .toggle-cell {
+    text-align: center;
+}
+
+.status-toggle {
+    width: 18px;
+    height: 18px;
+    accent-color: #198754;
+    cursor: pointer;
+}
+
 .enabled {
     background-color: #d9f2e3;
     color: #176b3a;
@@ -71,8 +82,22 @@ body {
         padding: 20px;
     }
 
+    .user-table {
+        font-size: 13px;
+    }
+
     .user-table th,
     .user-table td {
-        padding: 10px;
+        padding: 8px 5px;
+    }
+
+    .status {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+
+    .status-toggle {
+        width: 16px;
+        height: 16px;
     }
 }

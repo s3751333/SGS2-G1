@@ -51,6 +51,7 @@
                                 <th scope="col">User</th>
                                 <th scope="col">User Type</th>
                                 <th scope="col">Status</th>
+                                <th class="toggle-cell" scope="col">Enable</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,21 +59,29 @@
                                 <th scope="row">Admin User</th>
                                 <td>Administrator</td>
                                 <td><span class="status enabled">Enabled</span></td>
+                                <td class="toggle-cell"><input class="status-toggle" type="checkbox" checked
+                                        aria-label="Enable Admin User"></td>
                             </tr>
                             <tr>
                                 <th scope="row">Linh Nguyen</th>
                                 <td>Member</td>
                                 <td><span class="status enabled">Enabled</span></td>
+                                <td class="toggle-cell"><input class="status-toggle" type="checkbox" checked
+                                        aria-label="Enable Linh Nguyen"></td>
                             </tr>
                             <tr>
                                 <th scope="row">Alex Pham</th>
                                 <td>Member</td>
                                 <td><span class="status disabled">Disabled</span></td>
+                                <td class="toggle-cell"><input class="status-toggle" type="checkbox"
+                                        aria-label="Enable Alex Pham"></td>
                             </tr>
                             <tr>
                                 <th scope="row">Mai Hoang</th>
                                 <td>Member</td>
                                 <td><span class="status enabled">Enabled</span></td>
+                                <td class="toggle-cell"><input class="status-toggle" type="checkbox" checked
+                                        aria-label="Enable Mai Hoang"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -85,6 +94,7 @@
         <p>&copy; 2026 SGS2-G1 BookNook</p>
     </footer>
 
+    <script src="js/user-list.js"></script>
     <script src="js/navbar.js"></script>
     <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
 </body>
