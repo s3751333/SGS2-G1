@@ -4,102 +4,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Browse BookNook books and board games.">
-    <title>BookNook | Products</title>
-    <link rel="stylesheet" href="css/default.css">
-    <link rel="stylesheet" href="css/navbar.css">
+    <meta name="description" content="Browse books and board games on BookNook, and read reviews before you buy.">
+    <title>BookNook | Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/products.css">
-    <script src="js/navbar.js" defer></script>
 </head>
 
 <body>
-    <nav class="navbar" aria-label="Main navigation">
+    <nav class="navbar">
         <div class="nav-container">
-            <div class="logo"><a href="index.html">SGS2-G1</a></div>
-            <ul class="menu-list" id="main-menu">
-                <li class="menu-control cancel-btn">
-                    <button class="icon" type="button" aria-label="Close menu">&times;</button>
-                </li>
-                <li><a class="nav-link" href="index.html">Home</a></li>
-                <li><a class="nav-link" href="products.html" aria-current="page">Product</a></li>
-                <li><a class="nav-link" href="blogs.html">Blog</a></li>
-                <li><a class="nav-link" href="forum-main.html">Forum</a></li>
+            <div class="logo">
+                <a href="index.html">SGS2-G1</a>
+            </div>
+            <ul class="menu-list">
+                <div class="icon cancel-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="blogs.html" class="nav-link">Blog</a></li>
+                <li><a href="products.html" class="nav-link" aria-current="page">Shop</a></li>
+                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
             </ul>
             <div class="right-menu">
-                <a class="nav-link" href="login.html">Sign In/Up</a>
-                <a class="cart-btn" href="cart.html" aria-label="Shopping cart">Cart</a>
-                <button class="icon menu-btn" type="button" aria-label="Open menu" aria-controls="main-menu">&#9776;</button>
+                <a href="profile.html" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
+                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
+                <a href="cart.html" class="cart-btn">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="icon menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="products-page">
-        <section class="products-heading">
+    <main class="page-container">
+        <div class="page-heading">
             <div>
-                <h1>Books & Board Games</h1>
-                <p>Find something new to read, learn or play.</p>
+                <h1>Shop</h1>
+                <p>Browse books and board games, and check reviews before you buy.</p>
             </div>
-            <form class="product-search" action="products.html" method="get" role="search">
-                <input type="search" name="q" placeholder="Search products" aria-label="Search products">
-                <button type="submit">Search</button>
-            </form>
-        </section>
+            <a href="wishlist.html" class="wishlist-link"><i class="fas fa-heart"></i> My Wishlist</a>
+        </div>
 
-        <section class="product-section" id="books">
-            <h2>Books</h2>
-            <div class="product-grid">
-                <article class="product-card">
-                    <img src="img/harry-potter.jpg" alt="Harry Potter book">
-                    <h3>Harry Potter</h3>
-                    <p>J. K. Rowling</p>
-                    <p><strong>150,000 VND</strong></p>
-                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
-                </article>
-                <article class="product-card">
-                    <img src="img/the-little-prince.jpg" alt="The Little Prince book">
-                    <h3>The Little Prince</h3>
-                    <p>Antoine de Saint-Exupéry</p>
-                    <p><strong>100,000 VND</strong></p>
-                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
-                </article>
-                <article class="product-card">
-                    <img src="img/english-grammar.jpg" alt="English Grammar book">
-                    <h3>English Grammar</h3>
-                    <p>Raymond Murphy</p>
-                    <p><strong>180,000 VND</strong></p>
-                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
-                </article>
+        <div class="shop-tools">
+            <div class="form-field search-field">
+                <label for="shop-search">Search products</label>
+                <input type="text" id="shop-search" placeholder="Try: The Little Prince">
             </div>
-        </section>
+            <div class="form-field">
+                <label for="shop-category">Category</label>
+                <select id="shop-category">
+                    <option value="all">All categories</option>
+                    <option value="fiction">Fiction</option>
+                    <option value="self-help">Self-Help</option>
+                    <option value="reference">Reference</option>
+                    <option value="board-games">Board Games</option>
+                </select>
+            </div>
+            <button type="button">Search</button>
+        </div>
 
-        <section class="product-section" id="board-games">
-            <h2>Board Games</h2>
-            <div class="product-grid">
-                <article class="product-card">
-                    <img src="img/catan.jpg" alt="Catan board game">
-                    <h3>Catan</h3>
-                    <p>3–4 players</p>
-                    <p><strong>200,000 VND</strong></p>
-                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
-                </article>
-                <article class="product-card">
-                    <img src="img/monopoly.jpg" alt="Monopoly board game">
-                    <h3>Monopoly</h3>
-                    <p>2–8 players</p>
-                    <p><strong>350,000 VND</strong></p>
-                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
-                </article>
-                <article class="product-card">
-                    <img src="img/uno.jpg" alt="Uno card game">
-                    <h3>Uno</h3>
-                    <p>2–10 players</p>
-                    <p><strong>100,000 VND</strong></p>
-                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
-                </article>
-            </div>
-        </section>
+        <h2 class="section-title" id="books">Featured Books</h2>
+        <div class="product-grid">
+            <article class="product-card">
+                <img src="img/book.jpg" alt="Cover of Harry Potter and the Sorcerer's Stone">
+                <span class="tag">Fantasy</span>
+                <h3><a href="product-detail.html">Harry Potter and the Sorcerer's Stone</a></h3>
+                <p class="card-meta">Author: J. K. Rowling</p>
+                <a class="card-rating" href="product-detail.html#reviews">
+                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+                    4.7 &middot; 210 reviews
+                </a>
+                <p class="card-price">150,000 VND</p>
+                <div class="card-actions">
+                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i></a>
+                </div>
+            </article>
+
+            <article class="product-card">
+                <img src="img/book.jpg" alt="Cover of The Little Prince">
+                <span class="tag">Fiction</span>
+                <h3><a href="product-detail.html">The Little Prince</a></h3>
+                <p class="card-meta">Author: Antoine de Saint-Exupéry</p>
+                <a class="card-rating" href="product-detail.html#reviews">
+                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+                    4.6 &middot; 128 reviews
+                </a>
+                <p class="card-price">100,000 VND</p>
+                <div class="card-actions">
+                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i></a>
+                </div>
+            </article>
+
+            <article class="product-card">
+                <img src="img/book.jpg" alt="Cover of English Grammar in Use">
+                <span class="tag">Reference</span>
+                <h3><a href="product-detail.html">English Grammar in Use</a></h3>
+                <p class="card-meta">Author: Raymond Murphy</p>
+                <a class="card-rating" href="product-detail.html#reviews">
+                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    4.8 &middot; 96 reviews
+                </a>
+                <p class="card-price">180,000 VND</p>
+                <div class="card-actions">
+                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i></a>
+                </div>
+            </article>
+        </div>
+
+        <h2 class="section-title" id="board-games">Featured Board Games</h2>
+        <div class="product-grid">
+            <article class="product-card">
+                <img src="img/book.jpg" alt="Catan board game box">
+                <span class="tag">Board Games</span>
+                <h3><a href="product-detail.html">Catan</a></h3>
+                <p class="card-meta">Players: 3&ndash;4</p>
+                <a class="card-rating" href="product-detail.html#reviews">
+                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+                    4.5 &middot; 54 reviews
+                </a>
+                <p class="card-price">200,000 VND</p>
+                <div class="card-actions">
+                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i></a>
+                </div>
+            </article>
+
+            <article class="product-card">
+                <img src="img/book.jpg" alt="Monopoly board game box">
+                <span class="tag">Board Games</span>
+                <h3><a href="product-detail.html">Monopoly</a></h3>
+                <p class="card-meta">Players: 2&ndash;8</p>
+                <a class="card-rating" href="product-detail.html#reviews">
+                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9734;&#9734;</span>
+                    3.9 &middot; 73 reviews
+                </a>
+                <p class="card-price">350,000 VND</p>
+                <div class="card-actions">
+                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i></a>
+                </div>
+            </article>
+
+            <article class="product-card">
+                <img src="img/book.jpg" alt="Uno card game box">
+                <span class="tag">Board Games</span>
+                <h3><a href="product-detail.html">Uno</a></h3>
+                <p class="card-meta">Players: 2&ndash;10</p>
+                <a class="card-rating" href="product-detail.html#reviews">
+                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
+                    4.4 &middot; 68 reviews
+                </a>
+                <p class="card-price">100,000 VND</p>
+                <div class="card-actions">
+                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i></a>
+                </div>
+            </article>
+        </div>
     </main>
 
+    <footer class="forum-footer">
+        <p>&copy; 2026 SGS2-G1 BookNook</p>
+    </footer>
+
+    <script src="js/navbar.js" defer></script>
 </body>
 
 </html>

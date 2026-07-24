@@ -2,11 +2,11 @@
 @import url(navbar.css);
 
 .auth-page {
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
+    margin-top: 55px;
 }
 
 .auth-container {
