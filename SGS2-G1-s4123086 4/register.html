@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNook | Register</title>
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/loginRegister.css">
+    <link rel="stylesheet" href="css/site-theme.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html">SGS2-G1</a>
+            </div>
+            <ul class="menu-list">
+                <div class="icon cancel-btn">
+                    <i class="fas fa-times"></i>
+                </div>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="products.html" class="nav-link">Product</a></li>
+                <li><a href="blogs.html" class="nav-link">Blog</a></li>
+                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
+                <a href="cart.html" class="cart-btn" aria-label="Shopping cart">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+                <div class="icon menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-page">
+
+        <div class="auth-container">
+
+            <div class="auth-card">
+
+                <h1 class="auth-title">Create Account</h1>
+
+                <form action="#" method="post">
+
+                    <div class="form-group">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="email">Introduction</label>
+                        <textarea name="introduction" id="" placeholder="I like the web."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" name="confirm-password"
+                            placeholder="Confirm your password" required>
+                    </div>
+
+                    <button type="submit" class="auth-btn">
+                        Create Account
+                    </button>
+
+                </form>
+
+                <div class="auth-text">
+                    Already have an account?
+                    <a href="login.html">Sign In</a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="js/navbar.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
