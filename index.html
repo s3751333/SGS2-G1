@@ -1,192 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bookstore | Home</title>
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-      .site-header { display: block; padding: 0; }
-      .header-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-      .brand { text-decoration: none; }
-      .account-links { display: flex; align-items: center; gap: 16px; }
-      .account-links a { text-decoration: none; }
-      .main-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
-      .main-nav a, .main-nav summary { display: block; padding: 10px 14px; border-radius: 6px; color: #173b4c; font-weight: 600; text-decoration: none; cursor: pointer; }
-      .main-nav a:hover, .main-nav summary:hover { background: #d7edf7; }
-      .main-nav details { position: relative; }
-      .main-nav details ul { position: absolute; z-index: 2; min-width: 190px; margin: 0; padding: 8px; list-style: none; background: white; border: 1px solid #c9dce5; border-radius: 6px; box-shadow: 0 5px 14px #0002; }
-      .main-nav details a { padding: 8px 10px; font-weight: normal; }
-      .main-nav .category-menu { min-width: 220px; }
-      .main-nav .category-menu > li > details { position: static; }
-      .main-nav .category-menu > li > details > summary { padding: 8px 10px; font-weight: 600; }
-      .main-nav .category-menu > li > details > ul { position: static; min-width: 0; padding: 0 0 4px 12px; border: 0; box-shadow: none; }
-      .intro { max-width: 760px; margin: 35px auto 25px; text-align: center; }
-      .search-box { display: flex; justify-content: center; gap: 8px; margin-top: 22px; }
-      .search-box input { width: min(100%, 420px); padding: 10px; border: 1px solid #b8c2c8; border-radius: 6px; font: inherit; }
-      .product-section { margin-top: 24px; padding: 22px; background: white; border-radius: 8px; }
-      .product-section h2 { margin-top: 0; }
-      .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
-      .product-card { padding: 16px; border: 1px solid #dbe5e9; border-radius: 8px; text-align: center; }
-      .product-card h3 { margin-top: 0; }
-      .product-card img { width: 200px; max-width: 100%; height: 250px; object-fit: cover; }
-      .product-card p { margin: 8px 0; }
-      .product-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-      .product-actions .secondary-button { background: #5d7d8c; }
-      footer { margin-top: 35px; }
-      @media (max-width: 720px) {
-        .header-top { align-items: flex-start; flex-direction: column; }
-        .product-grid { grid-template-columns: 1fr; }
-        .product-card img { width: 180px; height: 225px; }
-      }
-    </style>
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="header-top">
-        <a class="brand" href="index.html">Bookstore</a>
-        <div class="account-links">
-          <a href="login.html">Log in</a>
-          <a href="cart.html" aria-label="Shopping cart">🛒 Shopping cart</a>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Homepage for books, board games, blog posts and community discussions.">
+    <title>SGS2-G1 | Home</title>
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/home.css">
+    <script src="js/navbar.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">SGS2-G1</a></div>
+            <ul class="menu-list" id="main-menu">
+                <li class="menu-control cancel-btn">
+                    <button class="icon" type="button" aria-label="Close menu">&times;</button>
+                </li>
+                <li><a class="nav-link" href="index.html" aria-current="page">Home</a></li>
+                <li><a class="nav-link" href="products.html">Product</a></li>
+                <li><a class="nav-link" href="blogs.html">Blog</a></li>
+                <li><a class="nav-link" href="forum-main.html">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a class="nav-link" href="login.html">Sign In/Up</a>
+                <a class="cart-btn" href="cart.html" aria-label="Shopping cart">Cart</a>
+                <button class="icon menu-btn" type="button" aria-label="Open menu" aria-controls="main-menu">&#9776;</button>
+            </div>
         </div>
-      </div>
+    </nav>
 
-      <nav class="main-nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="blogs.html">Blog</a>
-        <a href="forum-main.html">Forum</a>
+    <main class="home-main">
+        <section class="hero">
+            <div>
+                <h1>Books and games for curious minds</h1>
+                <p>Discover English and Vietnamese books, family board games, useful articles and community discussions.</p>
+                <div class="hero-actions">
+                    <a class="home-button" href="products.html">Browse products</a>
+                    <a class="home-button-secondary" href="forum-main.html">Visit the forum</a>
+                </div>
+            </div>
+            <img class="hero-image" src="img/book.jpg" alt="Books and reading">
+        </section>
 
-        <details>
-          <summary>Categories</summary>
-          <ul class="category-menu">
-            <li>
-              <details>
-                <summary>English books</summary>
-                <ul>
-                  <li><a href="#english-books">Children's books</a></li>
-                  <li><a href="#english-books">Fiction</a></li>
-                  <li><a href="#english-books">Self-help books</a></li>
-                </ul>
-              </details>
-            </li>
-            <li>
-              <details>
-                <summary>Vietnamese books</summary>
-                <ul>
-                  <li><a href="#vietnamese-books">Education</a></li>
-                  <li><a href="#vietnamese-books">Novels</a></li>
-                  <li><a href="#vietnamese-books">Comic books</a></li>
-                </ul>
-              </details>
-            </li>
-            <li>
-              <details>
-                <summary>Board games</summary>
-                <ul>
-                  <li><a href="#board-games">New games</a></li>
-                  <li><a href="#board-games">Strategy games</a></li>
-                  <li><a href="#board-games">Family games</a></li>
-                </ul>
-              </details>
-            </li>
-          </ul>
-        </details>
-      </nav>
-    </header>
-
-    <main>
-      <section class="intro">
-        <h1>Welcome to Bookstore</h1>
-        <p>Find your favorite books and board games at great prices.</p>
-        <form class="search-box" action="#" method="get">
-          <input type="search" name="q" placeholder="Search for books..." aria-label="Search for books" />
-          <button type="submit">Search</button>
-        </form>
-      </section>
-
-      <section class="product-section" id="english-books">
-        <h2>Featured Books</h2>
-        <div class="product-grid">
-          <article class="product-card">
-            <h3>Harry Potter</h3>
-            <img src="img/harry-potter.jpg" alt="Harry Potter book" />
-            <p>Author: J. K. Rowling</p>
-            <p>Price: 150,000 VND</p>
-            <div class="product-actions">
-              <a class="button-link" href="cart.html">Buy now</a>
-              <a class="button-link secondary-button" href="cart.html">Add to cart</a>
+        <section class="home-section" aria-labelledby="explore-heading">
+            <h2 id="explore-heading">Explore our website</h2>
+            <div class="category-grid">
+                <a class="category-card" href="products.html#books">
+                    <h3>Books</h3>
+                    <p>Browse stories, learning resources and best sellers.</p>
+                </a>
+                <a class="category-card" href="products.html#board-games">
+                    <h3>Board Games</h3>
+                    <p>Find games for families, friends and strategy fans.</p>
+                </a>
+                <a class="category-card" href="blogs.html">
+                    <h3>Blog & Community</h3>
+                    <p>Read new articles or join a discussion with other readers.</p>
+                </a>
             </div>
-          </article>
-          <article class="product-card">
-            <h3>The Little Prince</h3>
-            <img src="img/the-little-prince.jpg" alt="The Little Prince book" />
-            <p>Author: Antoine de Saint-Exupery</p>
-            <p>Price: 100,000 VND</p>
-            <div class="product-actions">
-              <a class="button-link" href="cart.html">Buy now</a>
-              <a class="button-link secondary-button" href="cart.html">Add to cart</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <h3>English Grammar</h3>
-            <img src="img/english-grammar.jpg" alt="English Grammar book" />
-            <p>Author: Raymond Murphy</p>
-            <p>Price: 180,000 VND</p>
-            <div class="product-actions">
-              <a class="button-link" href="cart.html">Buy now</a>
-              <a class="button-link secondary-button" href="cart.html">Add to cart</a>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="product-section" id="board-games">
-        <h2>Featured Board Games</h2>
-        <div class="product-grid">
-          <article class="product-card">
-            <h3>Catan</h3>
-            <img src="img/catan.jpg" alt="Board game Catan" />
-            <p>Players: 3–4</p>
-            <p>Price: 200,000 VND</p>
-            <div class="product-actions">
-              <a class="button-link" href="cart.html">Buy now</a>
-              <a class="button-link secondary-button" href="cart.html">Add to cart</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <h3>Monopoly</h3>
-            <img src="img/monopoly.jpg" alt="Board game Monopoly" />
-            <p>Players: 2–8</p>
-            <p>Price: 350,000 VND</p>
-            <div class="product-actions">
-              <a class="button-link" href="cart.html">Buy now</a>
-              <a class="button-link secondary-button" href="cart.html">Add to cart</a>
-            </div>
-          </article>
-          <article class="product-card">
-            <h3>Uno</h3>
-            <img src="img/uno.jpg" alt="Board game Uno" />
-            <p>Players: 2–10</p>
-            <p>Price: 100,000 VND</p>
-            <div class="product-actions">
-              <a class="button-link" href="cart.html">Buy now</a>
-              <a class="button-link secondary-button" href="cart.html">Add to cart</a>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <div id="vietnamese-books" aria-hidden="true"></div>
+        </section>
     </main>
 
-    <footer>
-      <hr />
-      <h3>Bookstore</h3>
-      <p>Address: 702 Nguyen Van Linh, Ho Chi Minh City, Vietnam</p>
-      <p>Phone: 0123 456 789</p>
-      <p>Email: bookstore@example.com</p>
-      <p><a href="#">About us</a> | <a href="#">Contact</a> | <a href="#">Privacy policy</a></p>
-      <p>&copy; 2026 Bookstore. All rights reserved.</p>
-    </footer>
-  </body>
+</body>
+
 </html>
