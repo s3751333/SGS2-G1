@@ -14,7 +14,7 @@
 
 | Student Name | Student ID | Responsibilities & Assigned Modules |
 | :--- | :--- | :--- |
-| **Mark Molnar** | `s4051620` | Blog Platform, Shared User Access (`login.html`, `register.html`, `blogs.html`, `blog-create.html`, `blog-articles/`)|
+| **Mark Molnar** | `s4051620` | Blog Platform, Shared User Access (`login.html`, `register.html`, `blogs.html`, `blog-create.html`, `blog-articles/`, `sitemap.html`)|
 | **Tấn Tài Phạm** | `s3751333` | Discussion Forum & Admin Panel (`forum-main.html`, `forum-topic.html`, `forum-new-topic.html`, `admin-users.html`) |
 | **Ayden Le** | `s4123086` | Shopping Cart, Checkout, Landing Page & Navigation (`index.html`, `cart.html`, `checkout.html`) |
 | **Khoa Pham Dang Nguyen** | `s4132855` | Product Reviews, Wishlist & User Profile (`products.html`, `product-detail.html`, `profile.html`, `wishlist.html`)|
