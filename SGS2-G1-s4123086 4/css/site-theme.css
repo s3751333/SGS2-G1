@@ -1,0 +1,88 @@
+@import url(default.css);
+@import url(navbar.css);
+
+/* Shared visual language based on forum-main.html. */
+body {
+    background-color: #eef2f7;
+    color: #263238;
+}
+
+a { color: #0d6efd; }
+
+button,
+.button-link,
+.btn-read,
+.btn-action,
+.save-btn,
+.search-btn {
+    border: 1px solid #0d6efd;
+    border-radius: 6px;
+    background: #0d6efd;
+    color: #fff;
+}
+
+button:hover,
+.button-link:hover,
+.btn-read:hover,
+.btn-action:hover,
+.save-btn:hover,
+.search-btn:hover {
+    background: #0b5ed7;
+}
+
+.article-container,
+.admin-page,
+.auth-page,
+.blog-container,
+.sample-page {
+    min-height: calc(100vh - 130px);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 20px;
+}
+
+.blog-post,
+.comment-card,
+.comment-form,
+.admin-card,
+.auth-card,
+.card,
+.product-section,
+.product-card {
+    background-color: #fff;
+    border: 1px solid #d8dee5;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.blog-header {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 20px 10px;
+    text-align: left;
+}
+
+.blog-header h1,
+.admin-title,
+.auth-title { color: #263238; }
+
+.blog-container { padding-top: 18px; }
+.card { padding: 20px; }
+.card:hover { transform: none; border-color: #0d6efd; }
+
+.search-container { margin: 0 auto 28px; }
+.admin-page,
+.auth-page { align-items: flex-start; }
+.admin-card,
+.auth-card { box-shadow: none; }
+
+.post-content p,
+.comment-text { color: #263238; }
+
+@media (max-width: 720px) {
+    .article-container,
+    .admin-page,
+    .auth-page,
+    .blog-container,
+    .sample-page { padding: 24px 16px; }
+}
