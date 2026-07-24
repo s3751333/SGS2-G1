@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse BookNook books and board games.">
+    <title>BookNook | Products</title>
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/products.css">
+    <script src="js/navbar.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">SGS2-G1</a></div>
+            <ul class="menu-list" id="main-menu">
+                <li class="menu-control cancel-btn">
+                    <button class="icon" type="button" aria-label="Close menu">&times;</button>
+                </li>
+                <li><a class="nav-link" href="index.html">Home</a></li>
+                <li><a class="nav-link" href="products.html" aria-current="page">Product</a></li>
+                <li><a class="nav-link" href="blogs.html">Blog</a></li>
+                <li><a class="nav-link" href="forum-main.html">Forum</a></li>
+            </ul>
+            <div class="right-menu">
+                <a class="nav-link" href="login.html">Sign In/Up</a>
+                <a class="cart-btn" href="cart.html" aria-label="Shopping cart">Cart</a>
+                <button class="icon menu-btn" type="button" aria-label="Open menu" aria-controls="main-menu">&#9776;</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="products-page">
+        <section class="products-heading">
+            <div>
+                <h1>Books & Board Games</h1>
+                <p>Find something new to read, learn or play.</p>
+            </div>
+            <form class="product-search" action="products.html" method="get" role="search">
+                <input type="search" name="q" placeholder="Search products" aria-label="Search products">
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        <section class="product-section" id="books">
+            <h2>Books</h2>
+            <div class="product-grid">
+                <article class="product-card">
+                    <img src="img/harry-potter.jpg" alt="Harry Potter book">
+                    <h3>Harry Potter</h3>
+                    <p>J. K. Rowling</p>
+                    <p><strong>150,000 VND</strong></p>
+                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
+                </article>
+                <article class="product-card">
+                    <img src="img/the-little-prince.jpg" alt="The Little Prince book">
+                    <h3>The Little Prince</h3>
+                    <p>Antoine de Saint-Exupéry</p>
+                    <p><strong>100,000 VND</strong></p>
+                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
+                </article>
+                <article class="product-card">
+                    <img src="img/english-grammar.jpg" alt="English Grammar book">
+                    <h3>English Grammar</h3>
+                    <p>Raymond Murphy</p>
+                    <p><strong>180,000 VND</strong></p>
+                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
+                </article>
+            </div>
+        </section>
+
+        <section class="product-section" id="board-games">
+            <h2>Board Games</h2>
+            <div class="product-grid">
+                <article class="product-card">
+                    <img src="img/catan.jpg" alt="Catan board game">
+                    <h3>Catan</h3>
+                    <p>3–4 players</p>
+                    <p><strong>200,000 VND</strong></p>
+                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
+                </article>
+                <article class="product-card">
+                    <img src="img/monopoly.jpg" alt="Monopoly board game">
+                    <h3>Monopoly</h3>
+                    <p>2–8 players</p>
+                    <p><strong>350,000 VND</strong></p>
+                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
+                </article>
+                <article class="product-card">
+                    <img src="img/uno.jpg" alt="Uno card game">
+                    <h3>Uno</h3>
+                    <p>2–10 players</p>
+                    <p><strong>100,000 VND</strong></p>
+                    <div class="product-actions"><a class="product-button" href="cart.html">Buy now</a><a class="product-button secondary" href="cart.html">Add to cart</a></div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+</body>
+
+</html>
