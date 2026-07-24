@@ -1,3 +1,6 @@
+@import url(default.css);
+@import url(navbar.css);
+
 .cart-page {
     max-width: 1100px;
     min-height: calc(100vh - 80px);
