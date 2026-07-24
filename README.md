@@ -17,7 +17,7 @@
 | **Mark Molnar** | `s4051620` | Blog Platform, Shared User Access (`login.html`, `register.html`, `blogs.html`, `blog-create.html`, `blog-articles/`)|
 | **Tấn Tài Phạm** | `s3751333` | Discussion Forum & Admin Panel (`forum-main.html`, `forum-topic.html`, `forum-new-topic.html`, `admin-users.html`) |
 | **Ayden Le** | `s4123086` | Shopping Cart, Checkout, Landing Page & Navigation (`index.html`, `cart.html`, `checkout.html`) |
-| **Khoa Pham Dang Nguyen** | `s4132855` | Product Reviews, Wishlist & User Profile |
+| **Khoa Pham Dang Nguyen** | `s4132855` | Product Reviews, Wishlist & User Profile (`products.html`, `product-detail.html`, `profile.html`, `wishlist.html`)|
 
 ---
 
@@ -45,6 +45,8 @@ SGS2-G1/
 ├── index.html              # Main Landing / Home Page
 ├── login.html              # User login authentication page
 ├── register.html           # User account registration page
+├── products.html           # User browse for products
+├── product-detail.html     # User click to see the review and quantity of the products
 ├── profile.html            # User profile management page
 ├── wishlist.html           # Saved items / wishlist page
 ├── sitemap.html            # HTML Site structure navigation
