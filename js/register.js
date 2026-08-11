@@ -12,6 +12,31 @@ const password = document.querySelector("#password");
 const passwordMessage = document.querySelector("#password-message");
 const confirmPassword = document.querySelector("#confirm-password");
 const confirmPasswordMessage = document.querySelector("#confirm-password-message");
+const storageKey = "booknookRegistrationForm";
+
+function saveFormData() {
+  const formData = {
+    fullName: fullName.value,
+    username: username.value,
+    email: email.value,
+    introduction: introduction.value,
+  };
+
+  localStorage.setItem(storageKey, JSON.stringify(formData));
+}
+
+function loadFormData() {
+  const savedFormData = localStorage.getItem(storageKey);
+
+  if (savedFormData) {
+    const formData = JSON.parse(savedFormData);
+    fullName.value = formData.fullName || "";
+    username.value = formData.username || "";
+    email.value = formData.email || "";
+    introduction.value = formData.introduction || "";
+    introductionCount.textContent = `${introduction.value.length} / 300 characters`;
+  }
+}
 
 function showMessage(element, message, isValid) {
   element.textContent = message;
@@ -49,6 +74,12 @@ function showPasswordMatch() {
   showMessage(confirmPasswordMessage, isValid ? "Passwords match." : "Passwords do not match.", isValid);
   return isValid;
 }
+
+loadFormData();
+
+[fullName, username, email, introduction].forEach(function (field) {
+  field.addEventListener("input", saveFormData);
+});
 
 fullName.addEventListener("input", validateFullName);
 username.addEventListener("input", validateUsername);
