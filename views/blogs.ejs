@@ -36,8 +36,28 @@
         <button type="submit" class="search-btn">Search</button>
     </form>
 
-    <p id="blog-status" class="blog-status" aria-live="polite">Loading blog posts...</p>
-    <main id="blog-list" class="blog-container"></main>
+    <p id="blog-status" class="blog-status" aria-live="polite"><%= posts.length %> blog posts found.</p>
+    <main id="blog-list" class="blog-container">
+        <% posts.forEach((post) => { %>
+            <article class="card"
+                data-title="<%= post.title.toLowerCase() %>"
+                data-author="<%= post.author.toLowerCase() %>"
+                data-category="<%= post.category %>"
+                data-date="<%= post.date %>"
+                data-search="<%= [post.title, post.author, post.date, post.category, post.tags.join(' '), post.summary, post.content].join(' ').toLowerCase() %>">
+                <div class="card-image">
+                    <img src="/<%= post.image %>" alt="<%= post.title %>">
+                </div>
+                <h3><%= post.title %></h3>
+                <p class="card-meta">By <%= post.author %> · <%= post.category %></p>
+                <p><%= post.summary %></p>
+                <div class="card-footer">
+                    <span><%= new Date(post.date).toLocaleDateString("en-AU") %></span>
+                    <a href="/blog-articles/blog<%= post.id %>" class="btn-read">Read</a>
+                </div>
+            </article>
+        <% }) %>
+    </main>
 
     <%- include("partials/footer") %>
 

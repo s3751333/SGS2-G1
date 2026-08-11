@@ -161,19 +161,20 @@ app.post("/logout", (request, response) => {
   response.json({ message: "Logout successful." });
 });
 
-app.get("/blogs-data", (request, response) => {
-  const posts = blogPosts.map((post) => {
+function getBlogPostsWithAuthors() {
+  return blogPosts.map((post) => {
     const author = users.find((user) => user.id === post.authorId);
     return { ...post, author: author ? author.fullName : "Unknown author" };
   });
+}
 
-  response.json(posts);
+app.get("/blogs-data", (request, response) => {
+  response.json(getBlogPostsWithAuthors());
 });
 
 const pageNames = [
   "admin-users",
   "blog-create",
-  "blogs",
   "cart",
   "checkout",
   "forum-main",
@@ -197,6 +198,13 @@ function getActivePage(pageName) {
 
 app.get("/", (request, response) => {
   response.render("index", { activePage: "home" });
+});
+
+app.get("/blogs", (request, response) => {
+  response.render("blogs", {
+    activePage: "blog",
+    posts: getBlogPostsWithAuthors(),
+  });
 });
 
 app.get("/:page", (request, response, next) => {
