@@ -48,7 +48,7 @@
 
                 <h1 class="auth-title">Create Account</h1>
 
-                <form id="register-form" action="#" method="post">
+                <form id="register-form" action="#" method="post" novalidate>
 
                     <div class="form-group">
                         <label for="fullname">Full Name</label>
@@ -81,6 +81,7 @@
                         <label for="confirm-password">Confirm Password</label>
                         <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm your password" minlength="8" autocomplete="new-password" required>
                     </div>
+                    <p id="form-message" aria-live="polite"></p>
                     <button type="submit" class="auth-btn">Create Account</button>
                 </form>
                 <div class="auth-text">
@@ -92,6 +93,7 @@
     </div>
 
     <script src="js/navbar.js"></script>
+    <script src="js/register.js"></script>
     <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
 
 </body>
