@@ -95,7 +95,7 @@ password.addEventListener("input", function () {
 });
 confirmPassword.addEventListener("input", showPasswordMatch);
 
-registerForm.addEventListener("submit", function (event) {
+registerForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const requiredFields = registerForm.querySelectorAll("[required]");
@@ -125,5 +125,38 @@ registerForm.addEventListener("submit", function (event) {
     return;
   }
 
-  formMessage.textContent = "The registration form is valid.";
+  const registrationData = {
+    fullName: fullName.value,
+    username: username.value,
+    email: email.value,
+    introduction: introduction.value,
+    password: password.value,
+  };
+
+  try {
+    const response = await fetch("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(registrationData),
+    });
+
+    const result = await response.json();
+    formMessage.textContent = result.message;
+    formMessage.style.color = response.ok ? "green" : "red";
+
+    if (response.ok) {
+      localStorage.removeItem(storageKey);
+      registerForm.reset();
+      introductionCount.textContent = "0 / 300 characters";
+
+      [fullNameMessage, usernameMessage, emailMessage, passwordMessage, confirmPasswordMessage].forEach(function (message) {
+        message.textContent = "";
+      });
+    }
+  } catch {
+    formMessage.textContent = "Could not connect to the server.";
+    formMessage.style.color = "red";
+  }
 });
