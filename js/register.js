@@ -1,33 +1,67 @@
 const registerForm = document.querySelector("#register-form");
 const formMessage = document.querySelector("#form-message");
+const fullName = document.querySelector("#fullname");
+const fullNameMessage = document.querySelector("#fullname-message");
 const username = document.querySelector("#username");
 const usernameMessage = document.querySelector("#username-message");
+const email = document.querySelector("#email");
+const emailMessage = document.querySelector("#email-message");
+const introduction = document.querySelector("#introduction");
+const introductionCount = document.querySelector("#introduction-count");
 const password = document.querySelector("#password");
+const passwordMessage = document.querySelector("#password-message");
 const confirmPassword = document.querySelector("#confirm-password");
+const confirmPasswordMessage = document.querySelector("#confirm-password-message");
 
-username.addEventListener("input", function () {
-  const usernamePattern = /^[A-Za-z0-9_]{3,24}$/;
-
-  if (username.value === "") {
-    usernameMessage.textContent = "";
-  } else if (usernamePattern.test(username.value)) {
-    usernameMessage.textContent = "Username is valid.";
-  } else {
-    usernameMessage.textContent = "Use 3-24 letters, numbers, or underscores.";
-  }
-});
-
-function showPasswordMatch() {
-  if (password.value === "" || confirmPassword.value === "") {
-    formMessage.textContent = "";
-  } else if (password.value === confirmPassword.value) {
-    formMessage.textContent = "Passwords match.";
-  } else {
-    formMessage.textContent = "Passwords do not match.";
-  }
+function showMessage(element, message, isValid) {
+  element.textContent = message;
+  element.style.color = isValid ? "green" : "red";
 }
 
-password.addEventListener("input", showPasswordMatch);
+function validateFullName() {
+  const isValid = fullName.value.trim().length >= 2;
+  showMessage(fullNameMessage, isValid ? "Full name is valid." : "Enter at least 2 characters.", isValid);
+  return isValid;
+}
+
+function validateUsername() {
+  const usernamePattern = /^[A-Za-z0-9_]{3,24}$/;
+  const isValid = usernamePattern.test(username.value);
+  showMessage(usernameMessage, isValid ? "Username is valid." : "Use 3-24 letters, numbers, or underscores.", isValid);
+  return isValid;
+}
+
+function validateEmail() {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isValid = emailPattern.test(email.value);
+  showMessage(emailMessage, isValid ? "Email is valid." : "Enter a valid email address.", isValid);
+  return isValid;
+}
+
+function validatePassword() {
+  const isValid = password.value.length >= 8 && /[A-Z]/.test(password.value) && /[0-9]/.test(password.value);
+  showMessage(passwordMessage, isValid ? "Password is valid." : "Use 8 characters, a capital letter, and a number.", isValid);
+  return isValid;
+}
+
+function showPasswordMatch() {
+  const isValid = confirmPassword.value !== "" && password.value === confirmPassword.value;
+  showMessage(confirmPasswordMessage, isValid ? "Passwords match." : "Passwords do not match.", isValid);
+  return isValid;
+}
+
+fullName.addEventListener("input", validateFullName);
+username.addEventListener("input", validateUsername);
+email.addEventListener("input", validateEmail);
+introduction.addEventListener("input", function () {
+  introductionCount.textContent = `${introduction.value.length} / 300 characters`;
+});
+password.addEventListener("input", function () {
+  validatePassword();
+  if (confirmPassword.value !== "") {
+    showPasswordMatch();
+  }
+});
 confirmPassword.addEventListener("input", showPasswordMatch);
 
 registerForm.addEventListener("submit", function (event) {
@@ -47,8 +81,16 @@ registerForm.addEventListener("submit", function (event) {
     return;
   }
 
-  if (password.value !== confirmPassword.value) {
-    formMessage.textContent = "Passwords do not match.";
+  const validFields = [
+    validateFullName(),
+    validateUsername(),
+    validateEmail(),
+    validatePassword(),
+    showPasswordMatch(),
+  ];
+
+  if (validFields.includes(false)) {
+    formMessage.textContent = "Please correct the form errors.";
     return;
   }
 
