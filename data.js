@@ -10,4 +10,67 @@ const users = [
   },
 ];
 
-module.exports = { users };
+const blogPosts = [
+  {
+    id: 1,
+    authorId: 1,
+    title: "Top 5 Programming Languages to Learn in 2026",
+    date: "2026-07-01",
+    category: "programming",
+    tags: ["JavaScript", "Python", "Careers"],
+    summary: "Explore five programming languages that are useful for modern software development.",
+    content: "Software development continues to change through cloud platforms, automation, and artificial intelligence. Learning languages with strong communities and practical applications helps new developers build useful projects.",
+    image: "img/book.jpg",
+    comments: [],
+  },
+  {
+    id: 2,
+    authorId: 1,
+    title: "Getting Started with Mobile App Development",
+    date: "2026-06-18",
+    category: "mobile",
+    tags: ["Mobile", "Apps", "Development"],
+    summary: "A beginner-friendly introduction to planning and building mobile applications.",
+    content: "Mobile applications support communication, shopping, banking, education, and entertainment. Beginners should start with a small project and focus on a clear user interface before adding complex features.",
+    image: "img/mobileapp.jpg",
+    comments: [],
+  },
+  {
+    id: 3,
+    authorId: 1,
+    title: "How Open Source Projects Improve Your Skills",
+    date: "2026-07-09",
+    category: "programming",
+    tags: ["Open Source", "GitHub", "Teamwork"],
+    summary: "Learn how open source contribution provides practical programming and teamwork experience.",
+    content: "Open source projects allow developers to work on real software with contributors from different backgrounds. Reading existing code, fixing small issues, and discussing changes are valuable professional skills.",
+    image: "img/opensource.jpg",
+    comments: [],
+  },
+  {
+    id: 4,
+    authorId: 1,
+    title: "Why Cloud Computing Continues to Grow",
+    date: "2026-05-02",
+    category: "cloud",
+    tags: ["Cloud", "Infrastructure", "Web"],
+    summary: "Understand why organisations continue moving applications and infrastructure to cloud services.",
+    content: "Cloud computing gives organisations access to computing resources without maintaining large amounts of physical hardware. It can improve flexibility, collaboration, and the speed of deployment.",
+    image: "img/cloudcomputing.jpg",
+    comments: [],
+  },
+  {
+    id: 5,
+    authorId: 1,
+    title: "Cybersecurity Tips Everyone Should Know",
+    date: "2026-04-10",
+    category: "cybersecurity",
+    tags: ["Security", "Privacy", "Passwords"],
+    summary: "Simple habits that help protect accounts, personal information, and devices.",
+    content: "Cybersecurity threats continue to evolve, but strong unique passwords, software updates, multi-factor authentication, and careful link checking can reduce common risks.",
+    image: "img/security.jpg",
+    comments: [],
+  },
+];
+
+module.exports = { users, blogPosts };

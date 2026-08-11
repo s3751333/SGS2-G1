@@ -2,7 +2,7 @@ const http = require("node:http");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { readFile, stat } = require("node:fs/promises");
-const { users } = require("./data");
+const { users, blogPosts } = require("./data");
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT) || 3000;
@@ -209,6 +209,19 @@ function logoutUser(request, response) {
   sendJson(response, 200, { message: "Logout successful." });
 }
 
+function sendBlogPosts(response) {
+  const posts = blogPosts.map((post) => {
+    const author = users.find((user) => user.id === post.authorId);
+
+    return {
+      ...post,
+      author: author ? author.fullName : "Unknown author",
+    };
+  });
+
+  sendJson(response, 200, posts);
+}
+
 function resolvePublicPath(pathname) {
   const requestedPath = pathname === "/" ? "/index.html" : pathname;
 
@@ -275,6 +288,11 @@ const server = http.createServer(function (request, response) {
 
   if (request.method === "POST" && pathname === "/logout") {
     logoutUser(request, response);
+    return;
+  }
+
+  if (request.method === "GET" && pathname === "/blogs-data") {
+    sendBlogPosts(response);
     return;
   }
 
