@@ -219,15 +219,80 @@ app.get("/:page", (request, response, next) => {
 });
 
 app.get("/blog-articles/:article", (request, response, next) => {
-  const articleName = request.params.article;
-  const validArticles = ["blog1", "blog2", "blog3", "blog4", "blog5"];
+  const articleMatch = /^blog(\d+)$/.exec(request.params.article);
 
-  if (!validArticles.includes(articleName)) {
+  if (!articleMatch) {
     next();
     return;
   }
 
-  response.render(`blog-articles/${articleName}`, { activePage: "blog" });
+  const postId = Number(articleMatch[1]);
+  const post = getBlogPostsWithAuthors().find((item) => item.id === postId);
+
+  if (!post) {
+    next();
+    return;
+  }
+
+  response.render("blog-articles/article", {
+    activePage: "blog",
+    commentError: "",
+    commentValue: "",
+    currentUser: getCurrentUser(request),
+    post,
+  });
+});
+
+app.post("/blog-articles/:article/comments", (request, response, next) => {
+  const articleMatch = /^blog(\d+)$/.exec(request.params.article);
+
+  if (!articleMatch) {
+    next();
+    return;
+  }
+
+  const postId = Number(articleMatch[1]);
+  const post = blogPosts.find((item) => item.id === postId);
+
+  if (!post) {
+    next();
+    return;
+  }
+
+  const currentUser = getCurrentUser(request);
+
+  if (!currentUser) {
+    response.redirect("/login");
+    return;
+  }
+
+  const commentText = String(request.body.comment || "").trim();
+
+  if (commentText.length < 3 || commentText.length > 500) {
+    const postWithAuthor = getBlogPostsWithAuthors().find((item) => item.id === postId);
+
+    response.status(400).render("blog-articles/article", {
+      activePage: "blog",
+      commentError: "The comment must contain between 3 and 500 characters.",
+      commentValue: commentText,
+      currentUser,
+      post: postWithAuthor,
+    });
+    return;
+  }
+
+  const nextCommentId = post.comments.length > 0
+    ? Math.max(...post.comments.map((comment) => comment.id)) + 1
+    : 1;
+
+  post.comments.push({
+    id: nextCommentId,
+    author: currentUser.fullName,
+    date: new Date().toISOString().slice(0, 10),
+    text: commentText,
+  });
+
+  response.redirect(`/blog-articles/blog${post.id}#comments`);
 });
 
 app.use((request, response) => {

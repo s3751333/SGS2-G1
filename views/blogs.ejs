@@ -34,6 +34,7 @@
             <option value="author">Author A-Z</option>
         </select>
         <button type="submit" class="search-btn">Search</button>
+        <button type="button" id="reset-filters" class="reset-btn">Reset filters</button>
     </form>
 
     <p id="blog-status" class="blog-status" aria-live="polite"><%= posts.length %> blog posts found.</p>
@@ -44,7 +45,7 @@
                 data-author="<%= post.author.toLowerCase() %>"
                 data-category="<%= post.category %>"
                 data-date="<%= post.date %>"
-                data-search="<%= [post.title, post.author, post.date, post.category, post.tags.join(' '), post.summary, post.content].join(' ').toLowerCase() %>">
+                data-search="<%= [post.title, post.author, post.date, post.category, post.tags.join(' '), post.summary, post.content.join(' ')].join(' ').toLowerCase() %>">
                 <div class="card-image">
                     <img src="/<%= post.image %>" alt="<%= post.title %>">
                 </div>

@@ -65,6 +65,20 @@
     background: var(--main-hover);
 }
 
+.reset-btn {
+    padding: 12px 18px;
+    background: white;
+    color: #333;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.reset-btn:hover {
+    background: #f0f0f0;
+}
+
 
 .blog-header {
     text-align: center;

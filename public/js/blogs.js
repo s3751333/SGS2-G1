@@ -4,8 +4,11 @@ const blogControls = document.querySelector("#blog-controls");
 const searchInput = document.querySelector("#blog-search");
 const categoryFilter = document.querySelector("#category-filter");
 const sortOrder = document.querySelector("#sort-order");
-const filterStorageKey = "booknookBlogFilters";
+const resetFiltersButton = document.querySelector("#reset-filters");
+const filterStorageKey = "booknookBlogFiltersV2";
 const blogCards = Array.from(blogList.querySelectorAll(".card"));
+
+localStorage.removeItem("booknookBlogFilters");
 
 function saveFilters() {
   const filters = {
@@ -75,6 +78,14 @@ blogControls.addEventListener("submit", function (event) {
 searchInput.addEventListener("input", showFilteredPosts);
 categoryFilter.addEventListener("change", showFilteredPosts);
 sortOrder.addEventListener("change", showFilteredPosts);
+resetFiltersButton.addEventListener("click", function () {
+  searchInput.value = "";
+  categoryFilter.value = "all";
+  sortOrder.value = "newest";
+  localStorage.removeItem(filterStorageKey);
+  showFilteredPosts();
+  searchInput.focus();
+});
 
 loadFilters();
 showFilteredPosts();
