@@ -11,36 +11,11 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="index.html">SGS2-G1</a>
-            </div>
-            <ul class="menu-list">
-                <div class="icon cancel-btn">
-                    <i class="fas fa-times"></i>
-                </div>
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="blogs.html" class="nav-link">Blog</a></li>
-                <li><a href="products.html" class="nav-link">Shop</a></li>
-                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
-            </ul>
-            <div class="right-menu">
-                <a href="profile.html" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
-                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
-                <a href="cart.html" class="cart-btn">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
-                <div class="icon menu-btn">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <%- include("partials/navbar", { activePage }) %>
 
     <main class="page-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="index.html">Home</a> / <a href="products.html">Shop</a> / <a href="products.html#fiction">Fiction</a> / The Little Prince
+            <a href="/">Home</a> / <a href="products">Shop</a> / <a href="products#fiction">Fiction</a> / The Little Prince
         </nav>
 
         <section class="product-overview">
@@ -75,8 +50,8 @@
                         <span>1</span>
                         <button type="button" aria-label="Increase quantity">+</button>
                     </div>
-                    <a href="cart.html" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist.html" class="secondary-button"><i class="fas fa-heart"></i> Add to Wishlist</a>
+                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i> Add to Wishlist</a>
                 </div>
 
                 <div class="spec-card">
@@ -222,7 +197,7 @@
             <div class="review-form-card" aria-labelledby="review-form-heading">
                 <h2 id="review-form-heading">Write a Review</h2>
                 <p>Share your thoughts with other BookNook readers.</p>
-                <form id="review-form" action="product-detail.html" method="get">
+                <form id="review-form" action="product-detail" method="get">
                     <div>
                         <label for="rating-5">Your rating</label>
                         <div class="star-picker" role="radiogroup" aria-label="Star rating">
@@ -252,11 +227,9 @@
         </section>
     </main>
 
-    <footer class="forum-footer">
-        <p>&copy; 2026 SGS2-G1 BookNook | <a href="sitemap.html">Sitemap</a></p>
-    </footer>
+    <%- include("partials/footer") %>
 
-    <script src="js/navbar.js" defer></script>
+    <script src="/js/navbar.js" defer></script>
 </body>
 
 </html>

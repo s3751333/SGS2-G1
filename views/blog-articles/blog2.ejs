@@ -11,31 +11,7 @@
 
 <body>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="../index.html">SGS2-G1</a>
-            </div>
-            <ul class="menu-list">
-                <div class="icon cancel-btn">
-                    <i class="fas fa-times"></i>
-                </div>
-                <li><a href="../index.html" class="nav-link">Home</a></li>
-                <li><a href="../blogs.html" class="nav-link">Blog</a></li>
-                <li><a href="../products.html" class="nav-link">Shop</a></li>
-                <li><a href="../forum-main.html" class="nav-link">Forum</a></li>
-            </ul>
-            <div class="right-menu">
-                <a href="../login.html" class="nav-link auth-btn">Sign In/Up</a>
-                <a href="../cart.html" class="cart-btn">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
-                <div class="icon menu-btn">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <%- include("../partials/navbar", { activePage }) %>
 
     <main class="article-container">
 
@@ -106,7 +82,7 @@
             </div>
 
             <div class="author-actions">
-                <a href="../blog-create.html" class="btn-action btn-edit">
+                <a href="../blog-create" class="btn-action btn-edit">
                     Edit Post
                 </a>
 
@@ -172,11 +148,9 @@
         </section>
 
     </main>
-    <footer class="forum-footer">
-        <p>&copy; 2026 SGS2-G1 BookNook | <a href="../sitemap.html">Sitemap</a></p>
-    </footer>
+    <%- include("../partials/footer") %>
 
-    <script src="js/navbar.js"></script>
+    <script src="/js/navbar.js"></script>
 
     <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous">
     </script>

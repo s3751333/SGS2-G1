@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Homepage for books, board games, blog posts and community discussions.">
+    <title>SGS2-G1 | Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/home.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="home-main">
+        <section class="hero">
+            <div>
+                <h1>Books and games for curious minds</h1>
+                <p>Discover English and Vietnamese books, family board games, useful articles and community discussions.
+                </p>
+                <div class="hero-actions">
+                    <a class="home-button" href="products">Browse products</a>
+                    <a class="home-button-secondary" href="forum-main">Visit the forum</a>
+                </div>
+            </div>
+            <img class="hero-image" src="img/book.jpg" alt="Books and reading">
+        </section>
+
+        <section class="home-section" aria-labelledby="explore-heading">
+            <h2 id="explore-heading">Explore our website</h2>
+            <div class="category-grid">
+                <a class="category-card" href="products#books">
+                    <h3>Books</h3>
+                    <p>Browse stories, learning resources and best sellers.</p>
+                </a>
+                <a class="category-card" href="products#board-games">
+                    <h3>Board Games</h3>
+                    <p>Find games for families, friends and strategy fans.</p>
+                </a>
+                <a class="category-card" href="blogs">
+                    <h3>Blog & Community</h3>
+                    <p>Read new articles or join a discussion with other readers.</p>
+                </a>
+            </div>
+        </section>
+    </main>
+    <%- include("partials/footer") %>
+
+    <script src="/js/navbar.js" defer></script>
+</body>
+
+</html>

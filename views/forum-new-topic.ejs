@@ -11,43 +11,18 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="index.html">SGS2-G1</a>
-            </div>
-            <ul class="menu-list">
-                <li class="icon cancel-btn">
-                    <i class="fas fa-times"></i>
-                </li>
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="blogs.html" class="nav-link">Blog</a></li>
-                <li><a href="products.html" class="nav-link">Shop</a></li>
-                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
-            </ul>
-            <div class="right-menu">
-                <a href="profile.html" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
-                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
-                <a href="cart.html" class="cart-btn" aria-label="Shopping cart">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
-                <div class="icon menu-btn">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <%- include("partials/navbar", { activePage }) %>
 
     <main class="page-container form-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="forum-main.html">Forum</a> / Start a discussion
+            <a href="forum-main">Forum</a> / Start a discussion
         </nav>
 
         <section class="topic-form-card" aria-labelledby="form-title">
             <h1 id="form-title">Start a new discussion</h1>
             <p>Choose a subject and explain what you would like the community to discuss.</p>
 
-            <form id="topic-form" action="forum-topic.html" method="get">
+            <form id="topic-form" action="forum-topic" method="get">
                 <div class="form-field">
                     <label for="topic-category">Category</label>
                     <select id="topic-category" name="category" required>
@@ -76,18 +51,16 @@
                 </div>
 
                 <div class="form-actions">
-                    <a class="secondary-button" href="forum-main.html">Cancel</a>
+                    <a class="secondary-button" href="forum-main">Cancel</a>
                     <button class="button" type="submit">Publish discussion</button>
                 </div>
             </form>
         </section>
     </main>
 
-    <footer class="forum-footer">
-        <p>&copy; 2026 SGS2-G1 BookNook | <a href="sitemap.html">Sitemap</a></p>
-    </footer>
+    <%- include("partials/footer") %>
 
-    <script src="js/navbar.js"></script>
+    <script src="/js/navbar.js"></script>
     <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
 </body>
 

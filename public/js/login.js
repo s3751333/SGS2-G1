@@ -32,7 +32,7 @@ loginForm.addEventListener("submit", async function (event) {
 
     if (response.ok) {
       setTimeout(function () {
-        window.location.href = "blogs.html";
+        window.location.href = "blogs";
       }, 700);
     }
   } catch {

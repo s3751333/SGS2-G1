@@ -20,7 +20,7 @@ function createBlogCard(post) {
       <p>${post.summary}</p>
       <div class="card-footer">
         <span>${formattedDate}</span>
-        <a href="blog-articles/blog${post.id}.html" class="btn-read">Read</a>
+        <a href="blog-articles/blog${post.id}" class="btn-read">Read</a>
       </div>
     </article>
   `;

@@ -8,37 +8,14 @@
     <link rel="stylesheet" href="css/checkout.css" />
   </head>
   <body>
-    <nav class="navbar" aria-label="Main navigation">
-      <div class="nav-container">
-        <div class="logo"><a href="index.html">SGS2-G1</a></div>
-        <ul class="menu-list" id="main-menu">
-          <div class="icon cancel-btn">
-            <i class="fas fa-times"></i>
-          </div>
-          <li><a href="index.html" class="nav-link">Home</a></li>
-          <li><a href="blogs.html" class="nav-link">Blog</a></li>
-          <li><a href="products.html" class="nav-link">Shop</a></li>
-          <li><a href="forum-main.html" class="nav-link">Forum</a></li>
-        </ul>
-        <div class="right-menu">
-          <a href="profile.html" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
-          <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
-          <a href="cart.html" class="cart-btn" aria-label="Shopping cart">
-            <i class="fas fa-shopping-cart"></i>
-          </a>
-          <div class="icon menu-btn" role="button" tabindex="0" aria-label="Open menu" aria-controls="main-menu">
-            <i class="fas fa-bars"></i>
-          </div>
-        </div>
-      </div>
-    </nav>
-    <script src="js/navbar.js" defer></script>
+    <%- include("partials/navbar", { activePage }) %>
+    <script src="/js/navbar.js" defer></script>
 
     <main class="checkout-page">
       <h1>Checkout</h1>
 
       <div class="checkout-layout">
-        <form id="checkout-form" class="checkout-form" action="index.html">
+        <form id="checkout-form" class="checkout-form" action="/">
           <section class="form-section">
             <h2>Shipping Information</h2>
             <div class="form-grid">
@@ -108,5 +85,6 @@
       </div>
 
     </main>
-  </body>
+      <%- include("partials/footer") %>
+</body>
 </html>

@@ -2,7 +2,7 @@ const body = document.querySelector("body");
 const navbar = document.querySelector(".navbar");
 const menuBtn = document.querySelector(".menu-btn");
 const cancelBtn = document.querySelector(".cancel-btn");
-const loginLink = document.querySelector('.navbar a[href="login.html"]');
+const loginLink = document.querySelector('.navbar a[href="/login"]');
 
 menuBtn.onclick = () => {
     navbar.classList.add("show");
@@ -32,7 +32,7 @@ async function updateLoginLink() {
             loginLink.addEventListener("click", async function (event) {
                 event.preventDefault();
                 await fetch("/logout", { method: "POST" });
-                window.location.href = "login.html";
+                window.location.href = "/login";
             });
         }
     } catch {

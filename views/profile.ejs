@@ -11,36 +11,11 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="index.html">SGS2-G1</a>
-            </div>
-            <ul class="menu-list">
-                <div class="icon cancel-btn">
-                    <i class="fas fa-times"></i>
-                </div>
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="blogs.html" class="nav-link">Blog</a></li>
-                <li><a href="products.html" class="nav-link">Shop</a></li>
-                <li><a href="forum-main.html" class="nav-link">Forum</a></li>
-            </ul>
-            <div class="right-menu">
-                <a href="profile.html" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
-                <a href="login.html" class="nav-link auth-btn">Sign In/Up</a>
-                <a href="cart.html" class="cart-btn">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
-                <div class="icon menu-btn">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <%- include("partials/navbar", { activePage }) %>
 
     <main class="page-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="index.html">Home</a> / My Account / Profile
+            <a href="/">Home</a> / My Account / Profile
         </nav>
 
         <div class="page-heading">
@@ -62,8 +37,8 @@
                 <p class="member-since">Member since March 2026</p>
 
                 <nav class="profile-quick-links" aria-label="Account shortcuts">
-                    <a href="wishlist.html"><i class="fas fa-heart"></i> My Wishlist</a>
-                    <a href="cart.html"><i class="fas fa-shopping-cart"></i> My Cart</a>
+                    <a href="wishlist"><i class="fas fa-heart"></i> My Wishlist</a>
+                    <a href="cart"><i class="fas fa-shopping-cart"></i> My Cart</a>
                     <a href="#account-actions"><i class="fas fa-gear"></i> Account Settings</a>
                 </nav>
             </aside>
@@ -73,7 +48,7 @@
                     <h2 id="info-heading">Personal Information</h2>
                     <p>This information is only visible to you.</p>
 
-                    <form id="profile-form" action="profile.html" method="get">
+                    <form id="profile-form" action="profile" method="get">
                         <div class="full-field">
                             <label for="full-name">Full name</label>
                             <input type="text" id="full-name" name="full-name" value="Khoa Pham Dang Nguyen">
@@ -115,7 +90,7 @@
                             <h3>Password</h3>
                             <p>Last changed 3 months ago.</p>
                         </div>
-                        <a href="login.html" class="secondary-button">Change Password</a>
+                        <a href="login" class="secondary-button">Change Password</a>
                     </div>
 
                     <div class="account-action-row">
@@ -123,7 +98,7 @@
                             <h3>Log out</h3>
                             <p>Sign out of BookNook on this device.</p>
                         </div>
-                        <a href="login.html" class="secondary-button">Log Out</a>
+                        <a href="login" class="secondary-button">Log Out</a>
                     </div>
 
                     <div class="account-action-row danger">
@@ -138,11 +113,9 @@
         </div>
     </main>
 
-    <footer class="forum-footer">
-        <p>&copy; 2026 SGS2-G1 BookNook</p>
-    </footer>
+    <%- include("partials/footer") %>
 
-    <script src="js/navbar.js" defer></script>
+    <script src="/js/navbar.js" defer></script>
 </body>
 
 </html>
