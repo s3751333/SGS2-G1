@@ -6,7 +6,7 @@
     justify-content: center;
     gap: 10px;
     margin: 30px auto;
-    max-width: 600px;
+    max-width: 900px;
     padding: 0 20px;
 }
 
@@ -19,7 +19,8 @@
     transition: 0.3s;
 }
 
-.filter-select {
+.filter-select,
+.sort-select {
     padding: 12px 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -30,7 +31,8 @@
     outline: none;
 }
 
-.filter-select:focus {
+.filter-select:focus,
+.sort-select:focus {
     border-color: var(--main-color);
     box-shadow: 0 0 8px rgba(13, 110, 253, 0.2);
 }

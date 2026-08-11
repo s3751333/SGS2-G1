@@ -1,5 +1,11 @@
 const blogList = document.querySelector("#blog-list");
 const blogStatus = document.querySelector("#blog-status");
+const blogControls = document.querySelector("#blog-controls");
+const searchInput = document.querySelector("#blog-search");
+const categoryFilter = document.querySelector("#category-filter");
+const sortOrder = document.querySelector("#sort-order");
+const filterStorageKey = "booknookBlogFilters";
+let allPosts = [];
 
 function createBlogCard(post) {
   const formattedDate = new Date(post.date).toLocaleDateString("en-AU");
@@ -20,16 +26,82 @@ function createBlogCard(post) {
   `;
 }
 
+function saveFilters() {
+  const filters = {
+    search: searchInput.value,
+    category: categoryFilter.value,
+    sort: sortOrder.value,
+  };
+
+  localStorage.setItem(filterStorageKey, JSON.stringify(filters));
+}
+
+function loadFilters() {
+  const savedFilters = localStorage.getItem(filterStorageKey);
+
+  if (savedFilters) {
+    const filters = JSON.parse(savedFilters);
+    searchInput.value = filters.search || "";
+    categoryFilter.value = filters.category || "all";
+    sortOrder.value = filters.sort || "newest";
+  }
+}
+
+function showFilteredPosts() {
+  const searchText = searchInput.value.trim().toLowerCase();
+  const selectedCategory = categoryFilter.value;
+
+  const filteredPosts = allPosts.filter((post) => {
+    const searchableText = [
+      post.title,
+      post.author,
+      post.date,
+      post.category,
+      post.tags.join(" "),
+      post.summary,
+      post.content,
+    ].join(" ").toLowerCase();
+
+    const matchesSearch = searchableText.includes(searchText);
+    const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  filteredPosts.sort((firstPost, secondPost) => {
+    if (sortOrder.value === "oldest") {
+      return new Date(firstPost.date) - new Date(secondPost.date);
+    }
+    if (sortOrder.value === "title") {
+      return firstPost.title.localeCompare(secondPost.title);
+    }
+    if (sortOrder.value === "author") {
+      return firstPost.author.localeCompare(secondPost.author);
+    }
+    return new Date(secondPost.date) - new Date(firstPost.date);
+  });
+
+  blogList.innerHTML = filteredPosts.map(createBlogCard).join("");
+  blogStatus.textContent = `${filteredPosts.length} blog posts found.`;
+  saveFilters();
+}
+
 async function loadBlogPosts() {
   try {
     const response = await fetch("/blogs-data");
-    const posts = await response.json();
-
-    blogList.innerHTML = posts.map(createBlogCard).join("");
-    blogStatus.textContent = `${posts.length} blog posts found.`;
+    allPosts = await response.json();
+    loadFilters();
+    showFilteredPosts();
   } catch {
     blogStatus.textContent = "Could not load the blog posts.";
   }
 }
+
+blogControls.addEventListener("submit", function (event) {
+  event.preventDefault();
+  showFilteredPosts();
+});
+searchInput.addEventListener("input", showFilteredPosts);
+categoryFilter.addEventListener("change", showFilteredPosts);
+sortOrder.addEventListener("change", showFilteredPosts);
 
 loadBlogPosts();

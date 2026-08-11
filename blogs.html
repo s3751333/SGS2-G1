@@ -42,18 +42,24 @@
         <h1>Latest Blog Posts</h1>
     </div>
 
-    <div class="search-container">
-        <input type="text" placeholder="Search by title..." class="search-input">
-        <select class="filter-select">
+    <form id="blog-controls" class="search-container">
+        <input type="search" id="blog-search" placeholder="Search blog posts..." class="search-input"
+            aria-label="Search blog posts">
+        <select id="category-filter" class="filter-select" aria-label="Filter by category">
             <option value="all">All Categories</option>
             <option value="programming">Programming</option>
             <option value="mobile">Mobile App</option>
             <option value="cloud">Cloud Computing</option>
             <option value="cybersecurity">Cybersecurity</option>
         </select>
-
-        <button class="search-btn">Search</button>
-    </div>
+        <select id="sort-order" class="sort-select" aria-label="Sort blog posts">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="title">Title A-Z</option>
+            <option value="author">Author A-Z</option>
+        </select>
+        <button type="submit" class="search-btn">Search</button>
+    </form>
 
     <p id="blog-status" class="blog-status" aria-live="polite">Loading blog posts...</p>
     <main id="blog-list" class="blog-container"></main>
