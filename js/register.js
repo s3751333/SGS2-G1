@@ -1,5 +1,7 @@
 const registerForm = document.querySelector("#register-form");
 const formMessage = document.querySelector("#form-message");
+const password = document.querySelector("#password");
+const confirmPassword = document.querySelector("#confirm-password");
 
 registerForm.addEventListener("submit", function (event) {
   event.preventDefault();
@@ -13,9 +15,15 @@ registerForm.addEventListener("submit", function (event) {
     }
   });
 
-  if (allFieldsComplete) {
-    formMessage.textContent = "All required fields are complete.";
-  } else {
+  if (!allFieldsComplete) {
     formMessage.textContent = "Please complete all required fields.";
+    return;
   }
+
+  if (password.value !== confirmPassword.value) {
+    formMessage.textContent = "Passwords do not match.";
+    return;
+  }
+
+  formMessage.textContent = "The registration form is valid.";
 });
