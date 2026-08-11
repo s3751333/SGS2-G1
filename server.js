@@ -164,6 +164,51 @@ async function loginUser(request, response) {
   }
 }
 
+function getSessionId(request) {
+  const cookieHeader = request.headers.cookie || "";
+  const sessionCookie = cookieHeader
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith("sessionId="));
+
+  return sessionCookie ? sessionCookie.split("=")[1] : null;
+}
+
+function getCurrentUser(request) {
+  const sessionId = getSessionId(request);
+  const userId = sessions[sessionId];
+  return users.find((user) => user.id === userId) || null;
+}
+
+function sendCurrentSession(request, response) {
+  const user = getCurrentUser(request);
+
+  if (!user) {
+    sendJson(response, 200, { user: null });
+    return;
+  }
+
+  sendJson(response, 200, {
+    user: {
+      id: user.id,
+      fullName: user.fullName,
+      username: user.username,
+      role: user.role,
+    },
+  });
+}
+
+function logoutUser(request, response) {
+  const sessionId = getSessionId(request);
+
+  if (sessionId) {
+    delete sessions[sessionId];
+  }
+
+  response.setHeader("Set-Cookie", "sessionId=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
+  sendJson(response, 200, { message: "Logout successful." });
+}
+
 function resolvePublicPath(pathname) {
   const requestedPath = pathname === "/" ? "/index.html" : pathname;
 
@@ -220,6 +265,16 @@ const server = http.createServer(function (request, response) {
 
   if (request.method === "POST" && pathname === "/login") {
     loginUser(request, response);
+    return;
+  }
+
+  if (request.method === "GET" && pathname === "/session") {
+    sendCurrentSession(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/logout") {
+    logoutUser(request, response);
     return;
   }
 
