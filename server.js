@@ -6,11 +6,18 @@ const { users } = require("./data");
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT) || 3000;
+const sessions = {};
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
   const hash = crypto.scryptSync(password, salt, 64).toString("hex");
   return `${salt}:${hash}`;
+}
+
+function checkPassword(password, passwordHash) {
+  const [salt, savedHash] = passwordHash.split(":");
+  const enteredHash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return enteredHash === savedHash;
 }
 
 // Password for the sample account: Reader123!
@@ -122,6 +129,41 @@ async function registerUser(request, response) {
   }
 }
 
+async function loginUser(request, response) {
+  try {
+    const data = await readRequestBody(request);
+    const email = String(data.email || "").trim().toLowerCase();
+    const password = String(data.password || "");
+    const user = users.find((item) => item.email === email);
+
+    if (!user || !checkPassword(password, user.passwordHash)) {
+      sendJson(response, 401, { message: "Incorrect email or password." });
+      return;
+    }
+
+    if (user.status !== "active") {
+      sendJson(response, 403, { message: "This account is not active." });
+      return;
+    }
+
+    const sessionId = crypto.randomBytes(24).toString("hex");
+    sessions[sessionId] = user.id;
+
+    response.setHeader("Set-Cookie", `sessionId=${sessionId}; HttpOnly; SameSite=Lax; Path=/`);
+    sendJson(response, 200, {
+      message: "Login successful.",
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    sendJson(response, 400, { message: error.message });
+  }
+}
+
 function resolvePublicPath(pathname) {
   const requestedPath = pathname === "/" ? "/index.html" : pathname;
 
@@ -173,6 +215,11 @@ const server = http.createServer(function (request, response) {
 
   if (request.method === "POST" && pathname === "/register") {
     registerUser(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/login") {
+    loginUser(request, response);
     return;
   }
 
