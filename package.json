@@ -1,0 +1,13 @@
+{
+  "name": "booknook-a2-prototype",
+  "version": "2.0.0",
+  "private": true,
+  "description": "COSC3060 Assessment 2 web application prototype",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
