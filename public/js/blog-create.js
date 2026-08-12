@@ -10,7 +10,7 @@ const clearDraftButton = document.querySelector("#clear-draft");
 const titleCount = document.querySelector("#title-count");
 const summaryCount = document.querySelector("#summary-count");
 const contentCount = document.querySelector("#content-count");
-const draftStorageKey = "booknookBlogPostDraft";
+const draftStorageKey = blogCreateForm.dataset.draftKey;
 
 const formFields = [
   titleInput,
@@ -90,9 +90,8 @@ function saveDraft() {
 
 function loadDraft() {
   const savedDraft = localStorage.getItem(draftStorageKey);
-  const formAlreadyContainsData = formFields.some((field) => field.value !== "");
 
-  if (!savedDraft || formAlreadyContainsData) {
+  if (!savedDraft || blogCreateForm.dataset.loadDraft !== "true") {
     updateCharacterCounts();
     return;
   }
@@ -134,7 +133,9 @@ formFields.forEach(function (field) {
 clearDraftButton.addEventListener("click", function () {
   blogCreateForm.reset();
   localStorage.removeItem(draftStorageKey);
-  formMessage.textContent = "Draft cleared.";
+  formMessage.textContent = clearDraftButton.textContent.includes("Reset")
+    ? "Original values restored."
+    : "Draft cleared.";
 
   formFields.forEach(function (field) {
     showFieldError(field, "");

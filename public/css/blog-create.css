@@ -130,6 +130,13 @@
     background: #f0f0f0;
 }
 
+.cancel-link {
+    display: block;
+    margin-top: 18px;
+    color: #555;
+    text-align: center;
+}
+
 @media (max-width: 600px) {
     .admin-card {
         padding: 22px;

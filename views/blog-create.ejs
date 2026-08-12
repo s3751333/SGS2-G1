@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookNook | Create Blog Post</title>
+    <title>BookNook | <%= formTitle %></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/blog-create.css">
 </head>
@@ -15,12 +15,14 @@
     <main class="admin-page">
         <div class="admin-container">
             <div class="admin-card">
-                <h1 class="admin-title">Create New Blog Post</h1>
-                <p class="form-intro">Publishing as <strong><%= currentUser.fullName %></strong></p>
+                <h1 class="admin-title"><%= formTitle %></h1>
+                <p class="form-intro"><%= formMode === 'edit' ? 'Editing' : 'Publishing as' %> <strong><%= currentUser.fullName %></strong></p>
 
                 <p id="form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length > 0 ? 'Please correct the highlighted fields.' : '' %></p>
 
-                <form id="blog-create-form" action="/blog-create" method="post" novalidate>
+                <form id="blog-create-form" action="<%= formAction %>" method="post"
+                    data-draft-key="booknookBlogPostDraft:<%= formMode %>:<%= formAction %>"
+                    data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
                     <div class="field-box">
                         <label for="post-title">Headline</label>
                         <input type="text" id="post-title" name="title" minlength="5" maxlength="100"
@@ -80,9 +82,10 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="save-btn">Publish Post</button>
-                        <button type="button" id="clear-draft" class="clear-btn">Clear Draft</button>
+                        <button type="submit" class="save-btn"><%= submitLabel %></button>
+                        <button type="button" id="clear-draft" class="clear-btn"><%= formMode === 'edit' ? 'Reset Form' : 'Clear Draft' %></button>
                     </div>
+                    <a href="<%= formMode === 'edit' ? formAction.replace('/edit', '') : '/blogs' %>" class="cancel-link">Cancel and return</a>
                 </form>
             </div>
         </div>

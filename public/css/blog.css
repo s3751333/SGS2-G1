@@ -64,6 +64,10 @@ body {
     padding-top: 20px;
 }
 
+.delete-post-form {
+    margin: 0;
+}
+
 .btn-action {
     padding: 10px 20px;
     border: none;

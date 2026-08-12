@@ -34,6 +34,12 @@
 
             <% if (currentUser && currentUser.id === post.authorId) { %>
                 <p class="owner-message">You are the author of this post.</p>
+                <div class="author-actions">
+                    <a href="/blog-articles/blog<%= post.id %>/edit" class="btn-action btn-edit">Edit Post</a>
+                    <form class="delete-post-form" action="/blog-articles/blog<%= post.id %>/delete" method="post">
+                        <button type="submit" class="btn-action btn-delete">Delete Post</button>
+                    </form>
+                </div>
             <% } %>
         </article>
 
@@ -80,6 +86,7 @@
     <%- include("../partials/footer") %>
     <script src="/js/navbar.js"></script>
     <script src="/js/comments.js"></script>
+    <script src="/js/article-actions.js"></script>
     <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
 </body>
 
