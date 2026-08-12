@@ -29,12 +29,16 @@ function loadFormData() {
   const savedFormData = localStorage.getItem(storageKey);
 
   if (savedFormData) {
-    const formData = JSON.parse(savedFormData);
-    fullName.value = formData.fullName || "";
-    username.value = formData.username || "";
-    email.value = formData.email || "";
-    introduction.value = formData.introduction || "";
-    introductionCount.textContent = `${introduction.value.length} / 300 characters`;
+    try {
+      const formData = JSON.parse(savedFormData);
+      fullName.value = formData.fullName || "";
+      username.value = formData.username || "";
+      email.value = formData.email || "";
+      introduction.value = formData.introduction || "";
+      introductionCount.textContent = `${introduction.value.length} / 300 characters`;
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
   }
 }
 
@@ -131,6 +135,7 @@ registerForm.addEventListener("submit", async function (event) {
     email: email.value,
     introduction: introduction.value,
     password: password.value,
+    confirmPassword: confirmPassword.value,
   };
 
   try {
@@ -154,6 +159,10 @@ registerForm.addEventListener("submit", async function (event) {
       [fullNameMessage, usernameMessage, emailMessage, passwordMessage, confirmPasswordMessage].forEach(function (message) {
         message.textContent = "";
       });
+
+      setTimeout(function () {
+        window.location.href = "/login";
+      }, 700);
     }
   } catch {
     formMessage.textContent = "Could not connect to the server.";

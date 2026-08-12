@@ -57,6 +57,18 @@
     text-decoration: underline;
 }
 
+.logout-button {
+    border: 0;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.logout-button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
 .cart-btn {
     color: #ffffff;
     font-size: 20px;

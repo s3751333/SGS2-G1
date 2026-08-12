@@ -53,15 +53,47 @@ function getCurrentUser(request) {
   return users.find((user) => user.id === userId) || null;
 }
 
+function getSafeNextPage(value) {
+  const nextPage = String(value || "");
+  return nextPage.startsWith("/") && !nextPage.startsWith("//") ? nextPage : "/blogs";
+}
+
+app.use((request, response, next) => {
+  response.locals.currentUser = getCurrentUser(request);
+  next();
+});
+
+app.get("/login", (request, response) => {
+  if (response.locals.currentUser) {
+    response.redirect("/blogs");
+    return;
+  }
+
+  response.render("login", {
+    activePage: "",
+    nextPage: getSafeNextPage(request.query.next),
+  });
+});
+
+app.get("/register", (request, response) => {
+  if (response.locals.currentUser) {
+    response.redirect("/blogs");
+    return;
+  }
+
+  response.render("register", { activePage: "" });
+});
+
 app.post("/register", (request, response) => {
   const fullName = String(request.body.fullName || "").trim();
   const username = String(request.body.username || "").trim();
   const email = String(request.body.email || "").trim().toLowerCase();
   const introduction = String(request.body.introduction || "").trim();
   const password = String(request.body.password || "");
+  const confirmPassword = String(request.body.confirmPassword || "");
 
-  if (!fullName || !username || !email || !password) {
-    response.status(400).json({ message: "Please complete all required fields." });
+  if (fullName.length < 2 || fullName.length > 80) {
+    response.status(400).json({ message: "The full name must contain between 2 and 80 characters." });
     return;
   }
 
@@ -70,13 +102,23 @@ app.post("/register", (request, response) => {
     return;
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     response.status(400).json({ message: "The email address is not valid." });
     return;
   }
 
-  if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+  if (introduction.length > 300) {
+    response.status(400).json({ message: "The introduction cannot exceed 300 characters." });
+    return;
+  }
+
+  if (password.length < 8 || password.length > 72 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
     response.status(400).json({ message: "The password is not valid." });
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    response.status(400).json({ message: "The passwords do not match." });
     return;
   }
 
@@ -131,6 +173,7 @@ app.post("/login", (request, response) => {
   response.setHeader("Set-Cookie", `sessionId=${sessionId}; HttpOnly; SameSite=Lax; Path=/`);
   response.json({
     message: "Login successful.",
+    redirectTo: getSafeNextPage(request.body.next),
     user: {
       id: user.id,
       fullName: user.fullName,
@@ -263,11 +306,9 @@ const pageNames = [
   "forum-main",
   "forum-new-topic",
   "forum-topic",
-  "login",
   "product-detail",
   "products",
   "profile",
-  "register",
   "sitemap",
   "wishlist",
 ];
@@ -295,7 +336,7 @@ app.get("/blog-create", (request, response) => {
   const currentUser = getCurrentUser(request);
 
   if (!currentUser) {
-    response.redirect("/login");
+    response.redirect("/login?next=%2Fblog-create");
     return;
   }
 
@@ -313,7 +354,7 @@ app.post("/blog-create", (request, response) => {
   const currentUser = getCurrentUser(request);
 
   if (!currentUser) {
-    response.redirect("/login");
+    response.redirect("/login?next=%2Fblog-create");
     return;
   }
 
@@ -365,7 +406,7 @@ app.get("/blog-articles/:article/edit", (request, response, next) => {
   const currentUser = getCurrentUser(request);
 
   if (!currentUser) {
-    response.redirect("/login");
+    response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}/edit`)}`);
     return;
   }
 
@@ -402,7 +443,7 @@ app.post("/blog-articles/:article/edit", (request, response, next) => {
   const currentUser = getCurrentUser(request);
 
   if (!currentUser) {
-    response.redirect("/login");
+    response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}/edit`)}`);
     return;
   }
 
@@ -449,7 +490,7 @@ app.post("/blog-articles/:article/delete", (request, response, next) => {
   const currentUser = getCurrentUser(request);
 
   if (!currentUser) {
-    response.redirect("/login");
+    response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}`)}`);
     return;
   }
 
@@ -518,7 +559,7 @@ app.post("/blog-articles/:article/comments", (request, response, next) => {
   const currentUser = getCurrentUser(request);
 
   if (!currentUser) {
-    response.redirect("/login");
+    response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}`)}`);
     return;
   }
 

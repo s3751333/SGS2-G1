@@ -21,19 +21,25 @@
             <div class="auth-card">
                 <h1 class="auth-title">Login</h1>
 
-                <form id="login-form" novalidate>
+                <form id="login-form" data-next="<%= nextPage %>" novalidate>
 
                     <div class="form-group">
                         <label for="login-email">Email</label>
                         <input type="email" id="login-email" name="email" placeholder="Enter your email"
                             autocomplete="email" required>
+                        <small id="login-email-message" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="login-password">Password</label>
                         <input type="password" id="login-password" name="password" placeholder="Enter your password"
                             autocomplete="current-password" required>
+                        <small id="login-password-message" aria-live="polite"></small>
                     </div>
+
+                    <label class="remember-email">
+                        <input type="checkbox" id="remember-email"> Remember my email
+                    </label>
 
                     <p id="login-message" aria-live="polite"></p>
                     <button type="submit" class="auth-btn">Sign In</button>
@@ -42,7 +48,7 @@
 
                 <div class="auth-text">
                     Don't have an account?
-                    <a href="register">Register</a>
+                    <a href="/register">Register</a>
                 </div>
 
             </div>
@@ -52,7 +58,7 @@
     </div>
 
     <script src="/js/navbar.js"></script>
-    <script src="js/login.js"></script>
+    <script src="/js/login.js"></script>
     <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
 
     <%- include("partials/footer") %>

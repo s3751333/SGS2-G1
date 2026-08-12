@@ -2,7 +2,7 @@ const body = document.querySelector("body");
 const navbar = document.querySelector(".navbar");
 const menuBtn = document.querySelector(".menu-btn");
 const cancelBtn = document.querySelector(".cancel-btn");
-const loginLink = document.querySelector('.navbar a[href="/login"]');
+const logoutButton = document.querySelector("#logout-button");
 
 menuBtn.onclick = () => {
     navbar.classList.add("show");
@@ -16,28 +16,17 @@ cancelBtn.onclick = () => {
     menuBtn.classList.remove("hide");
 }
 
-async function updateLoginLink() {
-    if (!loginLink) {
-        return;
-    }
+async function logout() {
+    logoutButton.disabled = true;
 
     try {
-        const response = await fetch("/session");
-        const result = await response.json();
-
-        if (result.user) {
-            loginLink.textContent = `Logout (${result.user.username})`;
-            loginLink.href = "#";
-
-            loginLink.addEventListener("click", async function (event) {
-                event.preventDefault();
-                await fetch("/logout", { method: "POST" });
-                window.location.href = "/login";
-            });
-        }
+        await fetch("/logout", { method: "POST" });
+        window.location.href = "/login";
     } catch {
-        console.log("Could not check the current session.");
+        logoutButton.disabled = false;
     }
 }
 
-updateLoginLink();
+if (logoutButton) {
+    logoutButton.addEventListener("click", logout);
+}

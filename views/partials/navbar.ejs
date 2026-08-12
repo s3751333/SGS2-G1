@@ -13,8 +13,12 @@
             <li><a href="/forum-main" class="nav-link" <%- activePage === "forum" ? 'aria-current="page"' : "" %>>Forum</a></li>
         </ul>
         <div class="right-menu">
-            <a href="/profile" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
-            <a href="/login" class="nav-link auth-btn">Sign In/Up</a>
+            <% if (currentUser) { %>
+                <a href="/profile" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
+                <button type="button" id="logout-button" class="nav-link auth-btn logout-button">Logout (<%= currentUser.username %>)</button>
+            <% } else { %>
+                <a href="/login" class="nav-link auth-btn">Sign In/Up</a>
+            <% } %>
             <a href="/cart" class="cart-btn" aria-label="Shopping cart">
                 <i class="fas fa-shopping-cart"></i>
             </a>
