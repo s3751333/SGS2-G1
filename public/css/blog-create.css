@@ -12,7 +12,7 @@
 
 .admin-container {
     width: 100%;
-    max-width: 500px;
+    max-width: 650px;
 }
 
 .admin-card {
@@ -29,6 +29,19 @@
     font-size: 24px;
 }
 
+.form-intro {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #555;
+}
+
+.form-message {
+    min-height: 22px;
+    margin-bottom: 15px;
+    color: var(--delete);
+    text-align: center;
+}
+
 .field-box {
     margin-bottom: 20px;
 }
@@ -41,7 +54,8 @@
 }
 
 .field-box input,
-.field-box textarea {
+.field-box textarea,
+.field-box select {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
@@ -57,14 +71,37 @@
 }
 
 .field-box input:focus,
-.field-box textarea:focus {
+.field-box textarea:focus,
+.field-box select:focus {
     outline: none;
     border-color: #0d6efd;
     box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
 }
 
+.field-box .input-error {
+    border-color: var(--delete);
+}
+
+.field-help {
+    margin-top: 6px;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.field-error {
+    min-height: 18px;
+    margin-top: 5px;
+    color: var(--delete);
+    font-size: 0.85rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+}
+
 .save-btn {
-    width: 100%;
+    flex: 1;
     padding: 14px;
     background: #0d6efd;
     color: white;
@@ -77,4 +114,28 @@
 
 .save-btn:hover {
     background: #0b5ed7;
+}
+
+.clear-btn {
+    padding: 14px 20px;
+    background: white;
+    color: #333;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.clear-btn:hover {
+    background: #f0f0f0;
+}
+
+@media (max-width: 600px) {
+    .admin-card {
+        padding: 22px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
 }

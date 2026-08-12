@@ -6,6 +6,7 @@ const { users, blogPosts } = require("./data");
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const sessions = {};
+const blogCategories = ["programming", "mobile", "cloud", "cybersecurity"];
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -174,7 +175,6 @@ app.get("/blogs-data", (request, response) => {
 
 const pageNames = [
   "admin-users",
-  "blog-create",
   "cart",
   "checkout",
   "forum-main",
@@ -203,8 +203,105 @@ app.get("/", (request, response) => {
 app.get("/blogs", (request, response) => {
   response.render("blogs", {
     activePage: "blog",
+    currentUser: getCurrentUser(request),
     posts: getBlogPostsWithAuthors(),
   });
+});
+
+app.get("/blog-create", (request, response) => {
+  const currentUser = getCurrentUser(request);
+
+  if (!currentUser) {
+    response.redirect("/login");
+    return;
+  }
+
+  response.render("blog-create", {
+    activePage: "blog",
+    currentUser,
+    errors: {},
+    formData: {},
+  });
+});
+
+app.post("/blog-create", (request, response) => {
+  const currentUser = getCurrentUser(request);
+
+  if (!currentUser) {
+    response.redirect("/login");
+    return;
+  }
+
+  const formData = {
+    title: String(request.body.title || "").trim(),
+    category: String(request.body.category || "").trim(),
+    tags: String(request.body.tags || "").trim(),
+    summary: String(request.body.summary || "").trim(),
+    image: String(request.body.image || "").trim(),
+    content: String(request.body.content || "").trim(),
+  };
+  const errors = {};
+  const tagList = formData.tags
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+
+  if (formData.title.length < 5 || formData.title.length > 100) {
+    errors.title = "The title must contain between 5 and 100 characters.";
+  }
+
+  if (!blogCategories.includes(formData.category)) {
+    errors.category = "Please select a valid category.";
+  }
+
+  if (tagList.length === 0 || tagList.length > 5 || tagList.some((tag) => tag.length > 25)) {
+    errors.tags = "Enter between 1 and 5 tags, with no more than 25 characters each.";
+  }
+
+  if (formData.summary.length < 20 || formData.summary.length > 250) {
+    errors.summary = "The summary must contain between 20 and 250 characters.";
+  }
+
+  if (!formData.image.startsWith("img/")) {
+    errors.image = "Please select a valid cover image.";
+  }
+
+  if (formData.content.length < 50 || formData.content.length > 5000) {
+    errors.content = "The article must contain between 50 and 5000 characters.";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    response.status(400).render("blog-create", {
+      activePage: "blog",
+      currentUser,
+      errors,
+      formData,
+    });
+    return;
+  }
+
+  const newPostId = blogPosts.length > 0
+    ? Math.max(...blogPosts.map((post) => post.id)) + 1
+    : 1;
+  const contentParagraphs = formData.content
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  blogPosts.push({
+    id: newPostId,
+    authorId: currentUser.id,
+    title: formData.title,
+    date: new Date().toISOString().slice(0, 10),
+    category: formData.category,
+    tags: tagList,
+    summary: formData.summary,
+    content: contentParagraphs,
+    image: formData.image,
+    comments: [],
+  });
+
+  response.redirect(`/blog-articles/blog${newPostId}`);
 });
 
 app.get("/:page", (request, response, next) => {

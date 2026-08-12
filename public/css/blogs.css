@@ -89,6 +89,26 @@
     color: var(--main-color);
 }
 
+.blog-header p {
+    margin-top: 12px;
+    color: #555;
+}
+
+.create-post-link {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 18px;
+    background: var(--main-color);
+    color: white;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.create-post-link:hover {
+    background: var(--main-hover);
+}
+
 .blog-status {
     text-align: center;
     color: #555;

@@ -195,6 +195,7 @@ body {
     border-radius: 10px;
     border-left: 4px solid var(--main-color);
 }
+
 .owner-message {
     margin-top: 25px;
 }

@@ -1,9 +1,10 @@
+// Password for the sample account: Reader123!
 const users = [
   {
     id: 1,
-    fullName: "Mark Molnar",
-    username: "markmolnar",
-    email: "mark.molnar@booknook.test",
+    fullName: "Booknook Admin",
+    username: "admin",
+    email: "admin@booknook.test",
     introduction: "I enjoy books and web development.",
     role: "member",
     status: "active",
