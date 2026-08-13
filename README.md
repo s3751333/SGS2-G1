@@ -49,3 +49,15 @@ npm start
 Open `http://localhost:3000` in a browser. Express routes use clean URLs such as
 `/blogs`, `/login`, and `/products`; the corresponding templates are stored as
 `.ejs` files inside the `views` folder.
+
+### Test Accounts
+
+Use the email address to log in. All sample accounts use the password
+`Reader123!`.
+
+| Account | Email | Role | Status |
+| :--- | :--- | :--- | :--- |
+| BookNook Admin | `admin@booknook.test` | Administrator | Active |
+| Linh Nguyen | `linh@booknook.test` | Member | Active |
+| Alex Pham | `alex@booknook.test` | Member | Locked |
+| Mai Hoang | `mai@booknook.test` | Member | Active |
