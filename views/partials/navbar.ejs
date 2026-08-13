@@ -14,6 +14,9 @@
         </ul>
         <div class="right-menu">
             <% if (currentUser) { %>
+                <% if (currentUser.role === "admin") { %>
+                    <a href="/admin-users" class="nav-link auth-btn">Users</a>
+                <% } %>
                 <a href="/profile" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
                 <button type="button" id="logout-button" class="nav-link auth-btn logout-button">Logout (<%= currentUser.username %>)</button>
             <% } else { %>
