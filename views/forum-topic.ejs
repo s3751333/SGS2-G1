@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Read and reply to a BookNook community discussion about The Little Prince.">
-    <title>BookNook | The Little Prince Discussion</title>
+    <meta name="description" content="Read and reply to a BookNook community discussion.">
+    <title>BookNook | <%= topic.title %></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/forum.css">
+    <link rel="stylesheet" href="/css/forum.css">
 </head>
 
 <body>
@@ -15,80 +15,112 @@
 
     <main class="page-container narrow-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="forum-main">Forum</a> / <a href="forum-main#english-books">English Books</a>
+            <a href="/forum-main">Forum</a> / <%= topic.categoryLabel %>
         </nav>
 
         <article class="discussion-card">
-            <span class="tag">English Books</span>
-            <h1>Which translation of The Little Prince should I read?</h1>
-            <p class="post-meta">Posted by <strong>Linh Nguyen</strong> on 18 July 2026</p>
-            <p>I want to read <em>The Little Prince</em> in English for the first time. I found translations by
-                Katherine Woods and Richard Howard. Which version is easier for an intermediate English learner?</p>
-            <div class="post-actions">
-                <button type="button">Edit topic</button>
-                <button type="button">Delete topic</button>
-            </div>
+            <span class="tag"><%= topic.categoryLabel %></span>
+            <h1><%= topic.title %></h1>
+            <p class="post-meta">Posted by <strong><%= topic.author %></strong> on <%= topic.createdLabel %></p>
+            <img class="post-image" src="/<%= topic.image %>" alt="Image for <%= topic.title %>">
+            <p><%= topic.content %></p>
+            <% if (currentUser && currentUser.id === topic.authorId) { %>
+                <div class="post-actions">
+                    <a href="/forum-topic/<%= topic.id %>/edit">Edit topic</a>
+                    <form class="delete-form" action="/forum-topic/<%= topic.id %>/delete" method="post">
+                        <button type="submit">Delete topic</button>
+                    </form>
+                </div>
+            <% } %>
         </article>
 
-        <section aria-labelledby="reply-heading">
-            <h2 id="reply-heading" class="section-title">4 replies</h2>
+        <section id="replies" aria-labelledby="reply-heading">
+            <h2 id="reply-heading" class="section-title"><%= replies.length %> replies</h2>
             <div class="reply-list">
-                <article class="reply-card">
-                    <header class="reply-header">
-                        <strong>Alex Pham</strong>
-                        <span>18 July 2026, 10:15</span>
-                    </header>
-                    <p>Richard Howard's translation uses more modern English. I found it clearer when I first read the
-                        story.</p>
-                    <a class="reply-link" href="#reply-form">Reply</a>
-                </article>
-
-                <article class="reply-card nested-reply">
-                    <header class="reply-header">
-                        <strong>Linh Nguyen</strong>
-                        <span>18 July 2026, 11:02</span>
-                    </header>
-                    <p><strong>Replying to Alex:</strong> Thank you. Modern wording sounds better for my first reading.</p>
-                    <a class="reply-link" href="#reply-form">Reply</a>
-                </article>
-
-                <article class="reply-card">
-                    <header class="reply-header">
-                        <strong>Mai Hoang</strong>
-                        <span>18 July 2026, 14:40</span>
-                    </header>
-                    <p>Katherine Woods has a more classic style. You could read one chapter from each version before
-                        choosing.</p>
-                    <a class="reply-link" href="#reply-form">Reply</a>
-                </article>
-
-                <article class="reply-card">
-                    <header class="reply-header">
-                        <strong>Daniel Lee</strong>
-                        <span>19 July 2026, 09:20</span>
-                    </header>
-                    <p>I also recommend Richard Howard for a learner. The sentences feel direct, but the meaning is
-                        still beautiful.</p>
-                    <a class="reply-link" href="#reply-form">Reply</a>
-                </article>
+                <% if (replies.length === 0) { %>
+                    <p class="empty-state">No replies yet. Start the conversation below.</p>
+                <% } %>
+                <% replies.forEach((reply) => { %>
+                    <article id="reply-<%= reply.id %>" class="reply-card <%= reply.parentReplyId ? 'nested-reply' : '' %>"
+                        style="--reply-depth: <%= Math.min(reply.depth, 3) %>">
+                        <header class="reply-header">
+                            <div>
+                                <strong><%= reply.title %></strong>
+                                <p><%= reply.author %></p>
+                            </div>
+                            <span><%= reply.createdLabel %></span>
+                        </header>
+                        <% if (reply.parentAuthor) { %>
+                            <p class="replying-to-posted">Replying to <strong><%= reply.parentAuthor %></strong></p>
+                        <% } %>
+                        <div class="reply-content">
+                            <img class="reply-image" src="/<%= reply.image %>" alt="Image for <%= reply.title %>">
+                            <p><%= reply.content %></p>
+                        </div>
+                        <% if (currentUser) { %>
+                            <button class="reply-link reply-target" type="button" data-reply-id="<%= reply.id %>" data-reply-author="<%= reply.author %>">Reply</button>
+                        <% } %>
+                        <% if (currentUser && currentUser.id === reply.authorId) { %>
+                            <div class="reply-actions">
+                                <a href="/forum-topic/<%= topic.id %>/replies/<%= reply.id %>/edit">Edit</a>
+                                <form class="delete-form" action="/forum-topic/<%= topic.id %>/replies/<%= reply.id %>/delete" method="post">
+                                    <button type="submit">Delete</button>
+                                </form>
+                            </div>
+                        <% } %>
+                    </article>
+                <% }) %>
             </div>
         </section>
 
         <section class="reply-form-section" aria-labelledby="reply-form-heading">
-            <h2 id="reply-form-heading">Add your reply</h2>
-            <form id="reply-form" action="forum-topic" method="get">
-                <label for="reply-message">Your message</label>
-                <textarea id="reply-message" name="message" rows="6" placeholder="Share a helpful answer..."
-                    required></textarea>
-                <button class="button" type="submit">Post reply</button>
-            </form>
+            <% if (currentUser) { %>
+                <h2 id="reply-form-heading">Add your reply</h2>
+                <p id="replying-to" class="replying-to" hidden></p>
+                <p id="reply-form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length ? 'Please correct the highlighted fields.' : '' %></p>
+                <form id="reply-form" action="/forum-topic/<%= topic.id %>/replies" method="post"
+                    data-draft-key="booknookForumReply:<%= topic.id %>" data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
+                    <input id="parent-reply-id" name="parentReplyId" type="hidden" value="<%= formData.parentReplyId || '' %>">
+                    <div class="form-field">
+                        <label for="reply-title">Reply title</label>
+                        <input id="reply-title" name="title" type="text" minlength="3" maxlength="100"
+                            value="<%= formData.title || '' %>" placeholder="Summarise your reply" required>
+                        <p class="field-help"><span id="reply-title-count">0</span> / 100 characters</p>
+                        <p id="reply-title-error" class="field-error" aria-live="polite"><%= errors.title || '' %></p>
+                    </div>
+                    <div class="form-field">
+                        <label for="reply-message">Your message</label>
+                        <textarea id="reply-message" name="content" rows="6" minlength="3" maxlength="1000"
+                            placeholder="Share a helpful answer..." required><%= formData.content || '' %></textarea>
+                        <p class="field-help"><span id="reply-message-count">0</span> / 1000 characters</p>
+                        <p id="reply-content-error" class="field-error" aria-live="polite"><%= errors.content || '' %></p>
+                    </div>
+                    <div class="form-field">
+                        <label for="reply-image">Image</label>
+                        <select id="reply-image" name="image" required>
+                            <option value="">Choose an image</option>
+                            <% forumImages.forEach((image) => { %>
+                                <option value="<%= image.value %>" <%= formData.image === image.value ? 'selected' : '' %>><%= image.label %></option>
+                            <% }) %>
+                        </select>
+                        <p id="reply-image-error" class="field-error" aria-live="polite"><%= errors.image || '' %></p>
+                    </div>
+                    <div class="form-actions">
+                        <button id="clear-reply-draft" class="secondary-button" type="button">Clear draft</button>
+                        <button class="button" type="submit">Post reply</button>
+                    </div>
+                </form>
+            <% } else { %>
+                <h2 id="reply-form-heading">Join the discussion</h2>
+                <p><a href="/login?next=<%= encodeURIComponent('/forum-topic/' + topic.id) %>">Sign in</a> to post a reply.</p>
+            <% } %>
         </section>
     </main>
 
     <%- include("partials/footer") %>
-
     <script src="/js/navbar.js"></script>
-    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+    <% if (currentUser) { %><script src="/js/forum-reply.js"></script><% } %>
+    <script src="/js/forum-delete.js"></script>
 </body>
 
 </html>
