@@ -106,6 +106,29 @@
         display: block;
     }
 
+    .nav-container {
+        padding: 14px 16px;
+    }
+
+    .navbar .logo a {
+        font-size: 21px;
+    }
+
+    .right-menu {
+        margin-left: auto;
+        gap: 10px;
+    }
+
+    .right-menu .nav-link {
+        padding: 6px;
+        font-size: 14px;
+    }
+
+    .logout-button {
+        max-width: 86px;
+        white-space: normal;
+    }
+
     .navbar .menu-list {
         position: fixed;
         height: 100vh;
