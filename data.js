@@ -1,4 +1,4 @@
-// Password for the sample account: Reader123!
+// Password for the sample accounts: Reader123!
 const users = [
   {
     id: 1,
@@ -6,6 +6,33 @@ const users = [
     username: "admin",
     email: "admin@booknook.test",
     introduction: "I enjoy books and web development.",
+    role: "admin",
+    status: "active",
+  },
+  {
+    id: 2,
+    fullName: "Linh Nguyen",
+    username: "linhnguyen",
+    email: "linh@booknook.test",
+    introduction: "I enjoy classic stories and language learning.",
+    role: "member",
+    status: "active",
+  },
+  {
+    id: 3,
+    fullName: "Alex Pham",
+    username: "alexpham",
+    email: "alex@booknook.test",
+    introduction: "I like cooperative board games.",
+    role: "member",
+    status: "locked",
+  },
+  {
+    id: 4,
+    fullName: "Mai Hoang",
+    username: "maihoang",
+    email: "mai@booknook.test",
+    introduction: "I read Vietnamese history and fiction.",
     role: "member",
     status: "active",
   },
@@ -159,4 +186,94 @@ const blogPosts = [
   },
 ];
 
-module.exports = { users, blogPosts };
+const forumTopics = [
+  {
+    id: 1,
+    authorId: 2,
+    category: "english",
+    title: "Which translation of The Little Prince should I read?",
+    content: "I want to read The Little Prince in English for the first time. I found translations by Katherine Woods and Richard Howard. Which version is easier for an intermediate English learner?",
+    image: "img/little_prince.jpg",
+    createdAt: "2026-07-18T09:00:00.000Z",
+    updatedAt: "2026-07-18T09:00:00.000Z",
+    views: 31,
+    deleted: false,
+  },
+  {
+    id: 2,
+    authorId: 4,
+    category: "vietnamese",
+    title: "Recommend a Vietnamese history book for beginners",
+    content: "I would like an accessible introduction to Vietnamese history. Which book gives a clear overview without assuming too much background knowledge?",
+    image: "img/book.jpg",
+    createdAt: "2026-07-17T08:30:00.000Z",
+    updatedAt: "2026-07-17T08:30:00.000Z",
+    views: 42,
+    deleted: false,
+  },
+  {
+    id: 3,
+    authorId: 3,
+    category: "board-games",
+    title: "Best cooperative board game for four new players?",
+    content: "Our group is new to modern board games and wants to play cooperatively. We need a game that teaches quickly and finishes in about one hour.",
+    image: "img/catan_bg.jpg",
+    createdAt: "2026-07-16T12:20:00.000Z",
+    updatedAt: "2026-07-16T12:20:00.000Z",
+    views: 57,
+    deleted: false,
+  },
+];
+
+const forumReplies = [
+  {
+    id: 1,
+    topicId: 1,
+    parentReplyId: null,
+    authorId: 3,
+    title: "The modern translation is clearer",
+    content: "Richard Howard's translation uses more modern English. I found it clearer when I first read the story.",
+    image: "img/book.jpg",
+    createdAt: "2026-07-18T10:15:00.000Z",
+    updatedAt: "2026-07-18T10:15:00.000Z",
+    deleted: false,
+  },
+  {
+    id: 2,
+    topicId: 1,
+    parentReplyId: 1,
+    authorId: 2,
+    title: "Thanks for the recommendation",
+    content: "Thank you. Modern wording sounds better for my first reading.",
+    image: "img/little_prince.jpg",
+    createdAt: "2026-07-18T11:02:00.000Z",
+    updatedAt: "2026-07-18T11:02:00.000Z",
+    deleted: false,
+  },
+  {
+    id: 3,
+    topicId: 1,
+    parentReplyId: null,
+    authorId: 4,
+    title: "Compare a sample chapter",
+    content: "Katherine Woods has a more classic style. You could read one chapter from each version before choosing.",
+    image: "img/eng_use.jpg",
+    createdAt: "2026-07-18T14:40:00.000Z",
+    updatedAt: "2026-07-18T14:40:00.000Z",
+    deleted: false,
+  },
+  {
+    id: 4,
+    topicId: 1,
+    parentReplyId: null,
+    authorId: 1,
+    title: "A direct style for learners",
+    content: "I also recommend Richard Howard for a learner. The sentences feel direct, but the meaning is still beautiful.",
+    image: "img/book.jpg",
+    createdAt: "2026-07-19T09:20:00.000Z",
+    updatedAt: "2026-07-19T09:20:00.000Z",
+    deleted: false,
+  },
+];
+
+module.exports = { users, blogPosts, forumTopics, forumReplies };

@@ -21,6 +21,20 @@ body {
     text-align: center;
 }
 
+.user-list-message {
+    min-height: 22px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.success-message {
+    color: #176b3a;
+}
+
+.error-message {
+    color: #842029;
+}
+
 .table-wrapper {
     overflow-x: auto;
 }
@@ -65,6 +79,11 @@ body {
     height: 18px;
     accent-color: #198754;
     cursor: pointer;
+}
+
+.status-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .enabled {

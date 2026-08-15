@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Start a new BookNook community discussion about a book or board game.">
-    <title>BookNook | Start a Discussion</title>
+    <meta name="description" content="Create or edit a BookNook community discussion.">
+    <title>BookNook | <%= pageTitle %></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/forum.css">
+    <link rel="stylesheet" href="/css/forum.css">
 </head>
 
 <body>
@@ -15,53 +15,67 @@
 
     <main class="page-container form-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="forum-main">Forum</a> / Start a discussion
+            <a href="/forum-main">Forum</a> / <%= pageTitle %>
         </nav>
 
         <section class="topic-form-card" aria-labelledby="form-title">
-            <h1 id="form-title">Start a new discussion</h1>
+            <h1 id="form-title"><%= pageTitle %></h1>
             <p>Choose a subject and explain what you would like the community to discuss.</p>
+            <p id="form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length ? 'Please correct the highlighted fields.' : '' %></p>
 
-            <form id="topic-form" action="forum-topic" method="get">
+            <form id="topic-form" action="<%= formAction %>" method="post"
+                data-draft-key="booknookForumTopic:<%= formMode %>:<%= formAction %>"
+                data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
                 <div class="form-field">
                     <label for="topic-category">Category</label>
                     <select id="topic-category" name="category" required>
                         <option value="">Choose a category</option>
-                        <option value="english">English Books</option>
-                        <option value="vietnamese">Vietnamese Books</option>
-                        <option value="board-games">Board Games</option>
+                        <% Object.entries(forumCategories).forEach(([value, label]) => { %>
+                            <option value="<%= value %>" <%= formData.category === value ? 'selected' : '' %>><%= label %></option>
+                        <% }) %>
                     </select>
+                    <p id="category-error" class="field-error" aria-live="polite"><%= errors.category || '' %></p>
                 </div>
 
                 <div class="form-field">
                     <label for="topic-title">Discussion title</label>
-                    <input id="topic-title" name="title" type="text"
-                        placeholder="Example: Recommend a short mystery novel" required>
+                    <input id="topic-title" name="title" type="text" minlength="5" maxlength="100"
+                        value="<%= formData.title || '' %>" placeholder="Example: Recommend a short mystery novel" required>
+                    <p class="field-help"><span id="title-count">0</span> / 100 characters</p>
+                    <p id="title-error" class="field-error" aria-live="polite"><%= errors.title || '' %></p>
                 </div>
 
                 <div class="form-field">
                     <label for="topic-message">Message</label>
-                    <textarea id="topic-message" name="message" rows="9"
-                        placeholder="Add enough detail so other members can help..." required></textarea>
+                    <textarea id="topic-message" name="content" rows="9" minlength="20" maxlength="2000"
+                        placeholder="Add enough detail so other members can help..." required><%= formData.content || '' %></textarea>
+                    <p class="field-help"><span id="message-count">0</span> / 2000 characters</p>
+                    <p id="content-error" class="field-error" aria-live="polite"><%= errors.content || '' %></p>
                 </div>
 
-                <div class="checkbox-field">
-                    <input id="reply-notification" name="notification" type="checkbox">
-                    <label for="reply-notification">Email me when someone replies</label>
+                <div class="form-field">
+                    <label for="topic-image">Image</label>
+                    <select id="topic-image" name="image" required>
+                        <option value="">Choose an image</option>
+                        <% forumImages.forEach((image) => { %>
+                            <option value="<%= image.value %>" <%= formData.image === image.value ? 'selected' : '' %>><%= image.label %></option>
+                        <% }) %>
+                    </select>
+                    <p id="image-error" class="field-error" aria-live="polite"><%= errors.image || '' %></p>
                 </div>
 
                 <div class="form-actions">
-                    <a class="secondary-button" href="forum-main">Cancel</a>
-                    <button class="button" type="submit">Publish discussion</button>
+                    <a class="secondary-button" href="<%= formMode === 'edit' ? formAction.replace('/edit', '') : '/forum-main' %>">Cancel</a>
+                    <button id="clear-topic-draft" class="secondary-button" type="button"><%= formMode === 'edit' ? 'Reset form' : 'Clear draft' %></button>
+                    <button class="button" type="submit"><%= submitLabel %></button>
                 </div>
             </form>
         </section>
     </main>
 
     <%- include("partials/footer") %>
-
     <script src="/js/navbar.js"></script>
-    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+    <script src="/js/forum-form.js"></script>
 </body>
 
 </html>
