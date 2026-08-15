@@ -6,6 +6,7 @@ const { users, blogPosts } = require("./data");
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const sessions = {};
+const passwordResetTokens = {};
 const blogCategories = ["programming", "mobile", "cloud", "cybersecurity"];
 const blogImages = [
   "img/book.jpg",
@@ -82,6 +83,98 @@ app.get("/register", (request, response) => {
   }
 
   response.render("register", { activePage: "" });
+});
+
+app.get("/forgot-password", (request, response) => {
+  response.render("forgot-password", { activePage: "" });
+});
+
+app.post("/forgot-password", (request, response) => {
+  const email = String(request.body.email || "").trim().toLowerCase();
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    response.status(400).json({ message: "Enter a valid email address." });
+    return;
+  }
+
+  const user = users.find((item) => item.email === email);
+
+  if (!user) {
+    response.status(404).json({ message: "No account was found with this email address." });
+    return;
+  }
+
+  const token = crypto.randomBytes(24).toString("hex");
+  passwordResetTokens[token] = {
+    expiresAt: Date.now() + 15 * 60 * 1000,
+    userId: user.id,
+  };
+
+  response.json({
+    message: "Password reset link created. It is valid for 15 minutes.",
+    resetUrl: `/reset-password?token=${token}`,
+  });
+});
+
+app.get("/reset-password", (request, response) => {
+  const token = String(request.query.token || "");
+  const resetRequest = passwordResetTokens[token];
+  const tokenIsValid = resetRequest && resetRequest.expiresAt > Date.now();
+
+  if (!tokenIsValid) {
+    delete passwordResetTokens[token];
+  }
+
+  response.render("reset-password", {
+    activePage: "",
+    token,
+    tokenIsValid,
+  });
+});
+
+app.post("/reset-password", (request, response) => {
+  const token = String(request.body.token || "");
+  const password = String(request.body.password || "");
+  const confirmPassword = String(request.body.confirmPassword || "");
+  const resetRequest = passwordResetTokens[token];
+
+  if (!resetRequest || resetRequest.expiresAt <= Date.now()) {
+    delete passwordResetTokens[token];
+    response.status(400).json({ message: "This password reset link is invalid or has expired." });
+    return;
+  }
+
+  if (password.length < 8 || password.length > 72 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    response.status(400).json({ message: "Use 8 characters, a capital letter, and a number." });
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    response.status(400).json({ message: "The passwords do not match." });
+    return;
+  }
+
+  const user = users.find((item) => item.id === resetRequest.userId);
+
+  if (!user) {
+    delete passwordResetTokens[token];
+    response.status(404).json({ message: "The user account no longer exists." });
+    return;
+  }
+
+  user.passwordHash = hashPassword(password);
+  delete passwordResetTokens[token];
+
+  Object.keys(sessions).forEach((sessionId) => {
+    if (sessions[sessionId] === user.id) {
+      delete sessions[sessionId];
+    }
+  });
+
+  response.json({
+    message: "Password changed successfully.",
+    redirectTo: "/login",
+  });
 });
 
 app.post("/register", (request, response) => {

@@ -91,6 +91,37 @@
     width: auto;
 }
 
+.forgot-password-link {
+    margin: -6px 0 14px;
+    text-align: right;
+}
+
+.forgot-password-link a,
+.prototype-reset-link {
+    color: var(--main-color);
+}
+
+.auth-description {
+    margin-bottom: 22px;
+    color: #555;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.prototype-notice {
+    margin-top: 18px;
+    padding: 14px;
+    background: #eef5ff;
+    border-left: 4px solid var(--main-color);
+    border-radius: 5px;
+    color: #444;
+    line-height: 1.5;
+}
+
+.auth-error {
+    color: var(--delete);
+}
+
 #login-message,
 #form-message {
     min-height: 22px;
