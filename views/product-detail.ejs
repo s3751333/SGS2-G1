@@ -46,11 +46,11 @@
 
                 <div class="purchase-row">
                     <div class="qty-selector" aria-label="Quantity">
-                        <button type="button" aria-label="Decrease quantity">&minus;</button>
-                        <span>1</span>
-                        <button type="button" aria-label="Increase quantity">+</button>
+                        <button type="button" data-quantity-decrease aria-label="Decrease quantity">&minus;</button>
+                        <span data-product-quantity aria-live="polite">1</span>
+                        <button type="button" data-quantity-increase aria-label="Increase quantity">+</button>
                     </div>
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="little-prince"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i> Add to Wishlist</a>
                 </div>
 
@@ -229,7 +229,9 @@
 
     <%- include("partials/footer") %>
 
+    <script src="/js/store.js" defer></script>
     <script src="/js/navbar.js" defer></script>
+    <script src="/js/product-detail.js" defer></script>
 </body>
 
 </html>

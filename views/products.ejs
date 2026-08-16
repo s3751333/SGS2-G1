@@ -39,10 +39,11 @@
             </div>
             <button type="button">Search</button>
         </div>
+        <p id="shop-results-message" class="results-message" role="status">6 products found.</p>
 
         <h2 class="section-title" id="books">Featured Books</h2>
         <div class="product-grid">
-            <article class="product-card">
+            <article class="product-card" data-category="fiction" data-search="harry potter sorcerer's stone j k rowling fantasy fiction">
                 <img src="img/harry_potter.jpg" alt="Cover of Harry Potter and the Sorcerer's Stone">
                 <span class="tag">Fantasy</span>
                 <h3><a href="product-detail">Harry Potter and the Sorcerer's Stone</a></h3>
@@ -53,12 +54,12 @@
                 </a>
                 <p class="card-price">150,000 VND</p>
                 <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="harry-potter"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
                 </div>
             </article>
 
-            <article class="product-card">
+            <article class="product-card" data-category="fiction" data-search="the little prince antoine de saint-exupery fiction">
                 <img src="img/little_prince.jpg" alt="Cover of The Little Prince">
                 <span class="tag">Fiction</span>
                 <h3><a href="product-detail">The Little Prince</a></h3>
@@ -69,12 +70,12 @@
                 </a>
                 <p class="card-price">100,000 VND</p>
                 <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="little-prince"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
                 </div>
             </article>
 
-            <article class="product-card">
+            <article class="product-card" data-category="reference" data-search="english grammar in use raymond murphy reference">
                 <img src="img/eng_use.jpg" alt="Cover of English Grammar in Use">
                 <span class="tag">Reference</span>
                 <h3><a href="product-detail">English Grammar in Use</a></h3>
@@ -85,7 +86,7 @@
                 </a>
                 <p class="card-price">180,000 VND</p>
                 <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="english-grammar"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
                 </div>
             </article>
@@ -93,7 +94,7 @@
 
         <h2 class="section-title" id="board-games">Featured Board Games</h2>
         <div class="product-grid">
-            <article class="product-card">
+            <article class="product-card" data-category="board-games" data-search="catan board games strategy">
                 <img src="img/catan_bg.jpg" alt="Catan board game box">
                 <span class="tag">Board Games</span>
                 <h3><a href="product-detail">Catan</a></h3>
@@ -104,12 +105,12 @@
                 </a>
                 <p class="card-price">200,000 VND</p>
                 <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="catan"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
                 </div>
             </article>
 
-            <article class="product-card">
+            <article class="product-card" data-category="board-games" data-search="monopoly board games family">
                 <img src="img/monopoly.jpg" alt="Monopoly board game box">
                 <span class="tag">Board Games</span>
                 <h3><a href="product-detail">Monopoly</a></h3>
@@ -120,12 +121,12 @@
                 </a>
                 <p class="card-price">350,000 VND</p>
                 <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="monopoly"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
                 </div>
             </article>
 
-            <article class="product-card">
+            <article class="product-card" data-category="board-games" data-search="uno card game board games family">
                 <img src="img/uno.jpg" alt="Uno card game box">
                 <span class="tag">Board Games</span>
                 <h3><a href="product-detail">Uno</a></h3>
@@ -136,7 +137,7 @@
                 </a>
                 <p class="card-price">100,000 VND</p>
                 <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <a href="cart" class="button" data-add-to-cart="uno"><i class="fas fa-cart-plus"></i> Add to Cart</a>
                     <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
                 </div>
             </article>
@@ -145,7 +146,9 @@
 
     <%- include("partials/footer") %>
 
+    <script src="/js/store.js" defer></script>
     <script src="/js/navbar.js" defer></script>
+    <script src="/js/products.js" defer></script>
 </body>
 
 </html>

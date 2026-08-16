@@ -44,10 +44,23 @@
                 </a>
             </div>
         </section>
+
+        <section class="home-section" aria-labelledby="featured-heading">
+            <div class="home-section-heading">
+                <div>
+                    <h2 id="featured-heading">Popular picks</h2>
+                    <p>Add a popular book or game directly to your cart.</p>
+                </div>
+                <a href="/products">View all products</a>
+            </div>
+            <div class="featured-products" id="home-featured-products"></div>
+        </section>
     </main>
     <%- include("partials/footer") %>
 
+    <script src="/js/store.js" defer></script>
     <script src="/js/navbar.js" defer></script>
+    <script src="/js/home.js" defer></script>
 </body>
 
 </html>

@@ -1,69 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shopping Cart - Bookstore</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <link rel="stylesheet" href="css/cart.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Review and update the products in your BookNook shopping cart.">
+    <title>BookNook | Shopping Cart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/cart.css">
   </head>
   <body>
     <%- include("partials/navbar", { activePage }) %>
-    <script src="/js/navbar.js" defer></script>
-
     <main class="cart-page">
       <h1>Shopping Cart</h1>
       <div class="cart-layout">
-        <section class="cart-items" aria-label="Cart items">
-          <article class="cart-item">
-            <img src="img/harry_potter.jpg" alt="Harry Potter book" />
-            <div class="item-info">
-              <h2>Harry Potter</h2>
-              <p>150,000 VND</p>
-              <a class="remove-link" href="cart">Remove</a>
-            </div>
-            <div class="quantity" aria-label="Quantity">
-              <button type="button">−</button><span>1</span><button type="button">+</button>
-            </div>
-            <strong class="item-total">150,000 VND</strong>
-          </article>
-
-          <article class="cart-item">
-            <img src="img/little_prince.jpg" alt="The Little Prince book" />
-            <div class="item-info">
-              <h2>The Little Prince</h2>
-              <p>100,000 VND</p>
-              <a class="remove-link" href="cart">Remove</a>
-            </div>
-            <div class="quantity" aria-label="Quantity">
-              <button type="button">−</button><span>2</span><button type="button">+</button>
-            </div>
-            <strong class="item-total">200,000 VND</strong>
-          </article>
-
-          <article class="cart-item">
-            <img src="img/uno.jpg" alt="Uno card game" />
-            <div class="item-info">
-              <h2>Uno</h2>
-              <p>100,000 VND</p>
-              <a class="remove-link" href="cart">Remove</a>
-            </div>
-            <div class="quantity" aria-label="Quantity">
-              <button type="button">−</button><span>1</span><button type="button">+</button>
-            </div>
-            <strong class="item-total">100,000 VND</strong>
-          </article>
-        </section>
+        <div>
+          <section id="cart-empty" class="empty-cart" hidden>
+            <i class="fas fa-cart-shopping" aria-hidden="true"></i>
+            <h2>Your cart is empty</h2>
+            <p>Explore our books and board games to find something you like.</p>
+            <a class="button-link" href="/products">Continue Shopping</a>
+          </section>
+          <section id="cart-items" class="cart-items" aria-label="Cart items"></section>
+        </div>
         <aside class="order-summary">
           <h2>Order Summary</h2>
-          <div class="summary-row"><span>Subtotal</span><strong>450,000 VND</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong id="cart-subtotal">0 VND</strong></div>
           <div class="summary-row"><span>Shipping</span><strong>Free</strong></div>
-          <hr />
-          <div class="summary-row total"><span>Total</span><strong>450,000 VND</strong></div>
-          <a class="button-link checkout-button" href="checkout">Checkout</a>
+          <hr>
+          <div class="summary-row total"><span>Total</span><strong id="cart-total">0 VND</strong></div>
+          <a id="checkout-link" class="button-link checkout-button" href="/checkout">Checkout</a>
+          <a class="continue-shopping" href="/products">Continue shopping</a>
         </aside>
       </div>
     </main>
-      <%- include("partials/footer") %>
-</body>
+    <%- include("partials/footer") %>
+    <script src="/js/store.js" defer></script>
+    <script src="/js/navbar.js" defer></script>
+    <script src="/js/cart.js" defer></script>
+  </body>
 </html>

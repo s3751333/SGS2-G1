@@ -80,6 +80,17 @@
     font-weight: normal;
 }
 
+.bank-details {
+    display: grid;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 14px;
+    border-radius: 6px;
+    background: #e8f1ff;
+}
+
+.bank-details[hidden] { display: none; }
+
 .checkout-summary {
     position: sticky;
     top: 100px;
@@ -127,12 +138,40 @@
 }
 
 .checkout-button:hover { background: var(--main-hover); }
+.checkout-button:disabled { background: #9aa5ae; cursor: not-allowed; }
 
 .secure-note {
     margin-top: 12px;
     color: #666666;
     font-size: 12px;
     text-align: center;
+}
+
+.checkout-message {
+    max-width: 650px;
+    margin: 40px auto;
+    padding: 42px 28px;
+    border: 1px solid #d8dee5;
+    border-radius: 10px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.checkout-message[hidden],
+#checkout-content[hidden] { display: none; }
+
+.checkout-message i { color: var(--main-color); font-size: 50px; }
+.checkout-message.confirmation i { color: #198754; }
+.checkout-message h2 { margin: 16px 0 10px; }
+.checkout-message p { margin: 8px 0; color: #5d6873; }
+.checkout-message a {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 11px 18px;
+    border-radius: 6px;
+    background: var(--main-color);
+    color: #ffffff;
+    text-decoration: none;
 }
 
 @media (max-width: 720px) {

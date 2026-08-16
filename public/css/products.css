@@ -53,12 +53,24 @@ a {
     display: flex;
     align-items: end;
     gap: 14px;
-    margin-bottom: 40px;
+    margin-bottom: 12px;
     padding: 18px;
     background-color: #ffffff;
     border: 1px solid #d8dee5;
     border-radius: 8px;
 }
+
+.results-message {
+    min-height: 24px;
+    margin-bottom: 24px;
+    color: #5d6873;
+}
+
+.product-card[hidden],
+.product-grid[hidden],
+.section-title[hidden] { display: none; }
+
+.button.added { background: #198754; border-color: #198754; }
 
 .shop-tools .form-field {
     display: flex;
