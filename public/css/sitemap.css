@@ -1,0 +1,73 @@
+@import url(default.css);
+@import url(navbar.css);
+
+.sitemap-container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.sitemap-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.sitemap-header h1 {
+    color: var(--main-color);
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.sitemap-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+.sitemap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.sitemap-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-top: 4px solid var(--main-color);
+}
+
+.sitemap-card h2 {
+    font-size: 1.2rem;
+    color: #222;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sitemap-card h2 i {
+    color: var(--main-color);
+}
+
+.sitemap-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sitemap-list li {
+    margin-bottom: 12px;
+}
+
+.sitemap-list a {
+    color: #444;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.sitemap-list a:hover {
+    color: var(--main-hover);
+    text-decoration: underline;
+}

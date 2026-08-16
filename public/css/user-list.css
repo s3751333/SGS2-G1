@@ -1,0 +1,122 @@
+@import url(blog-create.css);
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-page {
+    min-height: 0;
+    flex: 1;
+}
+
+.user-list-container {
+    max-width: 800px;
+}
+
+.admin-description {
+    margin: -12px 0 24px;
+    color: #666;
+    text-align: center;
+}
+
+.user-list-message {
+    min-height: 22px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.success-message {
+    color: #176b3a;
+}
+
+.error-message {
+    color: #842029;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table caption {
+    margin-bottom: 10px;
+    color: #444;
+    font-weight: bold;
+    text-align: left;
+}
+
+.user-table th,
+.user-table td {
+    padding: 14px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.user-table thead {
+    background-color: #eef2f7;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.user-table .toggle-cell {
+    text-align: center;
+}
+
+.status-toggle {
+    width: 18px;
+    height: 18px;
+    accent-color: #198754;
+    cursor: pointer;
+}
+
+.status-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.enabled {
+    background-color: #d9f2e3;
+    color: #176b3a;
+}
+
+.disabled {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+@media (max-width: 600px) {
+    .admin-card {
+        padding: 20px;
+    }
+
+    .user-table {
+        font-size: 13px;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 8px 5px;
+    }
+
+    .status {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+
+    .status-toggle {
+        width: 16px;
+        height: 16px;
+    }
+}
