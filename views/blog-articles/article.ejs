@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= post.title %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/blog.css">
+</head>
+
+<body>
+    <%- include("../partials/navbar", { activePage }) %>
+
+    <main class="article-container">
+        <article class="blog-post">
+            <h1 class="post-title"><%= post.title %></h1>
+
+            <div class="post-meta">
+                <span><i class="fas fa-user"></i> Published by: <%= post.author %></span>
+                <span><i class="fas fa-calendar-alt"></i> Date: <%= new Date(post.date).toLocaleDateString("en-AU") %></span>
+                <span><i class="fas fa-tag"></i> Category: <%= post.category %></span>
+            </div>
+
+            <div class="post-hero-image">
+                <img src="/<%= post.image %>" alt="<%= post.title %>">
+            </div>
+
+            <div class="post-content">
+                <% post.content.forEach((paragraph) => { %>
+                    <p><%= paragraph %></p>
+                <% }) %>
+            </div>
+
+            <% if (currentUser && currentUser.id === post.authorId) { %>
+                <p class="owner-message">You are the author of this post.</p>
+                <div class="author-actions">
+                    <a href="/blog-articles/blog<%= post.id %>/edit" class="btn-action btn-edit">Edit Post</a>
+                    <form class="delete-post-form" action="/blog-articles/blog<%= post.id %>/delete" method="post">
+                        <button type="submit" class="btn-action btn-delete">Delete Post</button>
+                    </form>
+                </div>
+            <% } %>
+        </article>
+
+        <hr class="section-divider">
+
+        <section class="comments-section" id="comments">
+            <h2>Comments (<%= post.comments.length %>)</h2>
+
+            <div class="comments-list">
+                <% if (post.comments.length === 0) { %>
+                    <p>No comments have been posted yet.</p>
+                <% } %>
+
+                <% post.comments.forEach((comment) => { %>
+                    <div class="comment-card">
+                        <div class="comment-header">
+                            <span class="comment-author"><%= comment.author %></span>
+                            <span class="comment-date"><%= new Date(comment.date).toLocaleDateString("en-AU") %></span>
+                        </div>
+                        <p class="comment-text"><%= comment.text %></p>
+                    </div>
+                <% }) %>
+            </div>
+
+            <% if (currentUser) { %>
+                <form class="comment-form" id="comment-form"
+                    action="/blog-articles/blog<%= post.id %>/comments" method="post"
+                    data-post-id="<%= post.id %>" novalidate>
+                    <h3>Leave a Reply</h3>
+                    <div class="form-group">
+                        <label for="comment-text">Comment</label>
+                        <textarea id="comment-text" name="comment" placeholder="Write your comment here..."
+                            rows="4" minlength="3" maxlength="500" required><%= commentValue %></textarea>
+                        <p id="comment-error" class="form-error" aria-live="polite"><%= commentError %></p>
+                    </div>
+                    <button type="submit" class="btn-submit-comment">Submit Comment</button>
+                </form>
+            <% } else { %>
+                <p class="comment-login">Please <a href="/login">sign in</a> to leave a comment.</p>
+            <% } %>
+        </section>
+    </main>
+
+    <%- include("../partials/footer") %>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/comments.js"></script>
+    <script src="/js/article-actions.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+</body>
+
+</html>

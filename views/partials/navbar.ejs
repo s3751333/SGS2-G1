@@ -1,0 +1,32 @@
+<nav class="navbar" aria-label="Main navigation">
+    <div class="nav-container">
+        <div class="logo">
+            <a href="/">SGS2-G1</a>
+        </div>
+        <ul class="menu-list" id="main-menu">
+            <li class="menu-control cancel-btn">
+                <button class="icon" type="button" aria-label="Close menu">&times;</button>
+            </li>
+            <li><a href="/" class="nav-link" <%- activePage === "home" ? 'aria-current="page"' : "" %>>Home</a></li>
+            <li><a href="/blogs" class="nav-link" <%- activePage === "blog" ? 'aria-current="page"' : "" %>>Blog</a></li>
+            <li><a href="/products" class="nav-link" <%- activePage === "shop" ? 'aria-current="page"' : "" %>>Shop</a></li>
+            <li><a href="/forum-main" class="nav-link" <%- activePage === "forum" ? 'aria-current="page"' : "" %>>Forum</a></li>
+        </ul>
+        <div class="right-menu">
+            <% if (currentUser) { %>
+                <% if (currentUser.role === "admin") { %>
+                    <a href="/admin-users" class="nav-link auth-btn">Users</a>
+                <% } %>
+                <a href="/profile" class="nav-link auth-btn"><i class="fas fa-user"></i> Profile</a>
+                <button type="button" id="logout-button" class="nav-link auth-btn logout-button">Logout (<%= currentUser.username %>)</button>
+            <% } else { %>
+                <a href="/login" class="nav-link auth-btn">Sign In/Up</a>
+            <% } %>
+            <a href="/cart" class="cart-btn" aria-label="Shopping cart, 0 items">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" data-cart-count hidden>0</span>
+            </a>
+            <button class="icon menu-btn" type="button" aria-label="Open menu" aria-controls="main-menu">&#9776;</button>
+        </div>
+    </div>
+</nav>

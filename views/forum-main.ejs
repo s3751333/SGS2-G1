@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse BookNook discussions about English books, Vietnamese books and board games.">
+    <title>BookNook | Discussion Forum</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/forum.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="page-container">
+        <section class="page-heading">
+            <div>
+                <h1>BookNook Discussion Forum</h1>
+                <p>Ask questions and share ideas about books and board games.</p>
+            </div>
+            <% if (currentUser) { %>
+                <a class="button" href="/forum-new-topic">Start a discussion</a>
+            <% } else { %>
+                <a class="button" href="/login?next=%2Fforum-new-topic">Sign in to post</a>
+            <% } %>
+        </section>
+
+        <form id="forum-controls" class="forum-tools" role="search">
+            <div class="form-field search-field">
+                <label for="forum-search">Search discussions</label>
+                <input id="forum-search" type="search" placeholder="Try: fantasy books">
+            </div>
+            <div class="form-field">
+                <label for="category-filter">Category</label>
+                <select id="category-filter">
+                    <option value="all">All categories</option>
+                    <% Object.entries(forumCategories).forEach(([value, label]) => { %>
+                        <option value="<%= value %>"><%= label %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="sort-order">Sort by</label>
+                <select id="sort-order">
+                    <option value="recent">Recent activity</option>
+                    <option value="oldest">Oldest topic</option>
+                    <option value="title">Title A-Z</option>
+                </select>
+            </div>
+            <button class="button" type="submit">Apply</button>
+            <button class="secondary-button" id="reset-forum" type="button">Reset</button>
+        </form>
+
+        <section aria-labelledby="category-heading">
+            <h2 id="category-heading" class="section-title">Browse by subject</h2>
+            <div class="category-grid">
+                <% Object.entries(forumCategories).forEach(([value, label]) => { %>
+                    <button class="category-card category-filter-button" type="button" data-category="<%= value %>">
+                        <h3><%= label %></h3>
+                        <p><%= value === 'english' ? 'Kids, fiction, non-fiction and best sellers' : value === 'vietnamese' ? 'Education, novels, comics and history' : 'New, classic, debate and turn-based games' %></p>
+                        <span><%= topics.filter((topic) => topic.category === value).length %> discussions</span>
+                    </button>
+                <% }) %>
+            </div>
+        </section>
+
+        <section aria-labelledby="discussion-heading">
+            <h2 id="discussion-heading" class="section-title">Discussions</h2>
+            <p id="forum-status" class="forum-status" aria-live="polite"><%= topics.length %> discussions found.</p>
+            <div id="topic-list" class="topic-list">
+                <% topics.forEach((topic) => { %>
+                    <article class="topic-row"
+                        data-category="<%= topic.category %>"
+                        data-created="<%= topic.createdAt %>"
+                        data-recent="<%= topic.lastActivity %>"
+                        data-search="<%= topic.searchText %>"
+                        data-title="<%= topic.title.toLowerCase() %>">
+                        <div>
+                            <span class="tag"><%= topic.categoryLabel %></span>
+                            <h3><a href="/forum-topic/<%= topic.id %>"><%= topic.title %></a></h3>
+                            <p>Started by <%= topic.author %> · <%= topic.createdLabel %></p>
+                        </div>
+                        <div class="topic-counts">
+                            <span><strong><%= topic.replyCount %></strong> replies</span>
+                            <span><strong><%= topic.views %></strong> views</span>
+                        </div>
+                    </article>
+                <% }) %>
+            </div>
+            <p id="forum-empty" class="empty-state" hidden>No discussions match your search.</p>
+        </section>
+    </main>
+
+    <%- include("partials/footer") %>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/forum-list.js"></script>
+</body>
+
+</html>

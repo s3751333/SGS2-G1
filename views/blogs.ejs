@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/blogs.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+
+    <div class="blog-header">
+        <h1>Latest Blog Posts</h1>
+        <% if (currentUser) { %>
+            <a href="/blog-create" class="create-post-link"><i class="fas fa-plus"></i> Create Post</a>
+        <% } else { %>
+            <p><a href="/login">Sign in</a> to publish a blog post.</p>
+        <% } %>
+    </div>
+
+    <form id="blog-controls" class="search-container">
+        <input type="search" id="blog-search" placeholder="Search blog posts..." class="search-input"
+            aria-label="Search blog posts">
+        <select id="category-filter" class="filter-select" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+            <option value="programming">Programming</option>
+            <option value="mobile">Mobile App</option>
+            <option value="cloud">Cloud Computing</option>
+            <option value="cybersecurity">Cybersecurity</option>
+        </select>
+        <select id="sort-order" class="sort-select" aria-label="Sort blog posts">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="title">Title A-Z</option>
+            <option value="author">Author A-Z</option>
+        </select>
+        <button type="submit" class="search-btn">Search</button>
+        <button type="button" id="reset-filters" class="reset-btn">Reset filters</button>
+    </form>
+
+    <p id="blog-status" class="blog-status" aria-live="polite"><%= posts.length %> blog posts found.</p>
+    <main id="blog-list" class="blog-container">
+        <% posts.forEach((post) => { %>
+            <article class="card"
+                data-title="<%= post.title.toLowerCase() %>"
+                data-author="<%= post.author.toLowerCase() %>"
+                data-category="<%= post.category %>"
+                data-date="<%= post.date %>"
+                data-search="<%= [post.title, post.author, post.date, post.category, post.tags.join(' '), post.summary, post.content.join(' ')].join(' ').toLowerCase() %>">
+                <div class="card-image">
+                    <img src="/<%= post.image %>" alt="<%= post.title %>">
+                </div>
+                <h3><%= post.title %></h3>
+                <p class="card-meta">By <%= post.author %> · <%= post.category %></p>
+                <p><%= post.summary %></p>
+                <div class="card-footer">
+                    <span><%= new Date(post.date).toLocaleDateString("en-AU") %></span>
+                    <a href="/blog-articles/blog<%= post.id %>" class="btn-read">Read</a>
+                </div>
+            </article>
+        <% }) %>
+    </main>
+
+    <%- include("partials/footer") %>
+
+    <script src="/js/navbar.js"></script>
+    <script src="js/blogs.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNook | <%= formTitle %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/blog-create.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="admin-page">
+        <div class="admin-container">
+            <div class="admin-card">
+                <h1 class="admin-title"><%= formTitle %></h1>
+                <p class="form-intro"><%= formMode === 'edit' ? 'Editing' : 'Publishing as' %> <strong><%= currentUser.fullName %></strong></p>
+
+                <p id="form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length > 0 ? 'Please correct the highlighted fields.' : '' %></p>
+
+                <form id="blog-create-form" action="<%= formAction %>" method="post"
+                    data-draft-key="booknookBlogPostDraft:<%= formMode %>:<%= formAction %>"
+                    data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
+                    <div class="field-box">
+                        <label for="post-title">Headline</label>
+                        <input type="text" id="post-title" name="title" minlength="5" maxlength="100"
+                            value="<%= formData.title || '' %>" placeholder="What is the title?" required>
+                        <p class="field-help"><span id="title-count">0</span> / 100 characters</p>
+                        <p id="title-error" class="field-error" aria-live="polite"><%= errors.title || '' %></p>
+                    </div>
+
+                    <div class="field-box">
+                        <label for="post-category">Category</label>
+                        <select id="post-category" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="programming" <%= formData.category === 'programming' ? 'selected' : '' %>>Programming</option>
+                            <option value="mobile" <%= formData.category === 'mobile' ? 'selected' : '' %>>Mobile App</option>
+                            <option value="cloud" <%= formData.category === 'cloud' ? 'selected' : '' %>>Cloud Computing</option>
+                            <option value="cybersecurity" <%= formData.category === 'cybersecurity' ? 'selected' : '' %>>Cybersecurity</option>
+                        </select>
+                        <p id="category-error" class="field-error" aria-live="polite"><%= errors.category || '' %></p>
+                    </div>
+
+                    <div class="field-box">
+                        <label for="post-tags">Tags</label>
+                        <input type="text" id="post-tags" name="tags" maxlength="150"
+                            value="<%= formData.tags || '' %>" placeholder="JavaScript, Node.js, Web">
+                        <p class="field-help">Enter 1-5 tags separated by commas.</p>
+                        <p id="tags-error" class="field-error" aria-live="polite"><%= errors.tags || '' %></p>
+                    </div>
+
+                    <div class="field-box">
+                        <label for="post-summary">Short Summary</label>
+                        <textarea id="post-summary" name="summary" minlength="20" maxlength="250" rows="3"
+                            placeholder="Write a short preview for the blog list." required><%= formData.summary || '' %></textarea>
+                        <p class="field-help"><span id="summary-count">0</span> / 250 characters</p>
+                        <p id="summary-error" class="field-error" aria-live="polite"><%= errors.summary || '' %></p>
+                    </div>
+
+                    <div class="field-box">
+                        <label for="post-image">Cover Image</label>
+                        <select id="post-image" name="image" required>
+                            <option value="">Select an image</option>
+                            <option value="img/book.jpg" <%= formData.image === 'img/book.jpg' ? 'selected' : '' %>>Books</option>
+                            <option value="img/mobileapp.jpg" <%= formData.image === 'img/mobileapp.jpg' ? 'selected' : '' %>>Mobile Development</option>
+                            <option value="img/opensource.jpg" <%= formData.image === 'img/opensource.jpg' ? 'selected' : '' %>>Open Source</option>
+                            <option value="img/cloudcomputing.jpg" <%= formData.image === 'img/cloudcomputing.jpg' ? 'selected' : '' %>>Cloud Computing</option>
+                            <option value="img/security.jpg" <%= formData.image === 'img/security.jpg' ? 'selected' : '' %>>Cybersecurity</option>
+                        </select>
+                        <p id="image-error" class="field-error" aria-live="polite"><%= errors.image || '' %></p>
+                    </div>
+
+                    <div class="field-box">
+                        <label for="post-content">Main Content</label>
+                        <textarea id="post-content" name="content" minlength="50" maxlength="5000" rows="10"
+                            placeholder="Write your article here. Use an empty line to start a new paragraph."
+                            required><%= formData.content || '' %></textarea>
+                        <p class="field-help"><span id="content-count">0</span> / 5000 characters</p>
+                        <p id="content-error" class="field-error" aria-live="polite"><%= errors.content || '' %></p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn"><%= submitLabel %></button>
+                        <button type="button" id="clear-draft" class="clear-btn"><%= formMode === 'edit' ? 'Reset Form' : 'Clear Draft' %></button>
+                    </div>
+                    <a href="<%= formMode === 'edit' ? formAction.replace('/edit', '') : '/blogs' %>" class="cancel-link">Cancel and return</a>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <%- include("partials/footer") %>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/blog-create.js"></script>
+    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
+</body>
+
+</html>

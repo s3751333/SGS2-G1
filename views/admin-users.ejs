@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin-only list of BookNook users, account types and enabled status.">
+    <title>BookNook | User List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/user-list.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="admin-page">
+        <div class="admin-container user-list-container">
+            <section class="admin-card">
+                <h1 class="admin-title">User List</h1>
+                <p class="admin-description">Administrator overview of BookNook user accounts.</p>
+                <p id="user-list-message" class="user-list-message" aria-live="polite"></p>
+
+                <div class="table-wrapper">
+                    <table class="user-table">
+                        <caption>Registered users</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">User</th>
+                                <th scope="col">User Type</th>
+                                <th scope="col">Status</th>
+                                <th class="toggle-cell" scope="col">Enable</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach((user) => { %>
+                                <tr data-user-id="<%= user.id %>">
+                                    <th scope="row"><%= user.fullName %></th>
+                                    <td><%= user.role === 'admin' ? 'Administrator' : 'Member' %></td>
+                                    <td><span class="status <%= user.status === 'active' ? 'enabled' : 'disabled' %>"><%= user.status === 'active' ? 'Enabled' : 'Disabled' %></span></td>
+                                    <td class="toggle-cell">
+                                        <input class="status-toggle" type="checkbox" <%= user.status === 'active' ? 'checked' : '' %>
+                                            <%= user.id === currentUser.id ? 'disabled' : '' %>
+                                            aria-label="Enable <%= user.fullName %>">
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <%- include("partials/footer") %>
+    <script src="/js/user-list.js"></script>
+    <script src="/js/navbar.js"></script>
+</body>
+
+</html>
