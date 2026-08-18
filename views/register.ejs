@@ -16,7 +16,7 @@
 
     <div class="auth-page">
 
-        <div class="auth-container">
+        <div class="auth-container auth-container-wide">
 
             <div class="auth-card">
 
@@ -49,6 +49,21 @@
                             placeholder="I like the web."></textarea>
                         <small id="introduction-count">0 / 300 characters</small>
                     </div>
+
+                    <section class="security-question-section" aria-labelledby="security-question-heading">
+                        <h2 id="security-question-heading">Security Questions</h2>
+                        <p>Your answers will be required if you need to reset your password. Answers are not case-sensitive.</p>
+
+                        <% securityQuestions.forEach((question, index) => { %>
+                            <div class="form-group">
+                                <label for="security-answer-<%= index + 1 %>"><%= index + 1 %>. <%= question %></label>
+                                <input type="password" id="security-answer-<%= index + 1 %>"
+                                    name="securityAnswer<%= index + 1 %>" minlength="2" maxlength="80"
+                                    autocomplete="off" placeholder="Enter your answer" required>
+                                <small id="security-answer-<%= index + 1 %>-message" aria-live="polite"></small>
+                            </div>
+                        <% }); %>
+                    </section>
 
                     <div class="form-group">
                         <label for="password">Password</label>

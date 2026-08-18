@@ -52,12 +52,16 @@ Open `http://localhost:3000` in a browser. Express routes use clean URLs such as
 
 ### Test Accounts
 
-Use the email address to log in. All sample accounts use the password
-`Reader123!`.
+Use the email address and the account's own password to log in. Security answers
+are case-insensitive and are used only for the password reset prototype.
 
-| Account | Email | Role | Status |
-| :--- | :--- | :--- | :--- |
-| BookNook Admin | `admin@booknook.test` | Administrator | Active |
-| Linh Nguyen | `linh@booknook.test` | Member | Active |
-| Alex Pham | `alex@booknook.test` | Member | Locked |
-| Mai Hoang | `mai@booknook.test` | Member | Active |
+| Account | Email | Password | Security answers (animal / book / colour) | Role | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| BookNook Admin | `admin@booknook.test` | `Admin123!` | `dog` / `the hobbit` / `blue` | Administrator | Active |
+| Linh Nguyen | `linh@booknook.test` | `Linh123!` | `cat` / `the little prince` / `green` | Member | Active |
+| Alex Pham | `alex@booknook.test` | `Alex123!` | `panda` / `dune` / `red` | Member | Locked |
+| Mai Hoang | `mai@booknook.test` | `Mai12345!` | `rabbit` / `norwegian wood` / `purple` | Member | Active |
+
+Passwords and security answers are stored in the in-memory user records only as
+salted `scrypt` hashes. Plain-text values are listed above solely as prototype
+test credentials.

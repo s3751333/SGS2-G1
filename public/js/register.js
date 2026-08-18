@@ -12,6 +12,12 @@ const password = document.querySelector("#password");
 const passwordMessage = document.querySelector("#password-message");
 const confirmPassword = document.querySelector("#confirm-password");
 const confirmPasswordMessage = document.querySelector("#confirm-password-message");
+const securityAnswerFields = [1, 2, 3].map(function (number) {
+  return {
+    input: document.querySelector(`#security-answer-${number}`),
+    message: document.querySelector(`#security-answer-${number}-message`),
+  };
+});
 const storageKey = "booknookRegistrationForm";
 
 function saveFormData() {
@@ -79,6 +85,13 @@ function showPasswordMatch() {
   return isValid;
 }
 
+function validateSecurityAnswer(field) {
+  const answerLength = field.input.value.trim().length;
+  const isValid = answerLength >= 2 && answerLength <= 80;
+  showMessage(field.message, isValid ? "Answer is valid." : "Enter between 2 and 80 characters.", isValid);
+  return isValid;
+}
+
 loadFormData();
 
 [fullName, username, email, introduction].forEach(function (field) {
@@ -98,6 +111,11 @@ password.addEventListener("input", function () {
   }
 });
 confirmPassword.addEventListener("input", showPasswordMatch);
+securityAnswerFields.forEach(function (field) {
+  field.input.addEventListener("input", function () {
+    validateSecurityAnswer(field);
+  });
+});
 
 registerForm.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -120,6 +138,7 @@ registerForm.addEventListener("submit", async function (event) {
     validateFullName(),
     validateUsername(),
     validateEmail(),
+    ...securityAnswerFields.map(validateSecurityAnswer),
     validatePassword(),
     showPasswordMatch(),
   ];
@@ -134,6 +153,9 @@ registerForm.addEventListener("submit", async function (event) {
     username: username.value,
     email: email.value,
     introduction: introduction.value,
+    securityAnswer1: securityAnswerFields[0].input.value,
+    securityAnswer2: securityAnswerFields[1].input.value,
+    securityAnswer3: securityAnswerFields[2].input.value,
     password: password.value,
     confirmPassword: confirmPassword.value,
   };
@@ -156,7 +178,16 @@ registerForm.addEventListener("submit", async function (event) {
       registerForm.reset();
       introductionCount.textContent = "0 / 300 characters";
 
-      [fullNameMessage, usernameMessage, emailMessage, passwordMessage, confirmPasswordMessage].forEach(function (message) {
+      [
+        fullNameMessage,
+        usernameMessage,
+        emailMessage,
+        ...securityAnswerFields.map(function (field) {
+          return field.message;
+        }),
+        passwordMessage,
+        confirmPasswordMessage,
+      ].forEach(function (message) {
         message.textContent = "";
       });
 

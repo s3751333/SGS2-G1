@@ -7,6 +7,11 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const sessions = {};
 const passwordResetTokens = {};
+const securityQuestions = [
+  "What is your favourite animal?",
+  "What is your favourite book?",
+  "What is your favourite colour?",
+];
 const blogCategories = ["programming", "mobile", "cloud", "cybersecurity"];
 const blogImages = [
   "img/book.jpg",
@@ -34,22 +39,37 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-function hashPassword(password) {
+function hashSecret(secret) {
   const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  const hash = crypto.scryptSync(secret, salt, 64).toString("hex");
   return `${salt}:${hash}`;
 }
 
-function checkPassword(password, passwordHash) {
-  const [salt, savedHash] = passwordHash.split(":");
-  const enteredHash = crypto.scryptSync(password, salt, 64).toString("hex");
-  return enteredHash === savedHash;
+function checkSecret(secret, storedHash) {
+  if (typeof storedHash !== "string") return false;
+
+  const [salt, savedHash] = storedHash.split(":");
+
+  if (!salt || !savedHash) return false;
+
+  try {
+    const savedHashBuffer = Buffer.from(savedHash, "hex");
+    const enteredHashBuffer = crypto.scryptSync(secret, salt, 64);
+
+    return savedHashBuffer.length === enteredHashBuffer.length
+      && crypto.timingSafeEqual(savedHashBuffer, enteredHashBuffer);
+  } catch {
+    return false;
+  }
 }
 
-// Password for all sample accounts: Reader123!
-users.forEach((user) => {
-  user.passwordHash = hashPassword("Reader123!");
-});
+function normalizeSecurityAnswer(answer) {
+  return String(answer || "")
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
 
 function getSessionId(request) {
   const cookieHeader = request.headers.cookie || "";
@@ -96,25 +116,46 @@ app.get("/register", (request, response) => {
     return;
   }
 
-  response.render("register", { activePage: "" });
+  response.render("register", {
+    activePage: "",
+    securityQuestions,
+  });
 });
 
 app.get("/forgot-password", (request, response) => {
-  response.render("forgot-password", { activePage: "" });
+  response.render("forgot-password", {
+    activePage: "",
+    securityQuestions,
+  });
 });
 
 app.post("/forgot-password", (request, response) => {
   const email = String(request.body.email || "").trim().toLowerCase();
+  const answers = [
+    request.body.securityAnswer1,
+    request.body.securityAnswer2,
+    request.body.securityAnswer3,
+  ].map(normalizeSecurityAnswer);
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     response.status(400).json({ message: "Enter a valid email address." });
     return;
   }
 
+  if (answers.some((answer) => answer.length < 2 || answer.length > 80)) {
+    response.status(400).json({ message: "Answer all three security questions." });
+    return;
+  }
+
   const user = users.find((item) => item.email === email);
 
-  if (!user) {
-    response.status(404).json({ message: "No account was found with this email address." });
+  const answersAreCorrect = user
+    && Array.isArray(user.securityAnswerHashes)
+    && user.securityAnswerHashes.length === answers.length
+    && answers.every((answer, index) => checkSecret(answer, user.securityAnswerHashes[index]));
+
+  if (!answersAreCorrect) {
+    response.status(401).json({ message: "The email or security answers are incorrect." });
     return;
   }
 
@@ -125,8 +166,8 @@ app.post("/forgot-password", (request, response) => {
   };
 
   response.json({
-    message: "Password reset link created. It is valid for 15 minutes.",
-    resetUrl: `/reset-password?token=${token}`,
+    message: "Your answers are correct. You can now choose a new password.",
+    redirectTo: `/reset-password?token=${token}`,
   });
 });
 
@@ -154,7 +195,7 @@ app.post("/reset-password", (request, response) => {
 
   if (!resetRequest || resetRequest.expiresAt <= Date.now()) {
     delete passwordResetTokens[token];
-    response.status(400).json({ message: "This password reset link is invalid or has expired." });
+    response.status(400).json({ message: "This password reset session is invalid or has expired." });
     return;
   }
 
@@ -176,7 +217,7 @@ app.post("/reset-password", (request, response) => {
     return;
   }
 
-  user.passwordHash = hashPassword(password);
+  user.passwordHash = hashSecret(password);
   delete passwordResetTokens[token];
 
   Object.keys(sessions).forEach((sessionId) => {
@@ -198,6 +239,11 @@ app.post("/register", (request, response) => {
   const introduction = String(request.body.introduction || "").trim();
   const password = String(request.body.password || "");
   const confirmPassword = String(request.body.confirmPassword || "");
+  const securityAnswers = [
+    request.body.securityAnswer1,
+    request.body.securityAnswer2,
+    request.body.securityAnswer3,
+  ].map(normalizeSecurityAnswer);
 
   if (fullName.length < 2 || fullName.length > 80) {
     response.status(400).json({ message: "The full name must contain between 2 and 80 characters." });
@@ -229,6 +275,11 @@ app.post("/register", (request, response) => {
     return;
   }
 
+  if (securityAnswers.some((answer) => answer.length < 2 || answer.length > 80)) {
+    response.status(400).json({ message: "Each security answer must contain between 2 and 80 characters." });
+    return;
+  }
+
   const usernameExists = users.some((user) => user.username.toLowerCase() === username.toLowerCase());
   const emailExists = users.some((user) => user.email === email);
 
@@ -243,7 +294,8 @@ app.post("/register", (request, response) => {
     username,
     email,
     introduction,
-    passwordHash: hashPassword(password),
+    passwordHash: hashSecret(password),
+    securityAnswerHashes: securityAnswers.map((answer) => hashSecret(answer)),
     role: "member",
     status: "active",
   };
@@ -265,7 +317,7 @@ app.post("/login", (request, response) => {
   const password = String(request.body.password || "");
   const user = users.find((item) => item.email === email);
 
-  if (!user || !checkPassword(password, user.passwordHash)) {
+  if (!user || !checkSecret(password, user.passwordHash)) {
     response.status(401).json({ message: "Incorrect email or password." });
     return;
   }

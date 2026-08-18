@@ -1,4 +1,10 @@
-// Password for the sample accounts: Reader123!
+// DEVELOPMENT-ONLY TEST CREDENTIALS
+// Security answer order: favourite animal / favourite book / favourite colour
+// Admin: admin@booknook.test | Password: Admin123! | Answers: dog / the hobbit / blue
+// Linh:  linh@booknook.test  | Password: Linh123!  | Answers: cat / the little prince / green
+// Alex:  alex@booknook.test  | Password: Alex123!  | Answers: panda / dune / red (locked account)
+// Mai:   mai@booknook.test   | Password: Mai12345! | Answers: rabbit / norwegian wood / purple
+// The user records below still contain only salted scrypt hashes.
 const users = [
   {
     id: 1,
@@ -6,6 +12,12 @@ const users = [
     username: "admin",
     email: "admin@booknook.test",
     introduction: "I enjoy books and web development.",
+    passwordHash: "13245f9bef8969a05aa40749ea737507:f0de63ca54c88a50a3824da916022506abf3f28e96d2d1b0b04a37433a3557bdf7f7e84ebcbd27f8e0433829f72108403f5d118587bf1348971ab41ff0728edb",
+    securityAnswerHashes: [
+      "4ee42a1b32e6bbd07d54cb31569830e9:4020de46500929f7df35dee527c41ab8858473c8e536a53d553bfed786fa560383b4487e3baea45fb059e313ee0d6fc3cda22f1a5977d7b9b744208dd01cf8d9",
+      "6b6e0f776f2ffcc3103bacdf51ccdfd7:020913cd1e5dcf530a9a59d6496757a14dc48289aef1d8b4ebcfb9c759fd7fbd4ad9aa73c4c4c304dd226eb28673540fa63f14056c0a314f093d7b0bb81b5060",
+      "904394a87ae55aa814d926f25dbbc19c:2003d42f696c07ae7039a3ee308e39674a73e0c797202de50379eef1e7bd6d8e7a1190956eb89e64108b9811a6d436e5baa9f9b1758840680e92f1ae15ead0cf",
+    ],
     role: "admin",
     status: "active",
   },
@@ -15,6 +27,12 @@ const users = [
     username: "linhnguyen",
     email: "linh@booknook.test",
     introduction: "I enjoy classic stories and language learning.",
+    passwordHash: "3ecd9f34e21a8dc4bff7cf1e5c77b23f:03e4daa40fff9b36e70d391aec15affd3ece814df4d72f0591dfe1260073f3ca8c9a25071e67602c40c062a50d62248fa1966d66915ddd30ec76aa28dcc0237d",
+    securityAnswerHashes: [
+      "6b0719e08b2f13749e70c29c68237bf6:af818f43b840e0d83172b0511adfeea649f49d489fe37c09935fa1bf109d63eb69aa7c154a8eb82d7e90446032409c35ef6407c6e7792ceaf2412a50384d4524",
+      "2669fa2771aa8a5a5a3e8fee8d869cca:4df5c4bc4d96c61ff4826962552baedd0882ce35c517bbf8916420769a16d896144db4044c462e1d8f60541b70320c6f6ede37da6532333b1365be5acf672028",
+      "ae062b53b2ab2db856141cdacbe37d4e:340e734e9099621b8b7a3a9b7625e9cebc4770f7a933ab6f028612bed4a53492a8758c344f22a1856bd4ca014215417274aad849bcdb7cbad812d920f5456ca5",
+    ],
     role: "member",
     status: "active",
   },
@@ -24,6 +42,12 @@ const users = [
     username: "alexpham",
     email: "alex@booknook.test",
     introduction: "I like cooperative board games.",
+    passwordHash: "c2e5e845d2d02f902e8b067324c865d6:5cd82076a9418c151873286dd05dd4aae4a992e203adccdcd60fccfdf24948895e047e122bf3b722c9cb5f42f6289ae68707a7d30029486252195b118174cf89",
+    securityAnswerHashes: [
+      "0dd1f668eaa2f8ae1bfe5d0d5d217a53:3e2c1554602ba935f085290123d69daab44ace7753ab48da21b803c37af37e0336f5f88151da5d1f30831ef54a1549bb63aed2f7a85559430054ec69625372cc",
+      "2c18e3754e968b3e8cfec45f5754069a:fac9a03e009326c4968c3652ee22e3ce6cca25cefeb9755e418cba6edab47a6862099db482d25c58547ef8b977dec753a555793b23624c4f0a904fd6d95814d1",
+      "e6fbf0bfb3139435ef94f76241710ac4:1e5282fed7b8495123f2f079af45057e3f92c872659ba640d85d3026088760760379264032041df2f353fde1a4c58f3ffcb123b1801b16a1c015c6ebc2894295",
+    ],
     role: "member",
     status: "locked",
   },
@@ -33,6 +57,12 @@ const users = [
     username: "maihoang",
     email: "mai@booknook.test",
     introduction: "I read Vietnamese history and fiction.",
+    passwordHash: "7c4ada82f59a041fe0b45cdee67ffc96:bcf973c5391b596535bbdde930d4b242faf41798bd0b19e0192b9ac524b35ebe244e567765cc856cee391facf7db9a66fd9e3a9ecd2d8e883e436bc143934745",
+    securityAnswerHashes: [
+      "7e3c642d3ce23f461fdeca56120271cf:d7af96e2ebf74fd41c5a3eedad8452e07f43bd2de04af218881a84dd88e7f3659c353987caad10bf894db7f90b420ed81508bb07d47302c3f81161b741ac469f",
+      "f9f4fb12429dc66bf665e292cc77615e:842b271286fc5747b7c71f4dfffa085a028eee1d997edd951aef0bfc77b0b7ebe49d0799da7ffef4b335771797e6bedee0d0090880c4ef4ba4045b543d767314",
+      "1fbc0a811ad7a5557d8f395fd0474379:ca3211c17272aa496a1b318564b8200af140f13742ffcddd0c26a73da28cfab426285cda6c505c993a61b72bf44c5c8c4ff837665eb84b07d04e9d3ef688ff52",
+    ],
     role: "member",
     status: "active",
   },
