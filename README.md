@@ -50,6 +50,14 @@ Open `http://localhost:3000` in a browser. Express routes use clean URLs such as
 `/blogs`, `/login`, and `/products`; the corresponding templates are stored as
 `.ejs` files inside the `views` folder.
 
+### Dynamic Sitemap
+
+Open `http://localhost:3000/sitemap` to view the generated website overview.
+The Express route supplies the current blog posts and non-deleted forum topics
+to the EJS template, so newly created public content appears without manually
+adding links to `sitemap.ejs`. Administrator links are shown only to a signed-in
+administrator.
+
 ### Test Accounts
 
 Use the email address and the account's own password to log in. Security answers

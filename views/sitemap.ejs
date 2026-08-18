@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookNook | Sitemap</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/sitemap.css">
+    <link rel="stylesheet" href="/css/sitemap.css">
 </head>
 
 <body>
@@ -15,39 +15,29 @@
     <main class="sitemap-container">
         <div class="sitemap-header">
             <h1>Sitemap</h1>
-            <p>Overview of public pages available on BookNook</p>
+            <p>Explore BookNook's main pages, current blog articles, and public discussion topics.</p>
         </div>
 
-        <div class="sitemap-grid">
-            <div class="sitemap-card">
-                <h2><i class="fas fa-compass"></i> Main Navigation</h2>
-                <ul class="sitemap-list">
-                    <li><a href="/">Home Page</a></li>
-                    <li><a href="blogs">Blog Articles</a></li>
-                    <li><a href="forum-main">Community Forum</a></li>
-                </ul>
-            </div>
-            <div class="sitemap-card">
-                <h2><i class="fas fa-shopping-bag"></i> Store</h2>
-                <ul class="sitemap-list">
-                    <li><a href="products">Shop</a></li>
-                </ul>
-            </div>
-            <div class="sitemap-card">
-                <h2><i class="fas fa-user"></i> Account Access</h2>
-                <ul class="sitemap-list">
-                    <li><a href="login">Sign In</a></li>
-                    <li><a href="register">Create Account</a></li>
-                </ul>
-            </div>
-
+        <div class="sitemap-grid" aria-label="BookNook website sections">
+            <% sitemapSections.forEach((section) => { %>
+                <section class="sitemap-card" aria-labelledby="<%= section.id %>-heading">
+                    <h2 id="<%= section.id %>-heading">
+                        <i class="<%= section.icon %>" aria-hidden="true"></i>
+                        <%= section.title %>
+                    </h2>
+                    <ul class="sitemap-list">
+                        <% section.links.forEach((link) => { %>
+                            <li><a href="<%= link.url %>"><%= link.label %></a></li>
+                        <% }) %>
+                    </ul>
+                </section>
+            <% }) %>
         </div>
     </main>
 
     <%- include("partials/footer") %>
 
     <script src="/js/navbar.js"></script>
-    <script src="https://kit.fontawesome.com/6416005539.js" crossorigin="anonymous"></script>
 
 </body>
 

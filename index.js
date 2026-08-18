@@ -973,7 +973,6 @@ const pageNames = [
   "product-detail",
   "products",
   "profile",
-  "sitemap",
   "wishlist",
 ];
 
@@ -983,6 +982,88 @@ function getActivePage(pageName) {
   if (pageName.includes("forum")) return "forum";
   return "";
 }
+
+function getSitemapSections(currentUser) {
+  const sections = [
+    {
+      id: "main-navigation",
+      title: "Main Navigation",
+      icon: "fas fa-compass",
+      links: [
+        { url: "/", label: "Home Page" },
+        { url: "/products", label: "Products" },
+        { url: "/blogs", label: "Blog" },
+        { url: "/forum-main", label: "Community Forum" },
+      ],
+    },
+    {
+      id: "shopping",
+      title: "Shopping and Saved Items",
+      icon: "fas fa-shopping-bag",
+      links: [
+        { url: "/product-detail", label: "Product Details" },
+        { url: "/cart", label: "Shopping Cart" },
+        { url: "/checkout", label: "Checkout" },
+        { url: "/wishlist", label: "Wishlist" },
+      ],
+    },
+    {
+      id: "account-access",
+      title: "Account Access",
+      icon: "fas fa-user",
+      links: [
+        { url: "/login", label: "Sign In" },
+        { url: "/register", label: "Create Account" },
+        { url: "/forgot-password", label: "Forgot Password" }
+      ],
+    },
+    {
+      id: "blog-articles",
+      title: "Blog Articles",
+      icon: "fas fa-newspaper",
+      links: [
+        { url: "/blogs", label: "All Blog Articles" },
+        ...getBlogPostsWithAuthors().map((post) => ({
+          url: `/blog-articles/blog${post.id}`,
+          label: post.title,
+        })),
+      ],
+    },
+    {
+      id: "forum-topics",
+      title: "Discussion Topics",
+      icon: "fas fa-comments",
+      links: [
+        { url: "/forum-main", label: "All Discussion Topics" },
+        { url: "/forum-new-topic", label: "Create a Discussion Topic" },
+        ...forumTopics
+          .filter((topic) => !topic.deleted)
+          .map((topic) => ({
+            url: `/forum-topic/${topic.id}`,
+            label: topic.title,
+          })),
+      ],
+    },
+  ];
+
+  if (currentUser && currentUser.role === "admin") {
+    sections.push({
+      id: "administration",
+      title: "Administration",
+      icon: "fas fa-user-shield",
+      links: [{ url: "/admin-users", label: "Manage User Accounts" }],
+    });
+  }
+
+  return sections;
+}
+
+app.get("/sitemap", (request, response) => {
+  response.render("sitemap", {
+    activePage: "",
+    sitemapSections: getSitemapSections(getCurrentUser(request)),
+  });
+});
 
 app.get("/", (request, response) => {
   response.render("index", { activePage: "home" });
