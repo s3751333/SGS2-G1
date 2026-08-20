@@ -997,17 +997,6 @@ function getSitemapSections(currentUser) {
       ],
     },
     {
-      id: "shopping",
-      title: "Shopping and Saved Items",
-      icon: "fas fa-shopping-bag",
-      links: [
-        { url: "/product-detail", label: "Product Details" },
-        { url: "/cart", label: "Shopping Cart" },
-        { url: "/checkout", label: "Checkout" },
-        { url: "/wishlist", label: "Wishlist" },
-      ],
-    },
-    {
       id: "account-access",
       title: "Account Access",
       icon: "fas fa-user",
@@ -1035,7 +1024,6 @@ function getSitemapSections(currentUser) {
       icon: "fas fa-comments",
       links: [
         { url: "/forum-main", label: "All Discussion Topics" },
-        { url: "/forum-new-topic", label: "Create a Discussion Topic" },
         ...forumTopics
           .filter((topic) => !topic.deleted)
           .map((topic) => ({
