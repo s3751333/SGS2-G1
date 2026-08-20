@@ -1,0 +1,35 @@
+@import url(default.css);
+@import url(navbar.css);
+
+.button-primary,
+.button-secondary {
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.button-primary {
+    border: none;
+    background: var(--main-color);
+    color: #fff;
+}
+
+.button-primary:hover {
+    background: var(--main-hover);
+}
+
+.button-secondary {
+    border: 1px solid #aaa;
+    background: #fff;
+    color: #333;
+}
+
+.button-secondary:hover {
+    background: #f0f0f0;
+}
+
+.input-error.input-error,
+.input-error.input-error:focus {
+    border-color: var(--delete);
+}

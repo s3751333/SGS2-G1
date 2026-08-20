@@ -1,5 +1,4 @@
-@import url(default.css);
-@import url(navbar.css);
+@import url(components.css);
 
 body {
     background-color: #f8f9fa;
@@ -81,12 +80,7 @@ body {
 }
 
 .btn-edit {
-    background-color: var(--main-color);
-    color: white;
-}
-
-.btn-edit:hover {
-    background-color: var(--main-hover);
+    border-radius: 6px;
 }
 
 .btn-delete {

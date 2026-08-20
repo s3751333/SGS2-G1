@@ -35,7 +35,7 @@
             <% if (currentUser && currentUser.id === post.authorId) { %>
                 <p class="owner-message">You are the author of this post.</p>
                 <div class="author-actions">
-                    <a href="/blog-articles/blog<%= post.id %>/edit" class="btn-action btn-edit">Edit Post</a>
+                    <a href="/blog-articles/blog<%= post.id %>/edit" class="btn-action btn-edit button-primary">Edit Post</a>
                     <form class="delete-post-form" action="/blog-articles/blog<%= post.id %>/delete" method="post">
                         <button type="submit" class="btn-action btn-delete">Delete Post</button>
                     </form>

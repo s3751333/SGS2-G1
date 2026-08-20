@@ -1,5 +1,4 @@
-@import url(default.css);
-@import url(navbar.css);
+@import url(components.css);
 
 .auth-page {
     display: flex;
@@ -43,7 +42,8 @@
     color: #333;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
@@ -52,28 +52,16 @@
     transition: .3s;
 }
 
-
 .form-group textarea {
-    display: inline-block;
-    width: 100%;
     height: 100px;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
     resize: none;
     line-height: 25px;
-    font-size: 15px;
-    color: #000;
 }
 
 .form-group input:focus, .form-group textarea:focus {
     outline: none;
     border-color: #0d6efd;
     box-shadow: 0 0 8px rgba(13, 110, 253, .2);
-}
-
-.form-group .input-error {
-    border-color: var(--delete);
 }
 
 .form-group small {
@@ -142,22 +130,11 @@
 }
 
 .auth-page .auth-btn {
-    text-decoration: none;
     text-align: center;
     display: block;
     width: 100%;
     padding: 12px;
-    background: #0d6efd;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
     font-size: 16px;
-    cursor: pointer;
-    transition: .3s;
-}
-
-.auth-page .auth-btn:hover {
-    background: #0b5ed7;
 }
 
 .auth-text {

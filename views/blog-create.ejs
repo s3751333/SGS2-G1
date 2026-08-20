@@ -82,8 +82,8 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="save-btn"><%= submitLabel %></button>
-                        <button type="button" id="clear-draft" class="clear-btn"><%= formMode === 'edit' ? 'Reset Form' : 'Clear Draft' %></button>
+                        <button type="submit" class="save-btn button-primary"><%= submitLabel %></button>
+                        <button type="button" id="clear-draft" class="clear-btn button-secondary"><%= formMode === 'edit' ? 'Reset Form' : 'Clear Draft' %></button>
                     </div>
                     <a href="<%= formMode === 'edit' ? formAction.replace('/edit', '') : '/blogs' %>" class="cancel-link">Cancel and return</a>
                 </form>

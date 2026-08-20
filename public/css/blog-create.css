@@ -1,5 +1,4 @@
-@import url(default.css);
-@import url(navbar.css);
+@import url(components.css);
 
 .admin-page {
     min-height: 100vh;
@@ -78,10 +77,6 @@
     box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
 }
 
-.field-box .input-error {
-    border-color: var(--delete);
-}
-
 .field-help {
     margin-top: 6px;
     color: #666;
@@ -103,31 +98,12 @@
 .save-btn {
     flex: 1;
     padding: 14px;
-    background: #0d6efd;
-    color: white;
-    border: none;
-    border-radius: 6px;
     font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.save-btn:hover {
-    background: #0b5ed7;
 }
 
 .clear-btn {
     padding: 14px 20px;
-    background: white;
-    color: #333;
-    border: 1px solid #aaa;
-    border-radius: 6px;
     font-weight: bold;
-    cursor: pointer;
-}
-
-.clear-btn:hover {
-    background: #f0f0f0;
 }
 
 .cancel-link {
