@@ -14,10 +14,53 @@
 
 | Student Name | Student ID | Responsibilities & Assigned Modules |
 | :--- | :--- | :--- |
-| **Mark Molnar** | `s4051620` | Blog Platform, Shared User Access (`/login`, `/register`, `/blogs`, `/blog-create`, `/blog-articles/`, `/sitemap`) |
+| **Mark Molnar** | `s4051620` | Blog Platform, Shared User Access (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/blogs`, `/blog-create`, `/blog-articles/`, `/sitemap`) |
 | **Tấn Tài Phạm** | `s3751333` | Discussion Forum & Admin Panel (`/forum-main`, `/forum-topic`, `/forum-new-topic`, `/admin-users`) |
 | **Ayden Le** | `s4123086` | Shopping Cart, Checkout, Landing Page & Navigation (`/`, `/cart`, `/checkout`) |
 | **Khoa Pham Dang Nguyen** | `s4132855` | Product Reviews, Wishlist & User Profile (`/products`, `/product-detail`, `/profile`, `/wishlist`) |
+
+---
+
+## File & Folder Responsibilities
+
+### Mark Molnar - s4051620
+
+- `views/login.ejs`, `views/register.ejs`, `views/forgot-password.ejs`, `views/reset-password.ejs`
+- `views/blogs.ejs`, `views/blog-create.ejs`, `views/sitemap.ejs`
+- `views/blog-articles/`
+- `public/js/login.js`, `public/js/register.js`, `public/js/forgot-password.js`, `public/js/reset-password.js`
+- `public/js/blogs.js`, `public/js/blog-create.js`, `public/js/comments.js`, `public/js/article-actions.js`
+- `public/css/loginRegister.css`, `public/css/blogs.css`, `public/css/blog.css`, `public/css/blog-create.css`, `public/css/sitemap.css`
+
+### Tấn Tài Phạm - s3751333
+
+- `views/forum-main.ejs`, `views/forum-new-topic.ejs`, `views/forum-topic.ejs`, `views/forum-edit-reply.ejs`
+- `views/admin-users.ejs`
+- `public/js/forum-delete.js`, `public/js/forum-form.js`, `public/js/forum-list.js`, `public/js/forum-reply.js`
+- `public/js/user-list.js`
+- `public/css/forum.css`, `public/css/user-list.css`
+
+### Ayden Le - s4123086
+
+- `views/index.ejs`, `views/cart.ejs`, `views/checkout.ejs`
+- `views/partials/navbar.ejs`
+- `public/js/home.js`, `public/js/navbar.js`, `public/js/store.js`, `public/js/cart.js`, `public/js/checkout.js`
+- `public/css/home.css`, `public/css/navbar.css`, `public/css/cart.css`, `public/css/checkout.css`
+
+### Khoa Pham Dang Nguyen - s4132855
+
+- `views/products.ejs`, `views/product-detail.ejs`, `views/wishlist.ejs`, `views/profile.ejs`
+- `public/js/products.js`, `public/js/product-detail.js`, `public/js/wishlist.js`, `public/js/profile.js`
+- `public/css/products.css`, `public/css/product-detail.css`, `public/css/wishlist.css`, `public/css/profile.css`
+
+### Shared Integration Files
+
+- `index.js` - Express configuration, middleware, and integrated routes
+- `data.js` - shared in-memory sample data
+- `package.json`, `package-lock.json` - project configuration and dependencies
+- `views/partials/footer.ejs` - shared footer
+- `public/css/default.css`, `public/css/components.css` - shared styles
+- `public/img/` - shared images and product covers
 
 ---
 
@@ -39,16 +82,55 @@ SGS2-G1/
 └── README.md               # Project documentation and guidelines
 ```
 
-## Running the Application
+## Requirements and Installation
+
+Before running the application, install:
+
+- [Node.js](https://nodejs.org/) version 20 or newer
+- npm, which is included with Node.js
+
+No separate database installation is required. Assessment 2 uses in-memory
+JavaScript data, so the prototype data resets whenever the Node.js process is
+restarted.
+
+After downloading or extracting the repository, open a terminal in the
+`SGS2-G1` project folder and install the dependencies:
 
 ```bash
 npm install
+```
+
+This installs Express and EJS from `package.json`. Do not install these packages
+manually unless `npm install` reports an error.
+
+## Running the Application
+
+Start the application directly with Node.js:
+
+```bash
+node index.js
+```
+
+Alternatively, use the equivalent npm command:
+
+```bash
 npm start
 ```
 
-Open `http://localhost:3000` in a browser. Express routes use clean URLs such as
+The `start` script in `package.json` runs `node index.js`, so both commands start
+the same application.
+
+When the terminal displays the server message, open `http://localhost:3000` in a
+browser. Express routes use clean URLs such as
 `/blogs`, `/login`, and `/products`; the corresponding templates are stored as
 `.ejs` files inside the `views` folder.
+
+```bash
+npm run dev
+```
+
+Press `Ctrl+C` in the terminal to stop the application. If port 3000 is already
+in use, stop the other Node.js process before starting BookNook again.
 
 ### Cart and Order API
 
