@@ -491,6 +491,15 @@ a {
     font-size: 0.85rem;
 }
 
+.form-error {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background-color: #ffe8ec;
+    color: #d63659;
+    font-size: 14px;
+}
+
 .review-tools {
     display: flex;
     align-items: center;

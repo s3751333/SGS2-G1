@@ -989,7 +989,15 @@ app.post("/product-detail/:id/reviews", requireLogin, (request, response, next) 
     return;
   }
 
+  const alreadyReviewed = reviews.some(
+    (review) => review.productId === product.id && review.userId === request.currentUser.id,
+  );
+
   const { errors, rating, title, body } = getReviewFormErrors(request.body);
+
+  if (alreadyReviewed) {
+    errors.duplicate = "You have already reviewed this product. Delete your existing review to write a new one.";
+  }
 
   if (Object.keys(errors).length > 0) {
     const productReviews = sortReviews(getReviewsForProduct(product.id), "recent")

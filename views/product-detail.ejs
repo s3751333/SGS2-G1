@@ -145,6 +145,9 @@
                 <div class="review-form-card" id="write-review" aria-labelledby="review-form-heading">
                     <h2 id="review-form-heading">Write a Review</h2>
                     <p>Share your thoughts with other BookNook readers.</p>
+                    <% if (reviewErrors.duplicate) { %>
+                        <p class="form-error"><%= reviewErrors.duplicate %></p>
+                    <% } %>
                     <form id="review-form" action="/product-detail/<%= product.id %>/reviews" method="post" novalidate>
                         <div>
                             <span id="rating-label">Your rating</span>
