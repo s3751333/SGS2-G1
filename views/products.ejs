@@ -19,128 +19,75 @@
                 <h1>Shop</h1>
                 <p>Browse books and board games, and check reviews before you buy.</p>
             </div>
-            <a href="wishlist" class="wishlist-link"><i class="fas fa-heart"></i> My Wishlist</a>
+            <a href="/wishlist" class="wishlist-link"><i class="fas fa-heart"></i> My Wishlist</a>
         </div>
 
-        <div class="shop-tools">
+        <form class="shop-tools" id="shop-controls" method="get" action="/products">
             <div class="form-field search-field">
                 <label for="shop-search">Search products</label>
-                <input type="text" id="shop-search" placeholder="Try: The Little Prince">
+                <input type="text" id="shop-search" name="q" placeholder="Try: The Little Prince" value="<%= query %>">
             </div>
             <div class="form-field">
                 <label for="shop-category">Category</label>
-                <select id="shop-category">
-                    <option value="all">All categories</option>
-                    <option value="fiction">Fiction</option>
-                    <option value="self-help">Self-Help</option>
-                    <option value="reference">Reference</option>
-                    <option value="board-games">Board Games</option>
+                <select id="shop-category" name="category">
+                    <option value="all" <%= category === "all" ? "selected" : "" %>>All categories</option>
+                    <% productCategories.forEach((cat) => { %>
+                        <option value="<%= cat %>" <%= category === cat ? "selected" : "" %>><%= cat.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()) %></option>
+                    <% }) %>
                 </select>
             </div>
-            <button type="button">Search</button>
-        </div>
-        <p id="shop-results-message" class="results-message" role="status">6 products found.</p>
+            <div class="form-field">
+                <label for="shop-sort">Sort by</label>
+                <select id="shop-sort" name="sort">
+                    <option value="recent" <%= sort === "recent" ? "selected" : "" %>>Featured</option>
+                    <option value="price-low" <%= sort === "price-low" ? "selected" : "" %>>Price: low to high</option>
+                    <option value="price-high" <%= sort === "price-high" ? "selected" : "" %>>Price: high to low</option>
+                    <option value="name" <%= sort === "name" ? "selected" : "" %>>Name (A&ndash;Z)</option>
+                    <option value="rating" <%= sort === "rating" ? "selected" : "" %>>Highest rated</option>
+                </select>
+            </div>
+            <button type="submit">Search</button>
+            <button type="button" id="reset-shop-filters">Reset</button>
+        </form>
+        <p id="shop-results-message" class="results-message" role="status"><%= resultCount %> product<%= resultCount === 1 ? "" : "s" %> found.</p>
 
-        <h2 class="section-title" id="books">Featured Books</h2>
-        <div class="product-grid">
-            <article class="product-card" data-category="fiction" data-search="harry potter sorcerer's stone j k rowling fantasy fiction">
-                <img src="img/harry_potter.jpg" alt="Cover of Harry Potter and the Sorcerer's Stone">
-                <span class="tag">Fantasy</span>
-                <h3><a href="product-detail">Harry Potter and the Sorcerer's Stone</a></h3>
-                <p class="card-meta">Author: J. K. Rowling</p>
-                <a class="card-rating" href="product-detail#reviews">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    4.7 &middot; 210 reviews
-                </a>
-                <p class="card-price">150,000 VND</p>
-                <div class="card-actions">
-                    <a href="cart" class="button" data-add-to-cart="harry-potter"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
-                </div>
-            </article>
-
-            <article class="product-card" data-category="fiction" data-search="the little prince antoine de saint-exupery fiction">
-                <img src="img/little_prince.jpg" alt="Cover of The Little Prince">
-                <span class="tag">Fiction</span>
-                <h3><a href="product-detail">The Little Prince</a></h3>
-                <p class="card-meta">Author: Antoine de Saint-Exupéry</p>
-                <a class="card-rating" href="product-detail#reviews">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    4.6 &middot; 128 reviews
-                </a>
-                <p class="card-price">100,000 VND</p>
-                <div class="card-actions">
-                    <a href="cart" class="button" data-add-to-cart="little-prince"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
-                </div>
-            </article>
-
-            <article class="product-card" data-category="reference" data-search="english grammar in use raymond murphy reference">
-                <img src="img/eng_use.jpg" alt="Cover of English Grammar in Use">
-                <span class="tag">Reference</span>
-                <h3><a href="product-detail">English Grammar in Use</a></h3>
-                <p class="card-meta">Author: Raymond Murphy</p>
-                <a class="card-rating" href="product-detail#reviews">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                    4.8 &middot; 96 reviews
-                </a>
-                <p class="card-price">180,000 VND</p>
-                <div class="card-actions">
-                    <a href="cart" class="button" data-add-to-cart="english-grammar"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
-                </div>
-            </article>
-        </div>
-
-        <h2 class="section-title" id="board-games">Featured Board Games</h2>
-        <div class="product-grid">
-            <article class="product-card" data-category="board-games" data-search="catan board games strategy">
-                <img src="img/catan_bg.jpg" alt="Catan board game box">
-                <span class="tag">Board Games</span>
-                <h3><a href="product-detail">Catan</a></h3>
-                <p class="card-meta">Players: 3&ndash;4</p>
-                <a class="card-rating" href="product-detail#reviews">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    4.5 &middot; 54 reviews
-                </a>
-                <p class="card-price">200,000 VND</p>
-                <div class="card-actions">
-                    <a href="cart" class="button" data-add-to-cart="catan"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
-                </div>
-            </article>
-
-            <article class="product-card" data-category="board-games" data-search="monopoly board games family">
-                <img src="img/monopoly.jpg" alt="Monopoly board game box">
-                <span class="tag">Board Games</span>
-                <h3><a href="product-detail">Monopoly</a></h3>
-                <p class="card-meta">Players: 2&ndash;8</p>
-                <a class="card-rating" href="product-detail#reviews">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9734;&#9734;</span>
-                    3.9 &middot; 73 reviews
-                </a>
-                <p class="card-price">350,000 VND</p>
-                <div class="card-actions">
-                    <a href="cart" class="button" data-add-to-cart="monopoly"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
-                </div>
-            </article>
-
-            <article class="product-card" data-category="board-games" data-search="uno card game board games family">
-                <img src="img/uno.jpg" alt="Uno card game box">
-                <span class="tag">Board Games</span>
-                <h3><a href="product-detail">Uno</a></h3>
-                <p class="card-meta">Players: 2&ndash;10</p>
-                <a class="card-rating" href="product-detail#reviews">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    4.4 &middot; 68 reviews
-                </a>
-                <p class="card-price">100,000 VND</p>
-                <div class="card-actions">
-                    <a href="cart" class="button" data-add-to-cart="uno"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i></a>
-                </div>
-            </article>
+        <div class="product-grid" id="product-grid">
+            <% if (products.length === 0) { %>
+                <p class="no-results">No products match your search. Try a different keyword or category.</p>
+            <% } %>
+            <% products.forEach((product) => { %>
+                <article
+                    class="product-card"
+                    data-product-id="<%= product.id %>"
+                    data-search="<%= `${product.name} ${product.meta} ${product.tag}`.toLowerCase() %>"
+                    data-category="<%= product.category %>"
+                    data-price="<%= product.price %>"
+                    data-name="<%= product.name %>"
+                    data-rating="<%= product.rating.average %>"
+                >
+                    <img src="<%= product.image %>" alt="Cover of <%= product.name %>">
+                    <span class="tag"><%= product.tag %></span>
+                    <h3><a href="/product-detail/<%= product.id %>"><%= product.name %></a></h3>
+                    <p class="card-meta"><%= product.metaLabel %>: <%= product.meta %></p>
+                    <a class="card-rating" href="/product-detail/<%= product.id %>#reviews">
+                        <% if (product.rating.count > 0) { %>
+                            <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(Math.round(product.rating.average)) + "&#9734;".repeat(5 - Math.round(product.rating.average)) %></span>
+                            <%= product.rating.average %> &middot; <%= product.rating.count %> review<%= product.rating.count === 1 ? "" : "s" %>
+                        <% } else { %>
+                            No reviews yet
+                        <% } %>
+                    </a>
+                    <p class="card-price"><%= product.price.toLocaleString("vi-VN") %> VND</p>
+                    <div class="card-actions">
+                        <a href="/cart" class="button" data-add-to-cart="<%= product.id %>"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                        <% if (currentUser) { %>
+                            <a href="/product-detail/<%= product.id %>#write-review" class="secondary-button" aria-label="View <%= product.name %> and add to wishlist"><i class="far fa-heart"></i></a>
+                        <% } else { %>
+                            <a href="/login?next=<%= encodeURIComponent(`/product-detail/${product.id}`) %>" class="secondary-button" aria-label="Sign in to save to wishlist"><i class="far fa-heart"></i></a>
+                        <% } %>
+                    </div>
+                </article>
+            <% }) %>
         </div>
     </main>
 

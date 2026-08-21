@@ -1,7 +1,17 @@
 const express = require("express");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { users, blogPosts, forumTopics, forumReplies } = require("./data");
+const {
+  users,
+  blogPosts,
+  forumTopics,
+  forumReplies,
+  products,
+  reviews,
+  wishlistItems,
+  getNextReviewId,
+  getNextWishlistItemId,
+} = require("./data");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -482,6 +492,483 @@ function requireAdmin(request, response, next) {
   request.currentUser = currentUser;
   next();
 }
+
+// ---------------------------------------------------------------------------
+// Product, Review, Wishlist, and Profile module (Khoa Pham Dang Nguyen)
+// ---------------------------------------------------------------------------
+
+const productCategories = ["fiction", "reference", "self-help", "board-games"];
+
+function getProductById(productId) {
+  return products.find((product) => product.id === productId) || null;
+}
+
+function getReviewsForProduct(productId) {
+  return reviews.filter((review) => review.productId === productId);
+}
+
+function getRatingSummary(productId) {
+  const productReviews = getReviewsForProduct(productId);
+  const count = productReviews.length;
+
+  const breakdown = [5, 4, 3, 2, 1].map((stars) => {
+    const starCount = productReviews.filter((review) => review.rating === stars).length;
+    return {
+      stars,
+      count: starCount,
+      percent: count > 0 ? Math.round((starCount / count) * 100) : 0,
+    };
+  });
+
+  const average = count > 0
+    ? productReviews.reduce((total, review) => total + review.rating, 0) / count
+    : 0;
+
+  return { average: Math.round(average * 10) / 10, count, breakdown };
+}
+
+function sortReviews(productReviews, sortKey) {
+  const sorted = [...productReviews];
+
+  if (sortKey === "helpful") {
+    sorted.sort((a, b) => b.helpfulCount - a.helpfulCount || new Date(b.createdAt) - new Date(a.createdAt));
+  } else {
+    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  return sorted;
+}
+
+function getReviewFormErrors(body) {
+  const errors = {};
+  const rating = Number(body.rating);
+  const title = String(body.title || "").trim();
+  const reviewBody = String(body.body || "").trim();
+
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    errors.rating = "Please select a star rating between 1 and 5.";
+  }
+
+  if (title.length < 3 || title.length > 120) {
+    errors.title = "Review title must be between 3 and 120 characters.";
+  }
+
+  if (reviewBody.length < 10 || reviewBody.length > 1000) {
+    errors.body = "Review must be between 10 and 1000 characters.";
+  }
+
+  return { errors, rating, title, body: reviewBody };
+}
+
+function matchesProductSearch(product, query) {
+  if (!query) return true;
+  const haystack = `${product.name} ${product.meta} ${product.tag} ${product.category}`.toLowerCase();
+  return haystack.includes(query.toLowerCase());
+}
+
+function sortProducts(productList, sortKey) {
+  const sorted = [...productList];
+
+  if (sortKey === "price-low") {
+    sorted.sort((a, b) => a.price - b.price);
+  } else if (sortKey === "price-high") {
+    sorted.sort((a, b) => b.price - a.price);
+  } else if (sortKey === "name") {
+    sorted.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortKey === "rating") {
+    sorted.sort((a, b) => getRatingSummary(b.id).average - getRatingSummary(a.id).average);
+  }
+
+  return sorted;
+}
+
+function getWishlistForUser(userId) {
+  return wishlistItems
+    .filter((item) => item.userId === userId)
+    .map((item) => ({ ...item, product: getProductById(item.productId) }))
+    .filter((item) => item.product !== null);
+}
+
+function countOtherCollectors(productId, currentUserId) {
+  return wishlistItems.filter(
+    (item) => item.productId === productId && item.userId !== currentUserId,
+  ).length;
+}
+
+function sortWishlist(items, sortKey) {
+  const sorted = [...items];
+
+  if (sortKey === "price-low") {
+    sorted.sort((a, b) => a.product.price - b.product.price);
+  } else if (sortKey === "price-high") {
+    sorted.sort((a, b) => b.product.price - a.product.price);
+  } else if (sortKey === "name") {
+    sorted.sort((a, b) => a.product.name.localeCompare(b.product.name));
+  } else {
+    sorted.sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+  }
+
+  return sorted;
+}
+
+const avatarColors = ["#0d6efd", "#d63659", "#218739", "#f5a623", "#7c3aed", "#0891b2"];
+
+function getProfileFormErrors(body) {
+  const errors = {};
+  const fullName = String(body.fullName || "").trim();
+  const email = String(body.email || "").trim().toLowerCase();
+  const introduction = String(body.introduction || "").trim();
+  const avatarColor = avatarColors.includes(body.avatarColor) ? body.avatarColor : avatarColors[0];
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (fullName.length < 2 || fullName.length > 80) {
+    errors.fullName = "Full name must be between 2 and 80 characters.";
+  }
+
+  if (!emailPattern.test(email)) {
+    errors.email = "Please enter a valid email address.";
+  } else if (users.some((user) => user.email === email && user.id !== Number(body.userId))) {
+    errors.email = "That email address is already in use by another account.";
+  }
+
+  if (introduction.length > 300) {
+    errors.introduction = "Introduction must be 300 characters or fewer.";
+  }
+
+  return { errors, fullName, email, introduction, avatarColor };
+}
+
+function getPasswordChangeErrors(body, currentUser) {
+  const errors = {};
+  const currentPassword = String(body.currentPassword || "");
+  const newPassword = String(body.newPassword || "");
+  const confirmPassword = String(body.confirmPassword || "");
+
+  if (!checkSecret(currentPassword, currentUser.passwordHash)) {
+    errors.currentPassword = "Current password is incorrect.";
+  }
+
+  if (newPassword.length < 8) {
+    errors.newPassword = "New password must be at least 8 characters.";
+  }
+
+  if (newPassword !== confirmPassword) {
+    errors.confirmPassword = "Passwords do not match.";
+  }
+
+  return { errors, newPassword };
+}
+
+app.get("/products", (request, response) => {
+  const query = String(request.query.q || "").trim();
+  const category = String(request.query.category || "all");
+  const sort = String(request.query.sort || "recent");
+
+  const filtered = products
+    .filter((product) => category === "all" || product.category === category)
+    .filter((product) => matchesProductSearch(product, query));
+
+  const sorted = sortProducts(filtered, sort);
+
+  response.render("products", {
+    activePage: "shop",
+    currentUser: getCurrentUser(request),
+    products: sorted.map((product) => ({ ...product, rating: getRatingSummary(product.id) })),
+    productCategories,
+    query,
+    category,
+    sort,
+    resultCount: sorted.length,
+  });
+});
+
+app.get("/product-detail/:id", (request, response, next) => {
+  const product = getProductById(request.params.id);
+
+  if (!product) {
+    next();
+    return;
+  }
+
+  const currentUser = getCurrentUser(request);
+  const sort = String(request.query.sort || "recent");
+  const productReviews = sortReviews(getReviewsForProduct(product.id), sort)
+    .map((review) => ({ ...review, isOwnReview: currentUser ? review.userId === currentUser.id : false }));
+
+  const wishlistEntry = currentUser
+    ? wishlistItems.find((item) => item.userId === currentUser.id && item.productId === product.id)
+    : null;
+
+  response.render("product-detail", {
+    activePage: "shop",
+    currentUser,
+    product,
+    reviews: productReviews,
+    rating: getRatingSummary(product.id),
+    reviewSort: sort,
+    isInWishlist: Boolean(wishlistEntry),
+    reviewErrors: {},
+    reviewFormData: { rating: "", title: "", body: "" },
+  });
+});
+
+app.post("/product-detail/:id/reviews", requireLogin, (request, response, next) => {
+  const product = getProductById(request.params.id);
+
+  if (!product) {
+    next();
+    return;
+  }
+
+  const { errors, rating, title, body } = getReviewFormErrors(request.body);
+
+  if (Object.keys(errors).length > 0) {
+    const productReviews = sortReviews(getReviewsForProduct(product.id), "recent")
+      .map((review) => ({ ...review, isOwnReview: review.userId === request.currentUser.id }));
+
+    const wishlistEntry = wishlistItems.find(
+      (item) => item.userId === request.currentUser.id && item.productId === product.id,
+    );
+
+    response.status(400).render("product-detail", {
+      activePage: "shop",
+      currentUser: request.currentUser,
+      product,
+      reviews: productReviews,
+      rating: getRatingSummary(product.id),
+      reviewSort: "recent",
+      isInWishlist: Boolean(wishlistEntry),
+      reviewErrors: errors,
+      reviewFormData: { rating: String(request.body.rating || ""), title, body },
+    });
+    return;
+  }
+
+  reviews.push({
+    id: getNextReviewId(),
+    productId: product.id,
+    userId: request.currentUser.id,
+    authorName: request.currentUser.fullName,
+    rating,
+    title,
+    body,
+    createdAt: new Date().toISOString(),
+    helpfulCount: 0,
+  });
+
+  response.redirect(`/product-detail/${product.id}#reviews`);
+});
+
+app.post("/product-detail/:id/reviews/:reviewId/delete", requireLogin, (request, response, next) => {
+  const product = getProductById(request.params.id);
+  if (!product) {
+    next();
+    return;
+  }
+
+  const reviewId = Number(request.params.reviewId);
+  const reviewIndex = reviews.findIndex((review) => review.id === reviewId && review.productId === product.id);
+
+  if (reviewIndex === -1) {
+    next();
+    return;
+  }
+
+  if (reviews[reviewIndex].userId !== request.currentUser.id) {
+    response.status(403).send("You can only delete your own review.");
+    return;
+  }
+
+  reviews.splice(reviewIndex, 1);
+  response.redirect(`/product-detail/${product.id}#reviews`);
+});
+
+app.post("/product-detail/:id/reviews/:reviewId/helpful", (request, response, next) => {
+  const product = getProductById(request.params.id);
+  if (!product) {
+    next();
+    return;
+  }
+
+  const reviewId = Number(request.params.reviewId);
+  const review = reviews.find((item) => item.id === reviewId && item.productId === product.id);
+
+  if (!review) {
+    response.status(404).json({ error: "Review not found." });
+    return;
+  }
+
+  review.helpfulCount += 1;
+  response.json({ helpfulCount: review.helpfulCount });
+});
+
+app.get("/wishlist", requireLogin, (request, response) => {
+  const sort = String(request.query.sort || "recent");
+  const items = sortWishlist(getWishlistForUser(request.currentUser.id), sort).map((item) => ({
+    ...item,
+    othersCount: countOtherCollectors(item.productId, request.currentUser.id),
+  }));
+
+  response.render("wishlist", {
+    activePage: "",
+    currentUser: request.currentUser,
+    items,
+    sort,
+  });
+});
+
+app.post("/wishlist", requireLogin, (request, response) => {
+  const productId = String(request.body.productId || "");
+  const product = getProductById(productId);
+
+  if (!product) {
+    response.status(404).json({ error: "Product not found." });
+    return;
+  }
+
+  const alreadySaved = wishlistItems.some(
+    (item) => item.userId === request.currentUser.id && item.productId === productId,
+  );
+
+  if (!alreadySaved) {
+    wishlistItems.push({
+      id: getNextWishlistItemId(),
+      userId: request.currentUser.id,
+      productId,
+      addedAt: new Date().toISOString(),
+      purchased: false,
+    });
+  }
+
+  const count = getWishlistForUser(request.currentUser.id).length;
+
+  if (request.headers.accept && request.headers.accept.includes("application/json")) {
+    response.json({ saved: true, count });
+    return;
+  }
+
+  response.redirect(request.get("Referer") || "/products");
+});
+
+app.delete("/wishlist/:productId", requireLogin, (request, response) => {
+  const productId = request.params.productId;
+  const index = wishlistItems.findIndex(
+    (item) => item.userId === request.currentUser.id && item.productId === productId,
+  );
+
+  if (index === -1) {
+    response.status(404).json({ error: "Item is not in your wishlist." });
+    return;
+  }
+
+  wishlistItems.splice(index, 1);
+  response.json({ saved: false, count: getWishlistForUser(request.currentUser.id).length });
+});
+
+app.post("/wishlist/:productId/move-to-cart", requireLogin, (request, response) => {
+  const productId = request.params.productId;
+  const index = wishlistItems.findIndex(
+    (item) => item.userId === request.currentUser.id && item.productId === productId,
+  );
+
+  if (index === -1) {
+    response.status(404).json({ error: "Item is not in your wishlist." });
+    return;
+  }
+
+  wishlistItems[index].purchased = true;
+  wishlistItems.splice(index, 1);
+  response.json({ moved: true, count: getWishlistForUser(request.currentUser.id).length });
+});
+
+app.get("/profile", requireLogin, (request, response) => {
+  response.render("profile", {
+    activePage: "",
+    currentUser: request.currentUser,
+    avatarColors,
+    profileErrors: {},
+    passwordErrors: {},
+    profileSaved: false,
+    passwordSaved: false,
+  });
+});
+
+app.post("/profile", requireLogin, (request, response) => {
+  const { errors, fullName, email, introduction, avatarColor } = getProfileFormErrors({
+    ...request.body,
+    userId: request.currentUser.id,
+  });
+
+  if (Object.keys(errors).length > 0) {
+    response.status(400).render("profile", {
+      activePage: "",
+      currentUser: { ...request.currentUser, fullName, email, introduction, avatarColor },
+      avatarColors,
+      profileErrors: errors,
+      passwordErrors: {},
+      profileSaved: false,
+      passwordSaved: false,
+    });
+    return;
+  }
+
+  const user = users.find((item) => item.id === request.currentUser.id);
+  user.fullName = fullName;
+  user.email = email;
+  user.introduction = introduction;
+  user.avatarColor = avatarColor;
+
+  response.render("profile", {
+    activePage: "",
+    currentUser: user,
+    avatarColors,
+    profileErrors: {},
+    passwordErrors: {},
+    profileSaved: true,
+    passwordSaved: false,
+  });
+});
+
+app.post("/profile/password", requireLogin, (request, response) => {
+  const user = users.find((item) => item.id === request.currentUser.id);
+  const { errors, newPassword } = getPasswordChangeErrors(request.body, user);
+
+  if (Object.keys(errors).length > 0) {
+    response.status(400).render("profile", {
+      activePage: "",
+      currentUser: user,
+      avatarColors,
+      profileErrors: {},
+      passwordErrors: errors,
+      profileSaved: false,
+      passwordSaved: false,
+    });
+    return;
+  }
+
+  user.passwordHash = hashSecret(newPassword);
+
+  response.render("profile", {
+    activePage: "",
+    currentUser: user,
+    avatarColors,
+    profileErrors: {},
+    passwordErrors: {},
+    profileSaved: false,
+    passwordSaved: true,
+  });
+});
+
+app.post("/profile/deactivate", requireLogin, (request, response) => {
+  const user = users.find((item) => item.id === request.currentUser.id);
+  user.status = "deactivated";
+
+  const sessionId = getSessionId(request);
+  delete sessions[sessionId];
+
+  response.clearCookie("sessionId");
+  response.redirect("/login");
+});
 
 function findForumTopic(topicId) {
   return forumTopics.find((topic) => topic.id === Number(topicId) && !topic.deleted) || null;
@@ -970,10 +1457,6 @@ app.post("/admin-users/:userId/status", requireAdmin, (request, response) => {
 const pageNames = [
   "cart",
   "checkout",
-  "product-detail",
-  "products",
-  "profile",
-  "wishlist",
 ];
 
 function getActivePage(pageName) {

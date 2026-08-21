@@ -483,3 +483,56 @@ a {
         gap: 4px;
     }
 }
+
+.field-error {
+    min-height: 18px;
+    margin-top: 5px;
+    color: #d63659;
+    font-size: 0.85rem;
+}
+
+.review-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+
+.review-tools select {
+    padding: 8px 10px;
+    border: 1px solid #aeb7c0;
+    border-radius: 5px;
+    font: inherit;
+}
+
+.no-reviews {
+    color: #6c757d;
+    margin-bottom: 24px;
+}
+
+.review-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.delete-review-btn {
+    border: 0;
+    background: none;
+    color: #d63659;
+    font-size: 13.5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.delete-review-btn:hover {
+    text-decoration: underline;
+}
+
+.secondary-button.is-saved i {
+    color: #d63659;
+}

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Product details and customer reviews for The Little Prince on BookNook.">
-    <title>BookNook | The Little Prince</title>
+    <meta name="description" content="Product details and customer reviews for <%= product.name %> on BookNook.">
+    <title>BookNook | <%= product.name %></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/product-detail.css">
 </head>
@@ -15,34 +15,40 @@
 
     <main class="page-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="/">Home</a> / <a href="products">Shop</a> / <a href="products#fiction">Fiction</a> / The Little Prince
+            <a href="/">Home</a> / <a href="/products">Shop</a> / <a href="/products?category=<%= product.category %>"><%= product.tag %></a> / <%= product.name %>
         </nav>
 
         <section class="product-overview">
             <div class="product-gallery">
-                <img src="img/little_prince.jpg" alt="Cover of The Little Prince">
+                <img src="<%= product.image %>" alt="Cover of <%= product.name %>">
             </div>
 
             <div class="product-info">
-                <span class="tag">Fiction</span>
-                <h1>The Little Prince</h1>
-                <p class="product-author">by Antoine de Saint-Exupéry &middot; Richard Howard translation</p>
+                <span class="tag"><%= product.tag %></span>
+                <h1><%= product.name %></h1>
+                <p class="product-author"><%= product.metaLabel %>: <%= product.meta %></p>
 
                 <div class="rating-line">
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    <span>4.6 out of 5</span>
-                    <a href="#reviews">128 reviews</a>
+                    <% if (rating.count > 0) { %>
+                        <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(Math.round(rating.average)) + "&#9734;".repeat(5 - Math.round(rating.average)) %></span>
+                        <span><%= rating.average %> out of 5</span>
+                        <a href="#reviews"><%= rating.count %> review<%= rating.count === 1 ? "" : "s" %></a>
+                    <% } else { %>
+                        <span>No reviews yet</span>
+                        <a href="#write-review">Be the first to review</a>
+                    <% } %>
                 </div>
 
-                <p class="product-price">100,000 VND</p>
-                <p class="stock-status"><i class="fas fa-circle-check"></i> In stock &mdash; 24 copies left</p>
-
-                <p class="product-description">
-                    A poetic tale of a young prince who leaves his tiny home planet to journey across the
-                    universe, meeting a fox, a rose, and a stranded pilot along the way. This edition uses
-                    Richard Howard's modern English translation, praised for its clarity and warmth &mdash; a
-                    great pick for both first-time readers and long-time fans revisiting the story.
+                <p class="product-price"><%= product.price.toLocaleString("vi-VN") %> VND</p>
+                <p class="stock-status">
+                    <% if (product.stock > 0) { %>
+                        <i class="fas fa-circle-check"></i> In stock &mdash; <%= product.stock %> copies left
+                    <% } else { %>
+                        <i class="fas fa-circle-xmark"></i> Out of stock
+                    <% } %>
                 </p>
+
+                <p class="product-description"><%= product.description %></p>
 
                 <div class="purchase-row">
                     <div class="qty-selector" aria-label="Quantity">
@@ -50,45 +56,26 @@
                         <span data-product-quantity aria-live="polite">1</span>
                         <button type="button" data-quantity-increase aria-label="Increase quantity">+</button>
                     </div>
-                    <a href="cart" class="button" data-add-to-cart="little-prince"><i class="fas fa-cart-plus"></i> Add to Cart</a>
-                    <a href="wishlist" class="secondary-button"><i class="fas fa-heart"></i> Add to Wishlist</a>
+                    <a href="/cart" class="button" data-add-to-cart="<%= product.id %>"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                    <% if (currentUser) { %>
+                        <button type="button" class="secondary-button <%= isInWishlist ? "is-saved" : "" %>" data-wishlist-toggle data-product-id="<%= product.id %>" data-saved="<%= isInWishlist %>">
+                            <i class="<%= isInWishlist ? "fas" : "far" %> fa-heart"></i>
+                            <span data-wishlist-label><%= isInWishlist ? "Saved to Wishlist" : "Add to Wishlist" %></span>
+                        </button>
+                    <% } else { %>
+                        <a href="/login?next=<%= encodeURIComponent(`/product-detail/${product.id}`) %>" class="secondary-button"><i class="far fa-heart"></i> Add to Wishlist</a>
+                    <% } %>
                 </div>
 
                 <div class="spec-card">
                     <h2>Product Specifications</h2>
                     <table class="spec-table">
-                        <tr>
-                            <th scope="row">ISBN</th>
-                            <td>978-0-15-601219-5</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Publisher</th>
-                            <td>Harvest Books, 2000 Edition</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Language</th>
-                            <td>English</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Format</th>
-                            <td>Paperback</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Pages</th>
-                            <td>96</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Dimensions</th>
-                            <td>13.3 x 1 x 20.3 cm</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Weight</th>
-                            <td>150 g</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Genre</th>
-                            <td>Classic Fiction, Fable</td>
-                        </tr>
+                        <% product.specs.forEach((spec) => { %>
+                            <tr>
+                                <th scope="row"><%= spec.label %></th>
+                                <td><%= spec.value %></td>
+                            </tr>
+                        <% }) %>
                     </table>
                 </div>
             </div>
@@ -99,131 +86,100 @@
 
             <div class="review-summary">
                 <div class="summary-score">
-                    <span class="score">4.6</span>
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    <p>Based on 128 reviews</p>
+                    <span class="score"><%= rating.average %></span>
+                    <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(Math.round(rating.average)) + "&#9734;".repeat(5 - Math.round(rating.average)) %></span>
+                    <p>Based on <%= rating.count %> review<%= rating.count === 1 ? "" : "s" %></p>
                 </div>
                 <div class="rating-bars">
-                    <div class="rating-bar-row">
-                        <span>5 stars</span>
-                        <div class="rating-bar-track"><div class="rating-bar-fill" style="width: 72%;"></div></div>
-                        <span>72%</span>
-                    </div>
-                    <div class="rating-bar-row">
-                        <span>4 stars</span>
-                        <div class="rating-bar-track"><div class="rating-bar-fill" style="width: 18%;"></div></div>
-                        <span>18%</span>
-                    </div>
-                    <div class="rating-bar-row">
-                        <span>3 stars</span>
-                        <div class="rating-bar-track"><div class="rating-bar-fill" style="width: 6%;"></div></div>
-                        <span>6%</span>
-                    </div>
-                    <div class="rating-bar-row">
-                        <span>2 stars</span>
-                        <div class="rating-bar-track"><div class="rating-bar-fill" style="width: 3%;"></div></div>
-                        <span>3%</span>
-                    </div>
-                    <div class="rating-bar-row">
-                        <span>1 star</span>
-                        <div class="rating-bar-track"><div class="rating-bar-fill" style="width: 1%;"></div></div>
-                        <span>1%</span>
-                    </div>
+                    <% rating.breakdown.forEach((row) => { %>
+                        <div class="rating-bar-row">
+                            <span><%= row.stars %> star<%= row.stars === 1 ? "" : "s" %></span>
+                            <div class="rating-bar-track"><div class="rating-bar-fill" style="width: <%= row.percent %>%;"></div></div>
+                            <span><%= row.percent %>%</span>
+                        </div>
+                    <% }) %>
                 </div>
+            </div>
+
+            <div class="review-tools">
+                <label for="review-sort">Sort by</label>
+                <select id="review-sort" data-review-sort>
+                    <option value="recent" <%= reviewSort === "recent" ? "selected" : "" %>>Newest first</option>
+                    <option value="helpful" <%= reviewSort === "helpful" ? "selected" : "" %>>Most helpful</option>
+                </select>
             </div>
 
             <div class="review-list">
-                <article class="review-card">
-                    <div class="review-header">
-                        <div>
-                            <span class="reviewer-name">Linh Nguyen</span>
-                            <span class="verified-badge"><i class="fas fa-circle-check"></i> Verified Purchase</span>
+                <% if (reviews.length === 0) { %>
+                    <p class="no-reviews">No reviews yet for this product. Be the first to share your thoughts below.</p>
+                <% } %>
+                <% reviews.forEach((review) => { %>
+                    <article class="review-card" data-review-id="<%= review.id %>">
+                        <div class="review-header">
+                            <div>
+                                <span class="reviewer-name"><%= review.authorName %></span>
+                                <% if (review.userId) { %>
+                                    <span class="verified-badge"><i class="fas fa-circle-check"></i> Verified Member</span>
+                                <% } %>
+                            </div>
+                            <span class="review-date"><%= new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) %></span>
                         </div>
-                        <span class="review-date">18 July 2026</span>
-                    </div>
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                    <h3 class="review-title">A beautiful, quick read</h3>
-                    <p class="review-body">
-                        I finished this in one afternoon and it stayed with me for days. The Howard translation
-                        reads very naturally in English, which made it easy for me as a second-language reader.
-                    </p>
-                    <div class="review-footer">
-                        <button type="button" class="helpful-btn"><i class="far fa-thumbs-up"></i> Helpful (32)</button>
-                    </div>
-                </article>
-
-                <article class="review-card">
-                    <div class="review-header">
-                        <div>
-                            <span class="reviewer-name">Daniel Lee</span>
-                            <span class="verified-badge"><i class="fas fa-circle-check"></i> Verified Purchase</span>
+                        <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(review.rating) + "&#9734;".repeat(5 - review.rating) %></span>
+                        <h3 class="review-title"><%= review.title %></h3>
+                        <p class="review-body"><%= review.body %></p>
+                        <div class="review-footer">
+                            <button type="button" class="helpful-btn" data-helpful-button data-product-id="<%= product.id %>" data-review-id="<%= review.id %>">
+                                <i class="far fa-thumbs-up"></i> Helpful (<span data-helpful-count><%= review.helpfulCount %></span>)
+                            </button>
+                            <% if (review.isOwnReview) { %>
+                                <form action="/product-detail/<%= product.id %>/reviews/<%= review.id %>/delete" method="post" data-confirm-delete="Delete your review?">
+                                    <button type="submit" class="delete-review-btn"><i class="far fa-trash-can"></i> Delete</button>
+                                </form>
+                            <% } %>
                         </div>
-                        <span class="review-date">14 July 2026</span>
-                    </div>
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span>
-                    <h3 class="review-title">Lovely edition, small print</h3>
-                    <p class="review-body">
-                        The story itself is timeless and the illustrations are printed nicely. My only complaint
-                        is that the text is a little small for reading before bed. Still a great gift book.
-                    </p>
-                    <div class="review-footer">
-                        <button type="button" class="helpful-btn"><i class="far fa-thumbs-up"></i> Helpful (11)</button>
-                    </div>
-                </article>
-
-                <article class="review-card">
-                    <div class="review-header">
-                        <div>
-                            <span class="reviewer-name">Mai Hoang</span>
-                        </div>
-                        <span class="review-date">2 July 2026</span>
-                    </div>
-                    <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                    <h3 class="review-title">Re-read it as an adult and cried</h3>
-                    <p class="review-body">
-                        I read this as a kid and picked it up again this year. Hits completely differently as an
-                        adult. Delivery was fast and the cover arrived in perfect condition.
-                    </p>
-                    <div class="review-footer">
-                        <button type="button" class="helpful-btn"><i class="far fa-thumbs-up"></i> Helpful (8)</button>
-                    </div>
-                </article>
+                    </article>
+                <% }) %>
             </div>
 
-            <div class="load-more-wrap">
-                <button type="button" class="secondary-button">Load more reviews</button>
-            </div>
-
-            <div class="review-form-card" aria-labelledby="review-form-heading">
-                <h2 id="review-form-heading">Write a Review</h2>
-                <p>Share your thoughts with other BookNook readers.</p>
-                <form id="review-form" action="product-detail" method="get">
-                    <div>
-                        <label for="rating-5">Your rating</label>
-                        <div class="star-picker" role="radiogroup" aria-label="Star rating">
-                            <input type="radio" id="rating-5" name="rating" value="5">
-                            <label for="rating-5" title="5 stars">&#9733;</label>
-                            <input type="radio" id="rating-4" name="rating" value="4">
-                            <label for="rating-4" title="4 stars">&#9733;</label>
-                            <input type="radio" id="rating-3" name="rating" value="3">
-                            <label for="rating-3" title="3 stars">&#9733;</label>
-                            <input type="radio" id="rating-2" name="rating" value="2">
-                            <label for="rating-2" title="2 stars">&#9733;</label>
-                            <input type="radio" id="rating-1" name="rating" value="1">
-                            <label for="rating-1" title="1 star">&#9733;</label>
+            <% if (currentUser) { %>
+                <div class="review-form-card" id="write-review" aria-labelledby="review-form-heading">
+                    <h2 id="review-form-heading">Write a Review</h2>
+                    <p>Share your thoughts with other BookNook readers.</p>
+                    <form id="review-form" action="/product-detail/<%= product.id %>/reviews" method="post" novalidate>
+                        <div>
+                            <span id="rating-label">Your rating</span>
+                            <div class="star-picker" role="radiogroup" aria-labelledby="rating-label">
+                                <input type="radio" id="rating-5" name="rating" value="5" <%= reviewFormData.rating === "5" ? "checked" : "" %>>
+                                <label for="rating-5" title="5 stars">&#9733;</label>
+                                <input type="radio" id="rating-4" name="rating" value="4" <%= reviewFormData.rating === "4" ? "checked" : "" %>>
+                                <label for="rating-4" title="4 stars">&#9733;</label>
+                                <input type="radio" id="rating-3" name="rating" value="3" <%= reviewFormData.rating === "3" ? "checked" : "" %>>
+                                <label for="rating-3" title="3 stars">&#9733;</label>
+                                <input type="radio" id="rating-2" name="rating" value="2" <%= reviewFormData.rating === "2" ? "checked" : "" %>>
+                                <label for="rating-2" title="2 stars">&#9733;</label>
+                                <input type="radio" id="rating-1" name="rating" value="1" <%= reviewFormData.rating === "1" ? "checked" : "" %>>
+                                <label for="rating-1" title="1 star">&#9733;</label>
+                            </div>
+                            <p class="field-error" data-error-for="rating"><%= reviewErrors.rating || "" %></p>
                         </div>
-                    </div>
-                    <div>
-                        <label for="review-title">Review title</label>
-                        <input type="text" id="review-title" name="title" placeholder="Sum up your review in a few words" required>
-                    </div>
-                    <div>
-                        <label for="review-body">Your review</label>
-                        <textarea id="review-body" name="body" rows="5" placeholder="What did you like or dislike about this book?" required></textarea>
-                    </div>
-                    <button class="button" type="submit">Submit Review</button>
-                </form>
-            </div>
+                        <div>
+                            <label for="review-title">Review title</label>
+                            <input type="text" id="review-title" name="title" placeholder="Sum up your review in a few words" value="<%= reviewFormData.title %>" maxlength="120" required>
+                            <p class="field-error" data-error-for="title"><%= reviewErrors.title || "" %></p>
+                        </div>
+                        <div>
+                            <label for="review-body">Your review</label>
+                            <textarea id="review-body" name="body" rows="5" placeholder="What did you like or dislike about this product? (10-1000 characters)" maxlength="1000" required><%= reviewFormData.body %></textarea>
+                            <p class="field-error" data-error-for="body"><%= reviewErrors.body || "" %></p>
+                        </div>
+                        <button class="button" type="submit">Submit Review</button>
+                    </form>
+                </div>
+            <% } else { %>
+                <div class="review-form-card" id="write-review">
+                    <p><a href="/login?next=<%= encodeURIComponent(`/product-detail/${product.id}#write-review`) %>">Sign in</a> to write a review.</p>
+                </div>
+            <% } %>
         </section>
     </main>
 

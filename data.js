@@ -546,6 +546,8 @@ const reviews = [
 const wishlistItems = [
   { id: 1, userId: 2, productId: "little-prince", addedAt: "2026-07-10T09:00:00.000Z", purchased: false },
   { id: 2, userId: 2, productId: "catan", addedAt: "2026-07-12T09:00:00.000Z", purchased: false },
+  { id: 3, userId: 4, productId: "little-prince", addedAt: "2026-07-08T09:00:00.000Z", purchased: false },
+  { id: 4, userId: 3, productId: "little-prince", addedAt: "2026-07-15T09:00:00.000Z", purchased: false },
 ];
 
 let nextReviewId = reviews.length

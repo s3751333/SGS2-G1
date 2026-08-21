@@ -273,3 +273,23 @@ a {
         flex-direction: column;
     }
 }
+
+.no-results {
+    grid-column: 1 / -1;
+    color: #6c757d;
+    padding: 20px 0;
+}
+
+#reset-shop-filters {
+    padding: 11px 16px;
+    border: 1px solid #aeb7c0;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #374151;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#reset-shop-filters:hover {
+    background-color: #f1f3f5;
+}
