@@ -78,6 +78,13 @@ a {
     color: #263238;
 }
 
+.wishlist-status {
+    min-height: 1.5em;
+    margin: -18px 0 18px;
+    color: #5d6873;
+    font-size: 14px;
+}
+
 .wishlist-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -184,6 +191,10 @@ a {
     color: #d97706;
 }
 
+.card-stock.out-of-stock {
+    color: #d63659;
+}
+
 .social-proof {
     display: flex;
     align-items: center;
@@ -230,6 +241,11 @@ a {
     background-color: var(--main-hover);
 }
 
+.button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .secondary-button {
     background-color: #ffffff;
     color: var(--main-color);
@@ -241,13 +257,17 @@ a {
 }
 
 .empty-wishlist {
-    display: none;
+    display: block;
     text-align: center;
     padding: 60px 20px;
     background: #ffffff;
     border: 1px dashed #d8dee5;
     border-radius: 12px;
     color: #5d6873;
+}
+
+.empty-wishlist[hidden] {
+    display: none;
 }
 
 @media (max-width: 600px) {

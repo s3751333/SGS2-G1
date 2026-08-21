@@ -41,7 +41,7 @@
     checkoutLink.setAttribute("aria-disabled", String(items.length === 0));
   }
 
-  itemsContainer.addEventListener("click", (event) => {
+  itemsContainer.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-cart-action]");
     const item = event.target.closest("[data-product-id]");
     if (!button || !item) return;
@@ -49,15 +49,21 @@
     const cartItem = store.getCart().find((entry) => entry.productId === item.dataset.productId);
     if (!cartItem) return;
 
-    if (button.dataset.cartAction === "increase") store.updateQuantity(cartItem.productId, cartItem.quantity + 1);
-    if (button.dataset.cartAction === "decrease") store.updateQuantity(cartItem.productId, cartItem.quantity - 1);
-    if (button.dataset.cartAction === "remove") store.removeItem(cartItem.productId);
-    render();
+    button.disabled = true;
+    try {
+      if (button.dataset.cartAction === "increase") await store.updateQuantity(cartItem.productId, cartItem.quantity + 1);
+      if (button.dataset.cartAction === "decrease") await store.updateQuantity(cartItem.productId, cartItem.quantity - 1);
+      if (button.dataset.cartAction === "remove") await store.removeItem(cartItem.productId);
+      render();
+    } catch (error) {
+      window.alert(error.message);
+      button.disabled = false;
+    }
   });
 
   checkoutLink.addEventListener("click", (event) => {
     if (!store.getItemCount()) event.preventDefault();
   });
 
-  render();
+  store.ready.then(render).catch((error) => window.alert(error.message));
 })();

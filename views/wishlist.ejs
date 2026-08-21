@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Your saved BookNook items, ready to move to your cart anytime.">
     <title>BookNook | My Wishlist</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/wishlist.css">
+    <link rel="stylesheet" href="/css/wishlist.css">
 </head>
-
 <body>
     <%- include("partials/navbar", { activePage }) %>
 
     <main class="page-container">
         <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="/">Home</a> / <a href="/">My Account</a> / Wishlist
+            <a href="/">Home</a> / <a href="/profile">My Account</a> / Wishlist
         </nav>
 
         <div class="page-heading">
@@ -25,111 +23,56 @@
             </div>
             <div class="wishlist-tools">
                 <label for="sort-wishlist">Sort by</label>
-                <select id="sort-wishlist" name="sort-wishlist">
-                    <option value="recent">Recently added</option>
-                    <option value="price-low">Price: low to high</option>
-                    <option value="price-high">Price: high to low</option>
-                    <option value="name">Name (A&ndash;Z)</option>
+                <select id="sort-wishlist" name="sort">
+                    <option value="recent" <%= sort === "recent" ? "selected" : "" %>>Recently added</option>
+                    <option value="price-low" <%= sort === "price-low" ? "selected" : "" %>>Price: low to high</option>
+                    <option value="price-high" <%= sort === "price-high" ? "selected" : "" %>>Price: high to low</option>
+                    <option value="name" <%= sort === "name" ? "selected" : "" %>>Name (A&ndash;Z)</option>
                 </select>
             </div>
         </div>
 
-        <p class="wishlist-count"><strong>6 items</strong> saved to your wishlist</p>
+        <p class="wishlist-count"><strong data-wishlist-count><%= items.length %> item<%= items.length === 1 ? "" : "s" %></strong> saved to your wishlist</p>
+        <p id="wishlist-status" class="wishlist-status" role="status" aria-live="polite"></p>
 
-        <section class="wishlist-grid" aria-label="Saved items">
-            <article class="wishlist-card">
-                <button type="button" class="remove-btn" aria-label="Remove The Little Prince from wishlist"><i class="fas fa-xmark"></i></button>
-                <img src="img/little_prince.jpg" alt="Cover of The Little Prince">
-                <span class="tag">Fiction</span>
-                <h3><a href="product-detail">The Little Prince</a></h3>
-                <p class="card-author">Antoine de Saint-Exupéry</p>
-                <p class="card-price">100,000 VND</p>
-                <p class="card-stock in-stock"><i class="fas fa-circle-check"></i> In stock</p>
-                <p class="social-proof"><i class="fas fa-heart"></i> Saved by 45 other collectors</p>
-                <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Move to Cart</a>
-                </div>
-            </article>
-
-            <article class="wishlist-card">
-                <button type="button" class="remove-btn" aria-label="Remove Harry Potter and the Sorcerer's Stone from wishlist"><i class="fas fa-xmark"></i></button>
-                <img src="img/harry_potter.jpg" alt="Cover of Harry Potter and the Sorcerer's Stone">
-                <span class="tag">Fantasy</span>
-                <h3><a href="product-detail">Harry Potter and the Sorcerer's Stone</a></h3>
-                <p class="card-author">J.K. Rowling</p>
-                <p class="card-price">125,000 VND</p>
-                <p class="card-stock low-stock"><i class="fas fa-triangle-exclamation"></i> Only 3 left</p>
-                <p class="social-proof"><i class="fas fa-heart"></i> Saved by 132 other collectors</p>
-                <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Move to Cart</a>
-                </div>
-            </article>
-
-            <article class="wishlist-card">
-                <button type="button" class="remove-btn" aria-label="Remove Uno card game from wishlist"><i class="fas fa-xmark"></i></button>
-                <img src="img/uno.jpg" alt="Uno card game box">
-                <span class="tag">Board Games</span>
-                <h3><a href="product-detail">Uno</a></h3>
-                <p class="card-author">Mattel Games</p>
-                <p class="card-price">100,000 VND</p>
-                <p class="card-stock in-stock"><i class="fas fa-circle-check"></i> In stock</p>
-                <p class="social-proof"><i class="fas fa-heart"></i> Saved by 68 other collectors</p>
-                <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Move to Cart</a>
-                </div>
-            </article>
-
-            <article class="wishlist-card">
-                <button type="button" class="remove-btn" aria-label="Remove Norwegian Wood from wishlist"><i class="fas fa-xmark"></i></button>
-                <img src="img/norwey_wood.jpg" alt="Cover of Norwegian Wood">
-                <span class="tag">Fiction</span>
-                <h3><a href="product-detail">Norwegian Wood</a></h3>
-                <p class="card-author">Haruki Murakami</p>
-                <p class="card-price">135,000 VND</p>
-                <p class="card-stock in-stock"><i class="fas fa-circle-check"></i> In stock</p>
-                <p class="social-proof"><i class="fas fa-heart"></i> Saved by 91 other collectors</p>
-                <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Move to Cart</a>
-                </div>
-            </article>
-
-            <article class="wishlist-card">
-                <button type="button" class="remove-btn" aria-label="Remove Catan from wishlist"><i class="fas fa-xmark"></i></button>
-                <img src="img/catan_bg.jpg" alt="Catan board game box">
-                <span class="tag">Board Games</span>
-                <h3><a href="product-detail">Catan</a></h3>
-                <p class="card-author">Catan Studio</p>
-                <p class="card-price">550,000 VND</p>
-                <p class="card-stock low-stock"><i class="fas fa-triangle-exclamation"></i> Only 2 left</p>
-                <p class="social-proof"><i class="fas fa-heart"></i> Saved by 54 other collectors</p>
-                <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Move to Cart</a>
-                </div>
-            </article>
-
-            <article class="wishlist-card">
-                <button type="button" class="remove-btn" aria-label="Remove Atomic Habits from wishlist"><i class="fas fa-xmark"></i></button>
-                <img src="img/atomic_book.webp" alt="Cover of Atomic Habits">
-                <span class="tag">Self-Help</span>
-                <h3><a href="product-detail">Atomic Habits</a></h3>
-                <p class="card-author">James Clear</p>
-                <p class="card-price">175,000 VND</p>
-                <p class="card-stock in-stock"><i class="fas fa-circle-check"></i> In stock</p>
-                <p class="social-proof"><i class="fas fa-heart"></i> Saved by 210 other collectors</p>
-                <div class="card-actions">
-                    <a href="cart" class="button"><i class="fas fa-cart-plus"></i> Move to Cart</a>
-                </div>
-            </article>
+        <section id="wishlist-grid" class="wishlist-grid" aria-label="Saved items" <%= items.length === 0 ? "hidden" : "" %>>
+            <% items.forEach((item) => { const product = item.product; %>
+                <article
+                    class="wishlist-card"
+                    data-product-id="<%= product.id %>"
+                    data-name="<%= product.name.toLowerCase() %>"
+                    data-price="<%= product.price %>"
+                    data-added-at="<%= item.addedAt %>">
+                    <button type="button" class="remove-btn" data-wishlist-action="remove" aria-label="Remove <%= product.name %> from wishlist">
+                        <i class="fas fa-xmark" aria-hidden="true"></i>
+                    </button>
+                    <img src="<%= product.image %>" alt="<%= product.name %>">
+                    <span class="tag"><%= product.tag %></span>
+                    <h3><a href="/product-detail/<%= product.id %>"><%= product.name %></a></h3>
+                    <p class="card-author"><%= product.metaLabel %>: <%= product.meta %></p>
+                    <p class="card-price"><%= new Intl.NumberFormat("vi-VN").format(product.price) %> VND</p>
+                    <p class="card-stock <%= product.stock <= 0 ? "out-of-stock" : product.stock <= 5 ? "low-stock" : "in-stock" %>">
+                        <i class="fas <%= product.stock <= 0 ? "fa-circle-xmark" : product.stock <= 5 ? "fa-triangle-exclamation" : "fa-circle-check" %>" aria-hidden="true"></i>
+                        <%= product.stock <= 0 ? "Out of stock" : product.stock <= 5 ? `Only ${product.stock} left` : "In stock" %>
+                    </p>
+                    <p class="social-proof"><i class="fas fa-heart" aria-hidden="true"></i> Saved by <%= item.othersCount %> other collector<%= item.othersCount === 1 ? "" : "s" %></p>
+                    <div class="card-actions">
+                        <button type="button" class="button" data-wishlist-action="move" <%= product.stock <= 0 ? "disabled" : "" %>>
+                            <i class="fas fa-cart-plus" aria-hidden="true"></i> Move to Cart
+                        </button>
+                    </div>
+                </article>
+            <% }); %>
         </section>
 
-        <div class="empty-wishlist">
+        <div id="wishlist-empty" class="empty-wishlist" <%= items.length > 0 ? "hidden" : "" %>>
             <p>Your wishlist is empty. Browse the shop and tap the heart icon on any item to save it here.</p>
-            <a href="products" class="button">Browse Shop</a>
+            <a href="/products" class="button">Browse Shop</a>
         </div>
     </main>
+
     <%- include("partials/footer") %>
-
     <script src="/js/navbar.js" defer></script>
+    <script src="/js/wishlist.js" defer></script>
 </body>
-
 </html>

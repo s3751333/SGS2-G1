@@ -96,18 +96,27 @@
     searchInput.focus();
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", async (event) => {
     const addButton = event.target.closest("[data-add-to-cart]");
     if (!addButton || !store) return;
     event.preventDefault();
 
-    store.addItem(addButton.dataset.addToCart, 1);
+    addButton.setAttribute("aria-disabled", "true");
+    try {
+      const result = await store.addItem(addButton.dataset.addToCart, 1);
+      if (!result) return;
+    } catch (error) {
+      window.alert(error.message);
+      addButton.removeAttribute("aria-disabled");
+      return;
+    }
     const originalText = addButton.innerHTML;
     addButton.innerHTML = '<i class="fas fa-check"></i> Added';
     addButton.classList.add("added");
     window.setTimeout(() => {
       addButton.innerHTML = originalText;
       addButton.classList.remove("added");
+      addButton.removeAttribute("aria-disabled");
     }, 1200);
   });
 

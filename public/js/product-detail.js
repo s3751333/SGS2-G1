@@ -27,12 +27,21 @@
       renderQuantity();
     });
 
-    addButton.addEventListener("click", (event) => {
+    addButton.addEventListener("click", async (event) => {
       event.preventDefault();
-      store.addItem(addButton.dataset.addToCart, quantity);
+      addButton.setAttribute("aria-disabled", "true");
+      try {
+        const result = await store.addItem(addButton.dataset.addToCart, quantity);
+        if (!result) return;
+      } catch (error) {
+        window.alert(error.message);
+        addButton.removeAttribute("aria-disabled");
+        return;
+      }
       addButton.innerHTML = '<i class="fas fa-check"></i> Added to Cart';
       window.setTimeout(() => {
         addButton.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+        addButton.removeAttribute("aria-disabled");
       }, 1400);
     });
 
