@@ -1,71 +1,88 @@
 (function () {
   "use strict";
 
-  const store = window.BookNookStore;
   const grid = document.querySelector("#wishlist-grid");
-  const emptyState = document.querySelector("#empty-wishlist");
-  const countText = document.querySelector("[data-wishlist-count-text]");
-  const sortSelect = document.querySelector("[data-wishlist-sort]");
+  const emptyState = document.querySelector("#wishlist-empty");
+  const countElement = document.querySelector("[data-wishlist-count]");
+  const sortSelect = document.querySelector("#sort-wishlist");
+  const statusMessage = document.querySelector("#wishlist-status");
 
-  function updateCount() {
-    const remaining = grid.querySelectorAll("[data-wishlist-card]").length;
-    countText.innerHTML = `<strong>${remaining} item${remaining === 1 ? "" : "s"}</strong> saved to your wishlist`;
+  function getCards() {
+    return [...grid.querySelectorAll(".wishlist-card")];
+  }
 
-    if (remaining === 0) {
-      grid.hidden = true;
-      emptyState.hidden = false;
+  function updateCount(count) {
+    countElement.textContent = `${count} item${count === 1 ? "" : "s"}`;
+    grid.hidden = count === 0;
+    emptyState.hidden = count > 0;
+  }
+
+  function sortCards() {
+    const sort = sortSelect.value;
+    const cards = getCards().sort((first, second) => {
+      if (sort === "price-low") return Number(first.dataset.price) - Number(second.dataset.price);
+      if (sort === "price-high") return Number(second.dataset.price) - Number(first.dataset.price);
+      if (sort === "name") return first.dataset.name.localeCompare(second.dataset.name);
+      return new Date(second.dataset.addedAt) - new Date(first.dataset.addedAt);
+    });
+
+    cards.forEach((card) => grid.appendChild(card));
+    const url = new URL(window.location.href);
+    url.searchParams.set("sort", sort);
+    window.history.replaceState({}, "", url);
+    statusMessage.textContent = `Wishlist sorted by ${sortSelect.options[sortSelect.selectedIndex].text}.`;
+  }
+
+  async function request(url, method) {
+    const response = await fetch(url, {
+      method,
+      headers: { Accept: "application/json" },
+    });
+
+    if (response.redirected && response.url.includes("/login")) {
+      window.location.href = `/login?next=${encodeURIComponent("/wishlist")}`;
+      return null;
     }
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || data.message || "The request could not be completed.");
+    return data;
   }
 
-  function removeCard(productId) {
-    const card = grid.querySelector(`[data-product-id="${productId}"]`);
-    if (card) card.remove();
-    updateCount();
-  }
+  sortSelect.addEventListener("change", sortCards);
 
   grid.addEventListener("click", async (event) => {
-    const removeButton = event.target.closest("[data-remove-wishlist]");
-    const moveButton = event.target.closest("[data-move-to-cart]");
+    const button = event.target.closest("[data-wishlist-action]");
+    const card = event.target.closest("[data-product-id]");
+    if (!button || !card) return;
 
-    if (removeButton) {
-      const productId = removeButton.dataset.productId;
-      removeButton.disabled = true;
+    const productId = encodeURIComponent(card.dataset.productId);
+    const action = button.dataset.wishlistAction;
+    button.disabled = true;
+    statusMessage.textContent = action === "move" ? "Moving item to your cart..." : "Removing item...";
 
-      try {
-        const response = await fetch(`/wishlist/${encodeURIComponent(productId)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Request failed");
-        removeCard(productId);
-      } catch {
-        window.alert("Could not remove this item. Please try again.");
-        removeButton.disabled = false;
+    try {
+      const data = action === "move"
+        ? await request(`/wishlist/${productId}/move-to-cart`, "POST")
+        : await request(`/wishlist/${productId}`, "DELETE");
+      if (!data) return;
+
+      card.remove();
+      updateCount(data.count);
+
+      if (action === "move") {
+        statusMessage.textContent = "Item moved to your cart.";
+        if (data.cart) {
+          window.dispatchEvent(new CustomEvent("booknook:cart-changed", { detail: data.cart }));
+        }
+      } else {
+        statusMessage.textContent = "Item removed from your wishlist.";
       }
-      return;
-    }
-
-    if (moveButton) {
-      const productId = moveButton.dataset.productId;
-      moveButton.disabled = true;
-      moveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Moving...';
-
-      try {
-        const response = await fetch(`/wishlist/${encodeURIComponent(productId)}/move-to-cart`, { method: "POST" });
-        if (!response.ok) throw new Error("Request failed");
-
-        if (store) store.addItem(productId, 1);
-        removeCard(productId);
-      } catch {
-        window.alert("Could not move this item to your cart. Please try again.");
-        moveButton.disabled = false;
-        moveButton.innerHTML = '<i class="fas fa-cart-plus"></i> Move to Cart';
-      }
+    } catch (error) {
+      statusMessage.textContent = error.message;
+      button.disabled = false;
     }
   });
 
-  if (sortSelect) {
-    sortSelect.addEventListener("change", () => {
-      const url = new URL(window.location.href);
-      url.searchParams.set("sort", sortSelect.value);
-      window.location.href = url.toString();
-    });
-  }
+  updateCount(getCards().length);
 })();

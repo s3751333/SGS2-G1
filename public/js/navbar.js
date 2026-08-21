@@ -22,24 +22,32 @@ function closeMenu() {
     menuBtn.setAttribute("aria-expanded", "false");
 }
 
-function updateCartCount() {
+function renderCartCount(count) {
     if (!cartCount) return;
-    let count = 0;
-    if (window.BookNookStore) {
-        count = window.BookNookStore.getItemCount();
-    } else {
-        try {
-            const cart = JSON.parse(localStorage.getItem("booknook-cart-v1")) || [];
-            count = Array.isArray(cart)
-                ? cart.reduce((total, item) => total + Math.max(0, Number(item.quantity) || 0), 0)
-                : 0;
-        } catch {
-            count = 0;
-        }
-    }
     cartCount.textContent = count > 99 ? "99+" : count;
     cartCount.hidden = count === 0;
     cartButton.setAttribute("aria-label", `Shopping cart, ${count} item${count === 1 ? "" : "s"}`);
+}
+
+async function updateCartCount(event) {
+    if (!cartCount) return;
+    if (event?.detail && Number.isInteger(event.detail.itemCount)) {
+        renderCartCount(event.detail.itemCount);
+        return;
+    }
+    try {
+        if (window.BookNookStore) {
+            await window.BookNookStore.ready;
+            renderCartCount(window.BookNookStore.getItemCount());
+            return;
+        }
+        const response = await fetch("/api/cart");
+        if (!response.ok) return renderCartCount(0);
+        const cart = await response.json();
+        renderCartCount(cart.itemCount);
+    } catch {
+        renderCartCount(0);
+    }
 }
 
 menuBtn?.addEventListener("click", openMenu);
@@ -65,6 +73,5 @@ if (logoutButton) {
 }
 
 window.addEventListener("booknook:cart-changed", updateCartCount);
-window.addEventListener("storage", updateCartCount);
 updateCartCount();
 })();
