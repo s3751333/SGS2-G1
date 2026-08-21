@@ -306,4 +306,271 @@ const forumReplies = [
   },
 ];
 
-module.exports = { users, blogPosts, forumTopics, forumReplies };
+// Canonical product catalogue (server-side source of truth for Assessment 2).
+// IDs and prices for the first six items match public/js/store.js so the
+// existing client-side cart keeps working without changes. Two extra items
+// referenced by the old static wishlist mockup (Norwegian Wood, Atomic
+// Habits) have been added here as real catalogue entries.
+const products = [
+  {
+    id: "harry-potter",
+    name: "Harry Potter and the Sorcerer's Stone",
+    metaLabel: "Author",
+    meta: "J. K. Rowling",
+    price: 150000,
+    category: "fiction",
+    tag: "Fantasy",
+    image: "/img/harry_potter.jpg",
+    description:
+      "The book that launched a phenomenon: an orphaned boy discovers on his eleventh birthday that he is a wizard, and is whisked away to Hogwarts School of Witchcraft and Wizardry.",
+    stock: 24,
+    specs: [
+      { label: "ISBN", value: "978-0-7475-3269-9" },
+      { label: "Publisher", value: "Bloomsbury, 1997 Edition" },
+      { label: "Language", value: "English" },
+      { label: "Format", value: "Paperback" },
+      { label: "Pages", value: "223" },
+      { label: "Genre", value: "Fantasy, Young Adult" },
+    ],
+  },
+  {
+    id: "little-prince",
+    name: "The Little Prince",
+    metaLabel: "Author",
+    meta: "Antoine de Saint-Exupéry",
+    price: 100000,
+    category: "fiction",
+    tag: "Fiction",
+    image: "/img/little_prince.jpg",
+    description:
+      "A poetic tale of a young prince who leaves his tiny home planet to journey across the universe, meeting a fox, a rose, and a stranded pilot along the way. This edition uses Richard Howard's modern English translation.",
+    stock: 24,
+    specs: [
+      { label: "ISBN", value: "978-0-15-601219-5" },
+      { label: "Publisher", value: "Harvest Books, 2000 Edition" },
+      { label: "Language", value: "English" },
+      { label: "Format", value: "Paperback" },
+      { label: "Pages", value: "96" },
+      { label: "Genre", value: "Classic Fiction, Fable" },
+    ],
+  },
+  {
+    id: "english-grammar",
+    name: "English Grammar in Use",
+    metaLabel: "Author",
+    meta: "Raymond Murphy",
+    price: 180000,
+    category: "reference",
+    tag: "Reference",
+    image: "/img/eng_use.jpg",
+    description:
+      "A self-study reference and practice book for intermediate learners of English, with clear explanations and exercises on facing pages.",
+    stock: 40,
+    specs: [
+      { label: "ISBN", value: "978-1-108-45765-4" },
+      { label: "Publisher", value: "Cambridge University Press" },
+      { label: "Language", value: "English" },
+      { label: "Format", value: "Paperback" },
+      { label: "Pages", value: "380" },
+      { label: "Genre", value: "Reference, Education" },
+    ],
+  },
+  {
+    id: "catan",
+    name: "Catan",
+    metaLabel: "Players",
+    meta: "3–4",
+    price: 200000,
+    category: "board-games",
+    tag: "Board Games",
+    image: "/img/catan_bg.jpg",
+    description:
+      "Trade, build, and settle a newly discovered island in this classic strategy board game. Collect resources, build roads and settlements, and out-trade your opponents.",
+    stock: 12,
+    specs: [
+      { label: "Players", value: "3–4" },
+      { label: "Playtime", value: "60–90 minutes" },
+      { label: "Ages", value: "10+" },
+      { label: "Publisher", value: "Catan Studio" },
+      { label: "Genre", value: "Strategy, Trading" },
+    ],
+  },
+  {
+    id: "monopoly",
+    name: "Monopoly",
+    metaLabel: "Players",
+    meta: "2–8",
+    price: 350000,
+    category: "board-games",
+    tag: "Board Games",
+    image: "/img/monopoly.jpg",
+    description:
+      "The classic property-trading board game. Buy, sell, and develop real estate to bankrupt your opponents and become the wealthiest player.",
+    stock: 18,
+    specs: [
+      { label: "Players", value: "2–8" },
+      { label: "Playtime", value: "60–180 minutes" },
+      { label: "Ages", value: "8+" },
+      { label: "Publisher", value: "Hasbro" },
+      { label: "Genre", value: "Family, Trading" },
+    ],
+  },
+  {
+    id: "uno",
+    name: "Uno",
+    metaLabel: "Players",
+    meta: "2–10",
+    price: 100000,
+    category: "board-games",
+    tag: "Board Games",
+    image: "/img/uno.jpg",
+    description:
+      "The classic fast-paced card game. Match colours and numbers, deploy Wild and action cards, and be the first to empty your hand.",
+    stock: 50,
+    specs: [
+      { label: "Players", value: "2–10" },
+      { label: "Playtime", value: "15–30 minutes" },
+      { label: "Ages", value: "7+" },
+      { label: "Publisher", value: "Mattel Games" },
+      { label: "Genre", value: "Family, Card Game" },
+    ],
+  },
+  {
+    id: "norwegian-wood",
+    name: "Norwegian Wood",
+    metaLabel: "Author",
+    meta: "Haruki Murakami",
+    price: 135000,
+    category: "fiction",
+    tag: "Fiction",
+    image: "/img/norwey_wood.jpg",
+    description:
+      "A nostalgic story of loss and burgeoning sexuality, told through the eyes of a young man reflecting on his student years in 1960s Tokyo.",
+    stock: 16,
+    specs: [
+      { label: "ISBN", value: "978-0-09-952804-2" },
+      { label: "Publisher", value: "Vintage, 2003 Edition" },
+      { label: "Language", value: "English (translated)" },
+      { label: "Format", value: "Paperback" },
+      { label: "Pages", value: "389" },
+      { label: "Genre", value: "Literary Fiction, Romance" },
+    ],
+  },
+  {
+    id: "atomic-habits",
+    name: "Atomic Habits",
+    metaLabel: "Author",
+    meta: "James Clear",
+    price: 175000,
+    category: "self-help",
+    tag: "Self-Help",
+    image: "/img/atomic_book.webp",
+    description:
+      "A practical, evidence-based guide to building good habits and breaking bad ones, one small change at a time.",
+    stock: 30,
+    specs: [
+      { label: "ISBN", value: "978-1-84-488331-8" },
+      { label: "Publisher", value: "Random House Business" },
+      { label: "Language", value: "English" },
+      { label: "Format", value: "Paperback" },
+      { label: "Pages", value: "320" },
+      { label: "Genre", value: "Self-Help, Productivity" },
+    ],
+  },
+];
+
+// Reviews are linked to a product and, when written by a signed-in member,
+// to that member's userId (enables the ownership checks required by A2).
+// Seed reviews use userId: null with a plain authorName since they predate
+// the account system and cannot be edited or deleted by anyone.
+const reviews = [
+  {
+    id: 1,
+    productId: "little-prince",
+    userId: 2,
+    authorName: "Linh Nguyen",
+    rating: 5,
+    title: "A beautiful, quick read",
+    body: "I finished this in one afternoon and it stayed with me for days. The Howard translation reads very naturally in English, which made it easy for me as a second-language reader.",
+    createdAt: "2026-07-18T10:00:00.000Z",
+    helpfulCount: 32,
+  },
+  {
+    id: 2,
+    productId: "little-prince",
+    userId: null,
+    authorName: "Daniel Lee",
+    rating: 4,
+    title: "Lovely edition, small print",
+    body: "The story itself is timeless and the illustrations are printed nicely. My only complaint is that the text is a little small for reading before bed. Still a great gift book.",
+    createdAt: "2026-07-14T10:00:00.000Z",
+    helpfulCount: 11,
+  },
+  {
+    id: 3,
+    productId: "little-prince",
+    userId: 4,
+    authorName: "Mai Hoang",
+    rating: 5,
+    title: "Re-read it as an adult and cried",
+    body: "I read this as a kid and picked it up again this year. Hits completely differently as an adult. Delivery was fast and the cover arrived in perfect condition.",
+    createdAt: "2026-07-02T10:00:00.000Z",
+    helpfulCount: 8,
+  },
+  {
+    id: 4,
+    productId: "harry-potter",
+    userId: null,
+    authorName: "Noah Tran",
+    rating: 5,
+    title: "The one that started it all",
+    body: "Still holds up decades later. Great starting point if you have never read the series.",
+    createdAt: "2026-06-20T10:00:00.000Z",
+    helpfulCount: 19,
+  },
+  {
+    id: 5,
+    productId: "catan",
+    userId: 3,
+    authorName: "Alex Pham",
+    rating: 4,
+    title: "Great for game night",
+    body: "Takes a round to learn but our group was hooked after that. Just wish the box insert was better organised.",
+    createdAt: "2026-07-05T10:00:00.000Z",
+    helpfulCount: 6,
+  },
+];
+
+// One row per saved product per user; addedAt supports "recently added"
+// sorting and purchased tracks the move-to-cart / purchased workflow.
+const wishlistItems = [
+  { id: 1, userId: 2, productId: "little-prince", addedAt: "2026-07-10T09:00:00.000Z", purchased: false },
+  { id: 2, userId: 2, productId: "catan", addedAt: "2026-07-12T09:00:00.000Z", purchased: false },
+];
+
+let nextReviewId = reviews.length
+  ? Math.max(...reviews.map((review) => review.id)) + 1
+  : 1;
+let nextWishlistItemId = wishlistItems.length
+  ? Math.max(...wishlistItems.map((item) => item.id)) + 1
+  : 1;
+
+function getNextReviewId() {
+  return nextReviewId++;
+}
+
+function getNextWishlistItemId() {
+  return nextWishlistItemId++;
+}
+
+module.exports = {
+  users,
+  blogPosts,
+  forumTopics,
+  forumReplies,
+  products,
+  reviews,
+  wishlistItems,
+  getNextReviewId,
+  getNextWishlistItemId,
+};
