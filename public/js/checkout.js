@@ -11,6 +11,7 @@
   const submitButton = document.querySelector("#place-order-button");
   const bankDetails = document.querySelector("#bank-details");
   const confirmation = document.querySelector("#order-confirmation");
+  const errorMessage = document.querySelector("#checkout-error");
 
   function renderOrder() {
     const items = store.getCartDetails();
@@ -40,7 +41,7 @@
     }
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!form.reportValidity() || !store.getItemCount()) return;
 
@@ -54,18 +55,39 @@
       district: values.get("district").trim(),
       note: values.get("note").trim(),
     };
-    const order = store.createOrder(customer, values.get("payment"));
+    errorMessage.hidden = true;
+    submitButton.disabled = true;
+    let order;
+
+    try {
+      order = await store.createOrder(customer, values.get("payment"));
+    } catch (error) {
+      errorMessage.textContent = error.message;
+      errorMessage.hidden = false;
+      Object.entries(error.errors || {}).forEach(([fieldName, message]) => {
+        const field = form.elements.namedItem(fieldName);
+        if (field?.setCustomValidity) field.setCustomValidity(message);
+      });
+      form.reportValidity();
+      submitButton.disabled = false;
+      return;
+    }
+
     if (!order) return;
 
     layout.hidden = true;
     emptyState.hidden = true;
     confirmation.hidden = false;
     confirmation.querySelector("[data-order-id]").textContent = order.id;
-    confirmation.querySelector("[data-order-total]").textContent = store.formatCurrency(order.subtotal);
+    confirmation.querySelector("[data-order-total]").textContent = store.formatCurrency(order.total);
     confirmation.querySelector("[data-order-email]").textContent = order.customer.email;
     confirmation.querySelector("[data-bank-message]").hidden = order.payment !== "bank";
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  renderOrder();
+  form.addEventListener("input", (event) => event.target.setCustomValidity?.(""));
+  store.ready.then(renderOrder).catch((error) => {
+    errorMessage.textContent = error.message;
+    errorMessage.hidden = false;
+  });
 })();

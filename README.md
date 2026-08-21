@@ -50,6 +50,22 @@ Open `http://localhost:3000` in a browser. Express routes use clean URLs such as
 `/blogs`, `/login`, and `/products`; the corresponding templates are stored as
 `.ejs` files inside the `views` folder.
 
+### Cart and Order API
+
+These endpoints require the `sessionId` cookie created by `POST /login`.
+Product prices, stock checks, and checkout totals are handled by the server.
+
+| Method | Endpoint | Purpose |
+| :--- | :--- | :--- |
+| `GET`, `DELETE` | `/api/cart` | Retrieve or clear the signed-in user's cart |
+| `POST` | `/api/cart/items` | Add a product to the signed-in user's cart |
+| `PATCH`, `DELETE` | `/api/cart/items/:productId` | Update or remove a cart item |
+| `GET`, `POST` | `/api/orders` | Retrieve owned orders or check out the current cart |
+| `GET`, `PATCH`, `DELETE` | `/api/orders/:orderId` | Retrieve, update, or delete an owned order |
+
+Carts, orders, and sessions are stored in memory for this prototype and reset
+when the Node.js process restarts.
+
 ### Dynamic Sitemap
 
 Open `http://localhost:3000/sitemap` to view the generated website overview.

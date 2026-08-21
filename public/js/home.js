@@ -20,11 +20,22 @@
     container.append(card);
   });
 
-  container.addEventListener("click", (event) => {
+  container.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-home-add]");
     if (!button) return;
-    store.addItem(button.dataset.homeAdd, 1);
+    button.disabled = true;
+    try {
+      const result = await store.addItem(button.dataset.homeAdd, 1);
+      if (!result) return;
+    } catch (error) {
+      window.alert(error.message);
+      button.disabled = false;
+      return;
+    }
     button.textContent = "Added";
-    window.setTimeout(() => { button.textContent = "Add to Cart"; }, 1200);
+    window.setTimeout(() => {
+      button.textContent = "Add to Cart";
+      button.disabled = false;
+    }, 1200);
   });
 })();
