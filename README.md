@@ -69,8 +69,8 @@ when the Node.js process restarts.
 ### Dynamic Sitemap
 
 Open `http://localhost:3000/sitemap` to view the generated website overview.
-The Express route supplies the current blog posts and non-deleted forum topics
-to the EJS template, so newly created public content appears without manually
+The Express route supplies the current products, blog posts, and non-deleted
+forum topics to the EJS template, so public content appears without manually
 adding links to `sitemap.ejs`. Administrator links are shown only to a signed-in
 administrator.
 

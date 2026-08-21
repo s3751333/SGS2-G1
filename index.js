@@ -1784,6 +1784,18 @@ function getSitemapSections(currentUser) {
       ],
     },
     {
+      id: "product-details",
+      title: "Product Details",
+      icon: "fas fa-book-open",
+      links: [
+        { url: "/products", label: "All Products" },
+        ...products.map((product) => ({
+          url: `/product-detail/${product.id}`,
+          label: product.name,
+        })),
+      ],
+    },
+    {
       id: "blog-articles",
       title: "Blog Articles",
       icon: "fas fa-newspaper",
