@@ -9,11 +9,11 @@ const { loadCurrentUser, requireAdmin, requireApiLogin, requireLogin } = require
 const { findUserByEmail, findUserById, listUsers, updateUser } = require("./repositories/userRepository");
 const { createAuthRouter } = require("./routes/authRoutes");
 const { createBlogRouter } = require("./routes/blogRoutes");
+const { createSitemapRouter } = require("./routes/sitemapRoutes");
 const { clearSessionCookie, deleteUserSessions } = require("./services/sessionService");
 const { checkSecret, hashSecret } = require("./utils/security");
 const {
   users,
-  blogPosts,
   forumTopics,
   forumReplies,
   products,
@@ -104,13 +104,7 @@ function validateCheckout(data) {
 app.use(loadCurrentUser);
 app.use(createAuthRouter());
 app.use(createBlogRouter());
-
-function getBlogPostsWithAuthors() {
-  return blogPosts.map((post) => {
-    const author = users.find((user) => user.id === post.authorId);
-    return { ...post, author: author ? author.fullName : "Unknown author" };
-  });
-}
+app.use(createSitemapRouter({ products, forumTopics }));
 
 function getValidQuantity(value) {
   const quantity = Number(value);
@@ -1306,88 +1300,6 @@ function getActivePage(pageName) {
   if (pageName.includes("forum")) return "forum";
   return "";
 }
-
-function getSitemapSections(currentUser) {
-  const sections = [
-    {
-      id: "main-navigation",
-      title: "Main Navigation",
-      icon: "fas fa-compass",
-      links: [
-        { url: "/", label: "Home Page" },
-        { url: "/products", label: "Products" },
-        { url: "/blogs", label: "Blog" },
-        { url: "/forum-main", label: "Community Forum" },
-      ],
-    },
-    {
-      id: "account-access",
-      title: "Account Access",
-      icon: "fas fa-user",
-      links: [
-        { url: "/login", label: "Sign In" },
-        { url: "/register", label: "Create Account" },
-        { url: "/forgot-password", label: "Forgot Password" }
-      ],
-    },
-    {
-      id: "product-details",
-      title: "Product Details",
-      icon: "fas fa-book-open",
-      links: [
-        { url: "/products", label: "All Products" },
-        ...products.map((product) => ({
-          url: `/product-detail/${product.id}`,
-          label: product.name,
-        })),
-      ],
-    },
-    {
-      id: "blog-articles",
-      title: "Blog Articles",
-      icon: "fas fa-newspaper",
-      links: [
-        { url: "/blogs", label: "All Blog Articles" },
-        ...getBlogPostsWithAuthors().map((post) => ({
-          url: `/blog-articles/blog${post.id}`,
-          label: post.title,
-        })),
-      ],
-    },
-    {
-      id: "forum-topics",
-      title: "Discussion Topics",
-      icon: "fas fa-comments",
-      links: [
-        { url: "/forum-main", label: "All Discussion Topics" },
-        ...forumTopics
-          .filter((topic) => !topic.deleted)
-          .map((topic) => ({
-            url: `/forum-topic/${topic.id}`,
-            label: topic.title,
-          })),
-      ],
-    },
-  ];
-
-  if (currentUser && currentUser.role === "admin") {
-    sections.push({
-      id: "administration",
-      title: "Administration",
-      icon: "fas fa-user-shield",
-      links: [{ url: "/admin-users", label: "Manage User Accounts" }],
-    });
-  }
-
-  return sections;
-}
-
-app.get("/sitemap", (request, response) => {
-  response.render("sitemap", {
-    activePage: "",
-    sitemapSections: getSitemapSections(response.locals.currentUser),
-  });
-});
 
 app.get("/", (request, response) => {
   response.render("index", { activePage: "home" });
