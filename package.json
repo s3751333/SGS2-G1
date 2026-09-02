@@ -5,7 +5,8 @@
   "description": "COSC3060 Assessment 2 web application prototype",
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "db:seed": "node database/seed.js"
   },
   "engines": {
     "node": ">=20"

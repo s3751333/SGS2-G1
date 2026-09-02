@@ -118,6 +118,16 @@ required database setting is missing.
 Never commit `.env` because it contains the private database username and
 password. Only `.env.example`, which contains placeholders, belongs in Git.
 
+Create the database indexes and insert the development test users once:
+
+```bash
+npm run db:seed
+```
+
+The seed is safe to run again. Existing test users are kept, and only missing
+sample accounts are inserted. Usernames and email addresses have case-insensitive
+unique indexes in MongoDB.
+
 ## Running the Application
 
 Start the application directly with Node.js:

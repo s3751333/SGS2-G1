@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { closeDatabase, connectDatabase } = require("./database/connection");
+const { ensureDatabaseIndexes } = require("./database/indexes");
 const {
   users,
   blogPosts,
@@ -2130,6 +2131,7 @@ let server;
 
 async function startServer() {
   const database = await connectDatabase();
+  await ensureDatabaseIndexes(database);
   app.locals.database = database;
 
   server = app.listen(PORT, () => {
