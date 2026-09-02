@@ -68,6 +68,12 @@
 
 ```text
 SGS2-G1/
+├── database/               # MongoDB connection, indexes, and seed script
+├── middleware/             # Authentication and access-control middleware
+├── repositories/           # Database operations grouped by collection
+├── routes/                 # Express routers grouped by application module
+├── services/               # Session and password-reset business logic
+├── utils/                  # Reusable security helpers
 ├── public/                 # Static files served by Express
 │   ├── css/                # Stylesheets
 │   ├── img/                # Images and book covers
@@ -144,6 +150,11 @@ npm start
 
 The `start` script in `package.json` runs `node index.js`, so both commands start
 the same application.
+
+Authentication, sessions, and password-reset tokens are stored in MongoDB.
+Session and reset tokens are hashed before storage and automatically expire
+through MongoDB TTL indexes. This allows valid login sessions to survive a
+Node.js server restart without storing raw tokens in the database.
 
 When the terminal displays the server message, open `http://localhost:3000` in a
 browser. Express routes use clean URLs such as

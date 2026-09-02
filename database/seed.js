@@ -27,6 +27,12 @@ async function seedUsers(database) {
   }));
 
   const result = await users.bulkWrite(operations, { ordered: true });
+  const highestUserId = Math.max(...sampleUsers.map((user) => user.id));
+  await database.collection("counters").updateOne(
+    { _id: "users" },
+    { $max: { value: highestUserId } },
+    { upsert: true },
+  );
   console.log(`Users ready: ${result.upsertedCount} inserted, ${result.matchedCount} already existed.`);
 }
 

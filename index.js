@@ -5,6 +5,11 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { closeDatabase, connectDatabase } = require("./database/connection");
 const { ensureDatabaseIndexes } = require("./database/indexes");
+const { loadCurrentUser, requireAdmin, requireApiLogin, requireLogin } = require("./middleware/auth");
+const { findUserByEmail, findUserById, listUsers, updateUser } = require("./repositories/userRepository");
+const { createAuthRouter } = require("./routes/authRoutes");
+const { clearSessionCookie, deleteUserSessions } = require("./services/sessionService");
+const { checkSecret, hashSecret } = require("./utils/security");
 const {
   users,
   blogPosts,
@@ -19,16 +24,9 @@ const {
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const sessions = {};
-const passwordResetTokens = {};
 const cartsByUserId = new Map();
 const orders = [];
 const MAX_CART_QUANTITY = 99;
-const securityQuestions = [
-  "What is your favourite animal?",
-  "What is your favourite book?",
-  "What is your favourite colour?",
-];
 const blogCategories = ["programming", "mobile", "cloud", "cybersecurity"];
 const blogImages = [
   "img/book.jpg",
@@ -55,60 +53,6 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-
-function hashSecret(secret) {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(secret, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-function checkSecret(secret, storedHash) {
-  if (typeof storedHash !== "string") return false;
-
-  const [salt, savedHash] = storedHash.split(":");
-
-  if (!salt || !savedHash) return false;
-
-  try {
-    const savedHashBuffer = Buffer.from(savedHash, "hex");
-    const enteredHashBuffer = crypto.scryptSync(secret, salt, 64);
-
-    return savedHashBuffer.length === enteredHashBuffer.length
-      && crypto.timingSafeEqual(savedHashBuffer, enteredHashBuffer);
-  } catch {
-    return false;
-  }
-}
-
-function normalizeSecurityAnswer(answer) {
-  return String(answer || "")
-    .normalize("NFKC")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-}
-
-function getSessionId(request) {
-  const cookieHeader = request.headers.cookie || "";
-  const sessionCookie = cookieHeader
-    .split(";")
-    .map((cookie) => cookie.trim())
-    .find((cookie) => cookie.startsWith("sessionId="));
-
-  return sessionCookie ? sessionCookie.split("=")[1] : null;
-}
-
-function getCurrentUser(request) {
-  const sessionId = getSessionId(request);
-  const userId = sessions[sessionId];
-  const user = users.find((item) => item.id === userId);
-  return user && user.status === "active" ? user : null;
-}
-
-function getSafeNextPage(value) {
-  const nextPage = String(value || "");
-  return nextPage.startsWith("/") && !nextPage.startsWith("//") ? nextPage : "/blogs";
-}
 
 function getUserCart(userId) {
   if (!cartsByUserId.has(userId)) cartsByUserId.set(userId, []);
@@ -164,283 +108,8 @@ function validateCheckout(data) {
   return errors;
 }
 
-app.use((request, response, next) => {
-  response.locals.currentUser = getCurrentUser(request);
-  next();
-});
-
-app.get("/login", (request, response) => {
-  if (response.locals.currentUser) {
-    response.redirect("/blogs");
-    return;
-  }
-
-  response.render("login", {
-    activePage: "",
-    nextPage: getSafeNextPage(request.query.next),
-  });
-});
-
-app.get("/register", (request, response) => {
-  if (response.locals.currentUser) {
-    response.redirect("/blogs");
-    return;
-  }
-
-  response.render("register", {
-    activePage: "",
-    securityQuestions,
-  });
-});
-
-app.get("/forgot-password", (request, response) => {
-  response.render("forgot-password", {
-    activePage: "",
-    securityQuestions,
-  });
-});
-
-app.post("/forgot-password", (request, response) => {
-  const email = String(request.body.email || "").trim().toLowerCase();
-  const answers = [
-    request.body.securityAnswer1,
-    request.body.securityAnswer2,
-    request.body.securityAnswer3,
-  ].map(normalizeSecurityAnswer);
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    response.status(400).json({ message: "Enter a valid email address." });
-    return;
-  }
-
-  if (answers.some((answer) => answer.length < 2 || answer.length > 80)) {
-    response.status(400).json({ message: "Answer all three security questions." });
-    return;
-  }
-
-  const user = users.find((item) => item.email === email);
-
-  const answersAreCorrect = user
-    && Array.isArray(user.securityAnswerHashes)
-    && user.securityAnswerHashes.length === answers.length
-    && answers.every((answer, index) => checkSecret(answer, user.securityAnswerHashes[index]));
-
-  if (!answersAreCorrect) {
-    response.status(401).json({ message: "The email or security answers are incorrect." });
-    return;
-  }
-
-  const token = crypto.randomBytes(24).toString("hex");
-  passwordResetTokens[token] = {
-    expiresAt: Date.now() + 15 * 60 * 1000,
-    userId: user.id,
-  };
-
-  response.json({
-    message: "Your answers are correct. You can now choose a new password.",
-    redirectTo: `/reset-password?token=${token}`,
-  });
-});
-
-app.get("/reset-password", (request, response) => {
-  const token = String(request.query.token || "");
-  const resetRequest = passwordResetTokens[token];
-  const tokenIsValid = resetRequest && resetRequest.expiresAt > Date.now();
-
-  if (!tokenIsValid) {
-    delete passwordResetTokens[token];
-  }
-
-  response.render("reset-password", {
-    activePage: "",
-    token,
-    tokenIsValid,
-  });
-});
-
-app.post("/reset-password", (request, response) => {
-  const token = String(request.body.token || "");
-  const password = String(request.body.password || "");
-  const confirmPassword = String(request.body.confirmPassword || "");
-  const resetRequest = passwordResetTokens[token];
-
-  if (!resetRequest || resetRequest.expiresAt <= Date.now()) {
-    delete passwordResetTokens[token];
-    response.status(400).json({ message: "This password reset session is invalid or has expired." });
-    return;
-  }
-
-  if (password.length < 8 || password.length > 72 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-    response.status(400).json({ message: "Use 8 characters, a capital letter, and a number." });
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    response.status(400).json({ message: "The passwords do not match." });
-    return;
-  }
-
-  const user = users.find((item) => item.id === resetRequest.userId);
-
-  if (!user) {
-    delete passwordResetTokens[token];
-    response.status(404).json({ message: "The user account no longer exists." });
-    return;
-  }
-
-  user.passwordHash = hashSecret(password);
-  delete passwordResetTokens[token];
-
-  Object.keys(sessions).forEach((sessionId) => {
-    if (sessions[sessionId] === user.id) {
-      delete sessions[sessionId];
-    }
-  });
-
-  response.json({
-    message: "Password changed successfully.",
-    redirectTo: "/login",
-  });
-});
-
-app.post("/register", (request, response) => {
-  const fullName = String(request.body.fullName || "").trim();
-  const username = String(request.body.username || "").trim();
-  const email = String(request.body.email || "").trim().toLowerCase();
-  const introduction = String(request.body.introduction || "").trim();
-  const password = String(request.body.password || "");
-  const confirmPassword = String(request.body.confirmPassword || "");
-  const securityAnswers = [
-    request.body.securityAnswer1,
-    request.body.securityAnswer2,
-    request.body.securityAnswer3,
-  ].map(normalizeSecurityAnswer);
-
-  if (fullName.length < 2 || fullName.length > 80) {
-    response.status(400).json({ message: "The full name must contain between 2 and 80 characters." });
-    return;
-  }
-
-  if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
-    response.status(400).json({ message: "The username is not valid." });
-    return;
-  }
-
-  if (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    response.status(400).json({ message: "The email address is not valid." });
-    return;
-  }
-
-  if (introduction.length > 300) {
-    response.status(400).json({ message: "The introduction cannot exceed 300 characters." });
-    return;
-  }
-
-  if (password.length < 8 || password.length > 72 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-    response.status(400).json({ message: "The password is not valid." });
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    response.status(400).json({ message: "The passwords do not match." });
-    return;
-  }
-
-  if (securityAnswers.some((answer) => answer.length < 2 || answer.length > 80)) {
-    response.status(400).json({ message: "Each security answer must contain between 2 and 80 characters." });
-    return;
-  }
-
-  const usernameExists = users.some((user) => user.username.toLowerCase() === username.toLowerCase());
-  const emailExists = users.some((user) => user.email === email);
-
-  if (usernameExists || emailExists) {
-    response.status(409).json({ message: "The username or email is already registered." });
-    return;
-  }
-
-  const newUser = {
-    id: users.length + 1,
-    fullName,
-    username,
-    email,
-    introduction,
-    passwordHash: hashSecret(password),
-    securityAnswerHashes: securityAnswers.map((answer) => hashSecret(answer)),
-    role: "member",
-    status: "active",
-  };
-
-  users.push(newUser);
-  response.status(201).json({
-    message: "Registration successful.",
-    user: {
-      id: newUser.id,
-      fullName: newUser.fullName,
-      username: newUser.username,
-      email: newUser.email,
-    },
-  });
-});
-
-app.post("/login", (request, response) => {
-  const email = String(request.body.email || "").trim().toLowerCase();
-  const password = String(request.body.password || "");
-  const user = users.find((item) => item.email === email);
-
-  if (!user || !checkSecret(password, user.passwordHash)) {
-    response.status(401).json({ message: "Incorrect email or password." });
-    return;
-  }
-
-  if (user.status !== "active") {
-    response.status(403).json({ message: "This account is not active." });
-    return;
-  }
-
-  const sessionId = crypto.randomBytes(24).toString("hex");
-  sessions[sessionId] = user.id;
-  response.setHeader("Set-Cookie", `sessionId=${sessionId}; HttpOnly; SameSite=Lax; Path=/`);
-  response.json({
-    message: "Login successful.",
-    redirectTo: getSafeNextPage(request.body.next),
-    user: {
-      id: user.id,
-      fullName: user.fullName,
-      username: user.username,
-      role: user.role,
-    },
-  });
-});
-
-app.get("/session", (request, response) => {
-  const user = getCurrentUser(request);
-
-  if (!user) {
-    response.json({ user: null });
-    return;
-  }
-
-  response.json({
-    user: {
-      id: user.id,
-      fullName: user.fullName,
-      username: user.username,
-      role: user.role,
-    },
-  });
-});
-
-app.post("/logout", (request, response) => {
-  const sessionId = getSessionId(request);
-
-  if (sessionId) {
-    delete sessions[sessionId];
-  }
-
-  response.setHeader("Set-Cookie", "sessionId=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
-  response.json({ message: "Logout successful." });
-});
+app.use(loadCurrentUser);
+app.use(createAuthRouter());
 
 function getBlogPostsWithAuthors() {
   return blogPosts.map((post) => {
@@ -523,47 +192,6 @@ function renderBlogForm(response, options) {
     formTitle: options.formTitle,
     submitLabel: options.submitLabel,
   });
-}
-
-function requireLogin(request, response, next) {
-  const currentUser = getCurrentUser(request);
-
-  if (!currentUser) {
-    response.redirect(`/login?next=${encodeURIComponent(request.originalUrl)}`);
-    return;
-  }
-
-  request.currentUser = currentUser;
-  next();
-}
-
-function requireAdmin(request, response, next) {
-  const currentUser = getCurrentUser(request);
-
-  if (!currentUser) {
-    response.redirect(`/login?next=${encodeURIComponent(request.originalUrl)}`);
-    return;
-  }
-
-  if (currentUser.role !== "admin") {
-    response.status(403).send("Administrator access is required.");
-    return;
-  }
-
-  request.currentUser = currentUser;
-  next();
-}
-
-function requireApiLogin(request, response, next) {
-  const currentUser = getCurrentUser(request);
-
-  if (!currentUser) {
-    response.status(401).json({ message: "Please sign in to manage your cart and orders." });
-    return;
-  }
-
-  request.currentUser = currentUser;
-  next();
 }
 
 function getValidQuantity(value) {
@@ -900,8 +528,6 @@ function getProfileFormErrors(body) {
 
   if (!emailPattern.test(email)) {
     errors.email = "Please enter a valid email address.";
-  } else if (users.some((user) => user.email === email && user.id !== Number(body.userId))) {
-    errors.email = "That email address is already in use by another account.";
   }
 
   if (introduction.length > 300) {
@@ -945,7 +571,7 @@ app.get("/products", (request, response) => {
 
   response.render("products", {
     activePage: "shop",
-    currentUser: getCurrentUser(request),
+    currentUser: response.locals.currentUser,
     products: sorted.map((product) => ({ ...product, rating: getRatingSummary(product.id) })),
     productCategories,
     query,
@@ -963,7 +589,7 @@ app.get("/product-detail/:id", (request, response, next) => {
     return;
   }
 
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
   const sort = String(request.query.sort || "recent");
   const productReviews = sortReviews(getReviewsForProduct(product.id), sort)
     .map((review) => ({ ...review, isOwnReview: currentUser ? review.userId === currentUser.id : false }));
@@ -1191,11 +817,14 @@ app.get("/profile", requireLogin, (request, response) => {
   });
 });
 
-app.post("/profile", requireLogin, (request, response) => {
-  const { errors, fullName, email, introduction, avatarColor } = getProfileFormErrors({
-    ...request.body,
-    userId: request.currentUser.id,
-  });
+app.post("/profile", requireLogin, async (request, response) => {
+  const database = request.app.locals.database;
+  const { errors, fullName, email, introduction, avatarColor } = getProfileFormErrors(request.body);
+  const existingUser = await findUserByEmail(database, email);
+
+  if (existingUser && existingUser.id !== request.currentUser.id) {
+    errors.email = "That email address is already in use by another account.";
+  }
 
   if (Object.keys(errors).length > 0) {
     response.status(400).render("profile", {
@@ -1210,11 +839,12 @@ app.post("/profile", requireLogin, (request, response) => {
     return;
   }
 
-  const user = users.find((item) => item.id === request.currentUser.id);
-  user.fullName = fullName;
-  user.email = email;
-  user.introduction = introduction;
-  user.avatarColor = avatarColor;
+  const user = await updateUser(database, request.currentUser.id, {
+    avatarColor,
+    email,
+    fullName,
+    introduction,
+  });
 
   response.render("profile", {
     activePage: "",
@@ -1227,8 +857,9 @@ app.post("/profile", requireLogin, (request, response) => {
   });
 });
 
-app.post("/profile/password", requireLogin, (request, response) => {
-  const user = users.find((item) => item.id === request.currentUser.id);
+app.post("/profile/password", requireLogin, async (request, response) => {
+  const database = request.app.locals.database;
+  const user = await findUserById(database, request.currentUser.id);
   const { errors, newPassword } = getPasswordChangeErrors(request.body, user);
 
   if (Object.keys(errors).length > 0) {
@@ -1244,11 +875,13 @@ app.post("/profile/password", requireLogin, (request, response) => {
     return;
   }
 
-  user.passwordHash = hashSecret(newPassword);
+  const updatedUser = await updateUser(database, user.id, {
+    passwordHash: hashSecret(newPassword),
+  });
 
   response.render("profile", {
     activePage: "",
-    currentUser: user,
+    currentUser: updatedUser,
     avatarColors,
     profileErrors: {},
     passwordErrors: {},
@@ -1257,14 +890,11 @@ app.post("/profile/password", requireLogin, (request, response) => {
   });
 });
 
-app.post("/profile/deactivate", requireLogin, (request, response) => {
-  const user = users.find((item) => item.id === request.currentUser.id);
-  user.status = "deactivated";
-
-  const sessionId = getSessionId(request);
-  delete sessions[sessionId];
-
-  response.clearCookie("sessionId");
+app.post("/profile/deactivate", requireLogin, async (request, response) => {
+  const database = request.app.locals.database;
+  await updateUser(database, request.currentUser.id, { status: "deactivated" });
+  await deleteUserSessions(database, request.currentUser.id);
+  clearSessionCookie(response);
   response.redirect("/login");
 });
 
@@ -1461,7 +1091,7 @@ app.get("/blogs-data", (request, response) => {
 app.get("/forum-main", (request, response) => {
   response.render("forum-main", {
     activePage: "forum",
-    currentUser: getCurrentUser(request),
+    currentUser: response.locals.currentUser,
     forumCategories,
     topics: forumTopics.filter((topic) => !topic.deleted).map(getForumTopicView),
   });
@@ -1711,16 +1341,17 @@ app.post("/forum-topic/:topicId/replies/:replyId/delete", requireLogin, (request
   response.redirect(`/forum-topic/${topic.id}#replies`);
 });
 
-app.get("/admin-users", requireAdmin, (request, response) => {
+app.get("/admin-users", requireAdmin, async (request, response) => {
   response.render("admin-users", {
     activePage: "",
     currentUser: request.currentUser,
-    users,
+    users: await listUsers(request.app.locals.database),
   });
 });
 
-app.post("/admin-users/:userId/status", requireAdmin, (request, response) => {
-  const user = users.find((item) => item.id === Number(request.params.userId));
+app.post("/admin-users/:userId/status", requireAdmin, async (request, response) => {
+  const database = request.app.locals.database;
+  const user = await findUserById(database, request.params.userId);
   const status = String(request.body.status || "");
 
   if (!user) {
@@ -1738,17 +1369,15 @@ app.post("/admin-users/:userId/status", requireAdmin, (request, response) => {
     return;
   }
 
-  user.status = status;
+  const updatedUser = await updateUser(database, user.id, { status });
 
   if (status === "locked") {
-    Object.entries(sessions).forEach(([sessionId, userId]) => {
-      if (userId === user.id) delete sessions[sessionId];
-    });
+    await deleteUserSessions(database, user.id);
   }
 
   response.json({
     message: `${user.fullName} is now ${status === "active" ? "enabled" : "disabled"}.`,
-    status: user.status,
+    status: updatedUser.status,
   });
 });
 
@@ -1842,7 +1471,7 @@ function getSitemapSections(currentUser) {
 app.get("/sitemap", (request, response) => {
   response.render("sitemap", {
     activePage: "",
-    sitemapSections: getSitemapSections(getCurrentUser(request)),
+    sitemapSections: getSitemapSections(response.locals.currentUser),
   });
 });
 
@@ -1853,13 +1482,13 @@ app.get("/", (request, response) => {
 app.get("/blogs", (request, response) => {
   response.render("blogs", {
     activePage: "blog",
-    currentUser: getCurrentUser(request),
+    currentUser: response.locals.currentUser,
     posts: getBlogPostsWithAuthors(),
   });
 });
 
 app.get("/blog-create", (request, response) => {
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
 
   if (!currentUser) {
     response.redirect("/login?next=%2Fblog-create");
@@ -1877,7 +1506,7 @@ app.get("/blog-create", (request, response) => {
 });
 
 app.post("/blog-create", (request, response) => {
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
 
   if (!currentUser) {
     response.redirect("/login?next=%2Fblog-create");
@@ -1929,7 +1558,7 @@ app.get("/blog-articles/:article/edit", (request, response, next) => {
     return;
   }
 
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
 
   if (!currentUser) {
     response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}/edit`)}`);
@@ -1966,7 +1595,7 @@ app.post("/blog-articles/:article/edit", (request, response, next) => {
     return;
   }
 
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
 
   if (!currentUser) {
     response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}/edit`)}`);
@@ -2013,7 +1642,7 @@ app.post("/blog-articles/:article/delete", (request, response, next) => {
     return;
   }
 
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
 
   if (!currentUser) {
     response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}`)}`);
@@ -2066,7 +1695,7 @@ app.get("/blog-articles/:article", (request, response, next) => {
     activePage: "blog",
     commentError: "",
     commentValue: "",
-    currentUser: getCurrentUser(request),
+    currentUser: response.locals.currentUser,
     post,
   });
 });
@@ -2087,7 +1716,7 @@ app.post("/blog-articles/:article/comments", (request, response, next) => {
     return;
   }
 
-  const currentUser = getCurrentUser(request);
+  const currentUser = response.locals.currentUser;
 
   if (!currentUser) {
     response.redirect(`/login?next=${encodeURIComponent(`/blog-articles/blog${post.id}`)}`);
