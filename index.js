@@ -5,8 +5,9 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { closeDatabase, connectDatabase } = require("./database/connection");
 const { ensureDatabaseIndexes } = require("./database/indexes");
-const { loadCurrentUser, requireAdmin, requireApiLogin, requireLogin } = require("./middleware/auth");
-const { findUserByEmail, findUserById, listUsers, updateUser } = require("./repositories/userRepository");
+const { loadCurrentUser, requireApiLogin, requireLogin } = require("./middleware/auth");
+const { findUserByEmail, findUserById, updateUser } = require("./repositories/userRepository");
+const { createAdminRouter } = require("./routes/adminRoutes");
 const { createAuthRouter } = require("./routes/authRoutes");
 const { createBlogRouter } = require("./routes/blogRoutes");
 const { createForumRouter } = require("./routes/forumRoutes");
@@ -91,6 +92,7 @@ function validateCheckout(data) {
 }
 
 app.use(loadCurrentUser);
+app.use(createAdminRouter());
 app.use(createAuthRouter());
 app.use(createBlogRouter());
 app.use(createSitemapRouter({ products, forumTopics }));
@@ -798,46 +800,6 @@ app.post("/profile/deactivate", requireLogin, async (request, response) => {
   await deleteUserSessions(database, request.currentUser.id);
   clearSessionCookie(response);
   response.redirect("/login");
-});
-
-app.get("/admin-users", requireAdmin, async (request, response) => {
-  response.render("admin-users", {
-    activePage: "",
-    currentUser: request.currentUser,
-    users: await listUsers(request.app.locals.database),
-  });
-});
-
-app.post("/admin-users/:userId/status", requireAdmin, async (request, response) => {
-  const database = request.app.locals.database;
-  const user = await findUserById(database, request.params.userId);
-  const status = String(request.body.status || "");
-
-  if (!user) {
-    response.status(404).json({ message: "User not found." });
-    return;
-  }
-
-  if (user.id === request.currentUser.id) {
-    response.status(400).json({ message: "You cannot lock your own account." });
-    return;
-  }
-
-  if (!["active", "locked"].includes(status)) {
-    response.status(400).json({ message: "Please select a valid account status." });
-    return;
-  }
-
-  const updatedUser = await updateUser(database, user.id, { status });
-
-  if (status === "locked") {
-    await deleteUserSessions(database, user.id);
-  }
-
-  response.json({
-    message: `${user.fullName} is now ${status === "active" ? "enabled" : "disabled"}.`,
-    status: updatedUser.status,
-  });
 });
 
 const pageNames = [

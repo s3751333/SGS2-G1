@@ -34,6 +34,7 @@
 
 ### Tấn Tài Phạm - s3751333
 
+- `routes/adminRoutes.js`, `routes/forumRoutes.js`
 - `views/forum-main.ejs`, `views/forum-new-topic.ejs`, `views/forum-topic.ejs`, `views/forum-edit-reply.ejs`
 - `views/admin-users.ejs`
 - `public/js/forum-delete.js`, `public/js/forum-form.js`, `public/js/forum-list.js`, `public/js/forum-reply.js`
