@@ -25,6 +25,9 @@
 
 ### Mark Molnar - s4051620
 
+- `routes/authRoutes.js`, `routes/blogRoutes.js`, `routes/sitemapRoutes.js`
+- `repositories/userRepository.js`, `repositories/blogRepository.js`
+- `services/sessionService.js`, `services/passwordResetService.js`, `services/sitemapService.js`
 - `views/login.ejs`, `views/register.ejs`, `views/forgot-password.ejs`, `views/reset-password.ejs`
 - `views/blogs.ejs`, `views/blog-create.ejs`, `views/sitemap.ejs`
 - `views/blog-articles/`
@@ -43,6 +46,8 @@
 
 ### Ayden Le - s4123086
 
+- `routes/cartRoutes.js`, `routes/pageRoutes.js`
+- `services/cartService.js`
 - `views/index.ejs`, `views/cart.ejs`, `views/checkout.ejs`
 - `views/partials/navbar.ejs`
 - `public/js/home.js`, `public/js/navbar.js`, `public/js/store.js`, `public/js/cart.js`, `public/js/checkout.js`
@@ -50,13 +55,15 @@
 
 ### Khoa Pham Dang Nguyen - s4132855
 
+- `routes/productRoutes.js`, `routes/profileRoutes.js`
 - `views/products.ejs`, `views/product-detail.ejs`, `views/wishlist.ejs`, `views/profile.ejs`
 - `public/js/products.js`, `public/js/product-detail.js`, `public/js/wishlist.js`, `public/js/profile.js`
 - `public/css/products.css`, `public/css/product-detail.css`, `public/css/wishlist.css`, `public/css/profile.css`
 
 ### Shared Integration Files
 
-- `index.js` - Express configuration, middleware, and integrated routes
+- `app.js` - Express configuration, middleware, and router integration
+- `index.js` - database connection and server startup/shutdown
 - `data.js` - shared in-memory sample data
 - `package.json`, `package-lock.json` - project configuration and dependencies
 - `views/partials/footer.ejs` - shared footer
@@ -84,7 +91,8 @@ SGS2-G1/
 │   ├── partials/           # Shared navbar and footer templates
 │   └── *.ejs               # Main application pages
 ├── data.js                 # In-memory sample data
-├── index.js                # Express application entry point and routes
+├── app.js                  # Express application setup and router integration
+├── index.js                # Database connection and server entry point
 ├── package.json            # Project scripts and dependencies
 └── README.md               # Project documentation and guidelines
 ```
@@ -96,9 +104,11 @@ Before running the application, install:
 - [Node.js](https://nodejs.org/) version 20 or newer
 - npm, which is included with Node.js
 
-No separate database installation is required. Assessment 2 uses in-memory
-JavaScript data, so the prototype data resets whenever the Node.js process is
-restarted.
+No separate local database installation is required. Assessment 3 uses MongoDB
+Atlas for user accounts, sessions, password resets, blog posts, and blog
+comments, so these records remain available after the Node.js process restarts.
+The remaining team modules still use their existing sample data until their
+database migrations are completed.
 
 After downloading or extracting the repository, open a terminal in the
 `SGS2-G1` project folder and install the dependencies:
@@ -182,16 +192,16 @@ Product prices, stock checks, and checkout totals are handled by the server.
 | `GET`, `POST` | `/api/orders` | Retrieve owned orders or check out the current cart |
 | `GET`, `PATCH`, `DELETE` | `/api/orders/:orderId` | Retrieve, update, or delete an owned order |
 
-Carts, orders, and sessions are stored in memory for this prototype and reset
-when the Node.js process restarts.
+Carts and orders currently use the existing in-memory module and reset when the
+Node.js process restarts. Login sessions are stored persistently in MongoDB.
 
 ### Dynamic Sitemap
 
 Open `http://localhost:3000/sitemap` to view the generated website overview.
-The Express route supplies the current products, blog posts, and non-deleted
-forum topics to the EJS template, so public content appears without manually
-adding links to `sitemap.ejs`. Administrator links are shown only to a signed-in
-administrator.
+The sitemap router loads current blog posts from MongoDB and receives the
+product and non-deleted forum-topic lists from their existing modules. Public
+content therefore appears without manually adding links to `sitemap.ejs`.
+Administrator links are shown only to a signed-in administrator.
 
 ### Test Accounts
 
@@ -205,6 +215,6 @@ are case-insensitive and are used only for the password reset prototype.
 | Alex Pham | `alex@booknook.test` | `Alex123!` | `panda` / `dune` / `red` | Member | Locked |
 | Mai Hoang | `mai@booknook.test` | `Mai12345!` | `rabbit` / `norwegian wood` / `purple` | Member | Active |
 
-Passwords and security answers are stored in the in-memory user records only as
-salted `scrypt` hashes. Plain-text values are listed above solely as prototype
-test credentials.
+Passwords and security answers are stored in MongoDB only as salted `scrypt`
+hashes. Plain-text values are listed above solely as development test
+credentials.
