@@ -1,6 +1,9 @@
+require("dotenv").config({ quiet: true });
+
 const express = require("express");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { closeDatabase, connectDatabase } = require("./database/connection");
 const {
   users,
   blogPosts,
@@ -2123,6 +2126,32 @@ app.use((request, response) => {
   response.status(404).send("Page not found");
 });
 
-app.listen(PORT, () => {
-  console.log(`BookNook is running at http://localhost:${PORT}`);
+let server;
+
+async function startServer() {
+  const database = await connectDatabase();
+  app.locals.database = database;
+
+  server = app.listen(PORT, () => {
+    console.log(`BookNook is running at http://localhost:${PORT}`);
+  });
+}
+
+async function stopServer(signal) {
+  console.log(`\n${signal} received. Closing BookNook...`);
+
+  if (server) {
+    await new Promise((resolve) => server.close(resolve));
+  }
+
+  await closeDatabase();
+  process.exit(0);
+}
+
+process.once("SIGINT", () => stopServer("SIGINT"));
+process.once("SIGTERM", () => stopServer("SIGTERM"));
+
+startServer().catch((error) => {
+  console.error(`BookNook could not start: ${error.message}`);
+  process.exit(1);
 });

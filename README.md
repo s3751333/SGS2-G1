@@ -100,8 +100,23 @@ After downloading or extracting the repository, open a terminal in the
 npm install
 ```
 
-This installs Express and EJS from `package.json`. Do not install these packages
-manually unless `npm install` reports an error.
+This installs Express, EJS, dotenv, and the official MongoDB Node.js driver from
+`package.json`. Do not install these packages manually unless `npm install`
+reports an error.
+
+Create the local environment file from the supplied example:
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and replace `MONGODB_URI` with the connection string supplied by
+MongoDB Atlas. Keep `MONGODB_DB_NAME=booknook` unless the team has agreed on a
+different database name. The application will show a clear startup error if a
+required database setting is missing.
+
+Never commit `.env` because it contains the private database username and
+password. Only `.env.example`, which contains placeholders, belongs in Git.
 
 ## Running the Application
 
