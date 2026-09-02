@@ -2,6 +2,8 @@ async function ensureDatabaseIndexes(database) {
   const users = database.collection("users");
   const sessions = database.collection("sessions");
   const passwordResetTokens = database.collection("passwordResetTokens");
+  const blogPosts = database.collection("blogPosts");
+  const blogComments = database.collection("blogComments");
 
   await users.createIndex(
     { username: 1 },
@@ -31,6 +33,30 @@ async function ensureDatabaseIndexes(database) {
   await passwordResetTokens.createIndex(
     { expiresAt: 1 },
     { expireAfterSeconds: 0, name: "expire_password_resets" },
+  );
+  await blogPosts.createIndex(
+    { deleted: 1, createdAt: -1 },
+    { name: "published_posts_by_date" },
+  );
+  await blogPosts.createIndex(
+    { authorId: 1, createdAt: -1 },
+    { name: "posts_by_author" },
+  );
+  await blogPosts.createIndex(
+    { category: 1, createdAt: -1 },
+    { name: "posts_by_category" },
+  );
+  await blogPosts.createIndex(
+    { title: "text", summary: "text", tags: "text", content: "text" },
+    { name: "blog_search" },
+  );
+  await blogComments.createIndex(
+    { postId: 1, deleted: 1, createdAt: 1 },
+    { name: "comments_by_post" },
+  );
+  await blogComments.createIndex(
+    { authorId: 1, createdAt: -1 },
+    { name: "comments_by_author" },
   );
 }
 
