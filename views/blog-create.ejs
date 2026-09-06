@@ -20,7 +20,7 @@
 
                 <p id="form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length > 0 ? 'Please correct the highlighted fields.' : '' %></p>
 
-                <form id="blog-create-form" action="<%= formAction %>" method="post"
+                <form id="blog-create-form" action="<%= formAction %>" method="post" enctype="multipart/form-data"
                     data-draft-key="booknookBlogPostDraft:<%= formMode %>:<%= formAction %>"
                     data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
                     <div class="field-box">
@@ -61,14 +61,21 @@
 
                     <div class="field-box">
                         <label for="post-image">Cover Image</label>
-                        <select id="post-image" name="image" required>
-                            <option value="">Select an image</option>
-                            <option value="img/book.jpg" <%= formData.image === 'img/book.jpg' ? 'selected' : '' %>>Books</option>
-                            <option value="img/mobileapp.jpg" <%= formData.image === 'img/mobileapp.jpg' ? 'selected' : '' %>>Mobile Development</option>
-                            <option value="img/opensource.jpg" <%= formData.image === 'img/opensource.jpg' ? 'selected' : '' %>>Open Source</option>
-                            <option value="img/cloudcomputing.jpg" <%= formData.image === 'img/cloudcomputing.jpg' ? 'selected' : '' %>>Cloud Computing</option>
-                            <option value="img/security.jpg" <%= formData.image === 'img/security.jpg' ? 'selected' : '' %>>Cybersecurity</option>
-                        </select>
+                        <% if (formData.image) { %>
+                            <img id="image-preview" class="image-preview" src="/<%= formData.image %>" alt="Current cover image"
+                                data-current-src="/<%= formData.image %>">
+                        <% } else { %>
+                            <img id="image-preview" class="image-preview image-preview-hidden" src="" alt="Selected cover image preview"
+                                data-current-src="">
+                        <% } %>
+                        <input type="file" id="post-image" name="imageFile"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
+                            data-has-existing-image="<%= Boolean(formData.image) %>"
+                            <%= formMode === 'create' ? 'required' : '' %>>
+                        <p class="field-help">
+                            Upload a JPG, PNG, GIF, or WebP image up to 5 MB.
+                            <%= formMode === 'edit' ? 'Leave this empty to keep the current image.' : '' %>
+                        </p>
                         <p id="image-error" class="field-error" aria-live="polite"><%= errors.image || '' %></p>
                     </div>
 

@@ -69,6 +69,19 @@
     resize: vertical;
 }
 
+.image-preview {
+    display: block;
+    width: 100%;
+    max-height: 280px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.image-preview-hidden {
+    display: none;
+}
+
 .field-box input:focus,
 .field-box textarea:focus,
 .field-box select:focus {

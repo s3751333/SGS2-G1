@@ -5,6 +5,7 @@ const categoryInput = document.querySelector("#post-category");
 const tagsInput = document.querySelector("#post-tags");
 const summaryInput = document.querySelector("#post-summary");
 const imageInput = document.querySelector("#post-image");
+const imagePreview = document.querySelector("#image-preview");
 const contentInput = document.querySelector("#post-content");
 const clearDraftButton = document.querySelector("#clear-draft");
 const titleCount = document.querySelector("#title-count");
@@ -58,7 +59,33 @@ function validateSummary() {
 }
 
 function validateImage() {
-  return showFieldError(imageInput, imageInput.value ? "" : "Select a cover image.");
+  const image = imageInput.files[0];
+  const hasExistingImage = imageInput.dataset.hasExistingImage === "true";
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  let message = "";
+
+  if (!image && !hasExistingImage) {
+    message = "Upload a cover image.";
+  } else if (image && !allowedTypes.includes(image.type)) {
+    message = "Upload a JPG, PNG, GIF, or WebP image.";
+  } else if (image && image.size > 5 * 1024 * 1024) {
+    message = "The cover image must be no larger than 5 MB.";
+  }
+
+  return showFieldError(imageInput, message);
+}
+
+function updateImagePreview() {
+  const image = imageInput.files[0];
+
+  if (image) {
+    imagePreview.src = URL.createObjectURL(image);
+    imagePreview.classList.remove("image-preview-hidden");
+    return;
+  }
+
+  imagePreview.src = imagePreview.dataset.currentSrc;
+  imagePreview.classList.toggle("image-preview-hidden", !imagePreview.dataset.currentSrc);
 }
 
 function validateContent() {
@@ -81,7 +108,6 @@ function saveDraft() {
     category: categoryInput.value,
     tags: tagsInput.value,
     summary: summaryInput.value,
-    image: imageInput.value,
     content: contentInput.value,
   };
 
@@ -102,7 +128,6 @@ function loadDraft() {
     categoryInput.value = draft.category || "";
     tagsInput.value = draft.tags || "";
     summaryInput.value = draft.summary || "";
-    imageInput.value = draft.image || "";
     contentInput.value = draft.content || "";
   } catch {
     localStorage.removeItem(draftStorageKey);
@@ -125,6 +150,7 @@ formFields.forEach(function (field) {
 
   field.addEventListener(eventName, function () {
     validationFunctions[field.id]();
+    if (field === imageInput) updateImagePreview();
     updateCharacterCounts();
     saveDraft();
   });
@@ -142,6 +168,7 @@ clearDraftButton.addEventListener("click", function () {
   });
 
   updateCharacterCounts();
+  updateImagePreview();
   titleInput.focus();
 });
 

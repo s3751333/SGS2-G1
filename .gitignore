@@ -7,3 +7,5 @@ output/
 .env
 .env.*
 !.env.example
+public/uploads/blog/*
+!public/uploads/blog/.gitkeep

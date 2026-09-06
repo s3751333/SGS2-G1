@@ -7,13 +7,18 @@ const blogImages = [
   "img/security.jpg",
 ];
 
-function getBlogFormData(body) {
+function isValidBlogImagePath(imagePath) {
+  return blogImages.includes(imagePath)
+    || /^uploads\/blog\/[a-zA-Z0-9-]+\.(gif|jpe?g|png|webp)$/.test(imagePath);
+}
+
+function getBlogFormData(body, image = "") {
   return {
     title: String(body.title || "").trim(),
     category: String(body.category || "").trim(),
     tags: String(body.tags || "").trim(),
     summary: String(body.summary || "").trim(),
-    image: String(body.image || "").trim(),
+    image: String(image || "").trim(),
     content: String(body.content || "").trim(),
   };
 }
@@ -41,8 +46,8 @@ function validateBlogForm(formData) {
     errors.summary = "The summary must contain between 20 and 250 characters.";
   }
 
-  if (!blogImages.includes(formData.image)) {
-    errors.image = "Please select a valid cover image.";
+  if (!isValidBlogImagePath(formData.image)) {
+    errors.image = "Please upload a valid cover image.";
   }
 
   if (formData.content.length < 50 || formData.content.length > 5000) {

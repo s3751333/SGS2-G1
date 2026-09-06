@@ -1,6 +1,11 @@
 const express = require("express");
 const { requireLogin } = require("../middleware/auth");
 const {
+  getUploadedBlogImagePath,
+  handleBlogImageUpload,
+  removeUploadedBlogImage,
+} = require("../middleware/blogImageUpload");
+const {
   createBlogComment,
   createBlogPost,
   deleteBlogPost,
@@ -58,11 +63,18 @@ function createBlogRouter() {
     });
   });
 
-  router.post("/blog-create", requireLogin, async (request, response) => {
-    const formData = getBlogFormData(request.body);
+  router.post("/blog-create", requireLogin, handleBlogImageUpload, async (request, response) => {
+    const uploadedImage = getUploadedBlogImagePath(request);
+    const formData = getBlogFormData(request.body, uploadedImage);
     const { errors, tags } = validateBlogForm(formData);
 
+    if (request.blogImageUploadError) {
+      errors.image = request.blogImageUploadError;
+    }
+
     if (Object.keys(errors).length > 0) {
+      await removeUploadedBlogImage(uploadedImage);
+      formData.image = "";
       renderBlogForm(response, {
         currentUser: request.currentUser,
         errors,
@@ -76,15 +88,23 @@ function createBlogRouter() {
       return;
     }
 
-    const postId = await createBlogPost(request.app.locals.database, {
-      authorId: request.currentUser.id,
-      category: formData.category,
-      content: splitContentIntoParagraphs(formData.content),
-      image: formData.image,
-      summary: formData.summary,
-      tags,
-      title: formData.title,
-    });
+    let postId;
+
+    try {
+      postId = await createBlogPost(request.app.locals.database, {
+        authorId: request.currentUser.id,
+        category: formData.category,
+        content: splitContentIntoParagraphs(formData.content),
+        image: formData.image,
+        summary: formData.summary,
+        tags,
+        title: formData.title,
+      });
+    } catch (error) {
+      await removeUploadedBlogImage(uploadedImage);
+      throw error;
+    }
+
     response.redirect(`/blog-articles/blog${postId}`);
   });
 
@@ -137,10 +157,21 @@ function createBlogRouter() {
       return;
     }
 
-    const formData = getBlogFormData(request.body);
+    request.blogPost = post;
+    next();
+  }, handleBlogImageUpload, async (request, response) => {
+    const post = request.blogPost;
+    const uploadedImage = getUploadedBlogImagePath(request);
+    const formData = getBlogFormData(request.body, uploadedImage || post.image);
     const { errors, tags } = validateBlogForm(formData);
 
+    if (request.blogImageUploadError) {
+      errors.image = request.blogImageUploadError;
+    }
+
     if (Object.keys(errors).length > 0) {
+      await removeUploadedBlogImage(uploadedImage);
+      formData.image = post.image;
       renderBlogForm(response, {
         currentUser: request.currentUser,
         errors,
@@ -154,14 +185,24 @@ function createBlogRouter() {
       return;
     }
 
-    await updateBlogPost(request.app.locals.database, post.id, request.currentUser.id, {
-      category: formData.category,
-      content: splitContentIntoParagraphs(formData.content),
-      image: formData.image,
-      summary: formData.summary,
-      tags,
-      title: formData.title,
-    });
+    try {
+      await updateBlogPost(request.app.locals.database, post.id, request.currentUser.id, {
+        category: formData.category,
+        content: splitContentIntoParagraphs(formData.content),
+        image: formData.image,
+        summary: formData.summary,
+        tags,
+        title: formData.title,
+      });
+    } catch (error) {
+      await removeUploadedBlogImage(uploadedImage);
+      throw error;
+    }
+
+    if (uploadedImage) {
+      await removeUploadedBlogImage(post.image);
+    }
+
     response.redirect(`/blog-articles/blog${post.id}`);
   });
 
@@ -187,6 +228,7 @@ function createBlogRouter() {
     }
 
     await deleteBlogPost(request.app.locals.database, post.id, request.currentUser.id);
+    await removeUploadedBlogImage(post.image);
     response.redirect("/blogs");
   });
 
