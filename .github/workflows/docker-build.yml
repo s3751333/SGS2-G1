@@ -1,0 +1,194 @@
+name: Build and Push Docker
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: docker-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-and-push:
+    name: Build and push application image
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Linux, X64]
+    env:
+      DOCKER_BUILD_RECORD_UPLOAD: false
+      IMAGE_NAME: johnnyp20/sgs2-g1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          platforms: linux/amd64
+          cache-from: type=gha,scope=sgs2-g1
+          cache-to: type=gha,mode=min,scope=sgs2-g1,ignore-error=true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  update-unraid:
+    name: Update Unraid container
+    needs: build-and-push
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Build Unraid updater image
+        run: |
+          docker build -t sgs2-g1-unraid-updater:${{ github.sha }} -f- . <<'DOCKERFILE'
+          FROM node:24.19.0-alpine3.23
+          WORKDIR /app
+          RUN cat <<'EOF' > /app/update-container.mjs
+          const baseUrl = new URL(process.env.UNRAID_BASE_URL || "https://unraid.3aa.uk");
+          const username = process.env.UNRAID_USERNAME;
+          const password = process.env.UNRAID_PASSWORD;
+          const containerName = "sgs2-g1";
+
+          if (!username || !password) process.exit(1);
+
+          const cookies = new Map();
+          const cookieHeader = () =>
+            [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
+
+          const storeCookies = (response) => {
+            for (const cookie of response.headers.getSetCookie?.() || []) {
+              const pair = String(cookie).split(";", 1)[0];
+              const separator = pair.indexOf("=");
+              if (separator > 0) {
+                cookies.set(
+                  pair.slice(0, separator).trim(),
+                  pair.slice(separator + 1).trim(),
+                );
+              }
+            }
+          };
+
+          const request = async (url, options = {}) => {
+            const headers = new Headers(options.headers);
+            if (cookies.size) headers.set("cookie", cookieHeader());
+            if (!headers.has("cache-control")) headers.set("cache-control", "no-cache");
+            if (!headers.has("pragma")) headers.set("pragma", "no-cache");
+
+            const response = await fetch(new URL(url, baseUrl), {
+              ...options,
+              headers,
+              redirect: "manual",
+            });
+            storeCookies(response);
+            return response;
+          };
+
+          const followRedirects = async (url, options = {}, maximum = 10) => {
+            let target = new URL(url, baseUrl);
+            let requestOptions = { ...options };
+
+            for (let attempt = 0; attempt <= maximum; attempt += 1) {
+              const response = await request(target, requestOptions);
+              if (response.status < 300 || response.status >= 400) {
+                return { response, loginRequired: false };
+              }
+
+              const location = response.headers.get("location");
+              if (!location) return { response, loginRequired: false };
+
+              target = new URL(location, target);
+              if (target.pathname === "/login") {
+                return { response, loginRequired: true };
+              }
+
+              const method = (requestOptions.method || "GET").toUpperCase();
+              if (
+                response.status === 303 ||
+                (response.status === 302 && method !== "GET" && method !== "HEAD")
+              ) {
+                requestOptions = { ...requestOptions, method: "GET", body: undefined };
+              }
+            }
+
+            return { response: null, loginRequired: true };
+          };
+
+          const assertNoConfigurationError = async (response) => {
+            const body = await response.text().catch(() => "");
+            if (body.toLowerCase().includes("configuration not found")) throw new Error();
+          };
+
+          try {
+            await request("/login");
+
+            const login = await followRedirects("/login", {
+              method: "POST",
+              headers: { "content-type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({ username, password }),
+            });
+            if (login.loginRequired) throw new Error();
+
+            const dockerPage = await followRedirects(`/Docker?_=${Date.now()}`);
+            if (dockerPage.loginRequired || !dockerPage.response || dockerPage.response.status >= 400) {
+              throw new Error();
+            }
+            await dockerPage.response.body?.cancel();
+
+            const updateUrl = new URL(
+              "/plugins/dynamix.docker.manager/include/CreateDocker.php",
+              baseUrl,
+            );
+            updateUrl.searchParams.set("updateContainer", "true");
+            updateUrl.searchParams.append("ct[]", containerName);
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10 * 60 * 1000);
+
+            try {
+              const response = await request(updateUrl, { signal: controller.signal });
+              if (response.status >= 300 && response.status < 400) {
+                const location = response.headers.get("location") || "";
+                if (new URL(location, updateUrl).pathname === "/login") throw new Error();
+              }
+              if (response.status >= 400) throw new Error();
+              await assertNoConfigurationError(response);
+            } finally {
+              clearTimeout(timeout);
+            }
+          } catch {
+            process.exit(1);
+          }
+          EOF
+          CMD ["node", "/app/update-container.mjs"]
+          DOCKERFILE
+
+      - name: Trigger Unraid Docker update
+        env:
+          UNRAID_BASE_URL: https://unraid.3aa.uk
+          UNRAID_USERNAME: ${{ secrets.UNRAID_USERNAME }}
+          UNRAID_PASSWORD: ${{ secrets.UNRAID_PASSWORD }}
+        run: |
+          docker run --rm \
+            -e UNRAID_BASE_URL \
+            -e UNRAID_USERNAME \
+            -e UNRAID_PASSWORD \
+            sgs2-g1-unraid-updater:${{ github.sha }}
