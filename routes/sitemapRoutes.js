@@ -1,8 +1,9 @@
 const express = require("express");
+const { listForumTopics } = require("../repositories/forumRepository");
 const { listBlogPosts } = require("../repositories/blogRepository");
 const { buildSitemapSections } = require("../services/sitemapService");
 
-function createSitemapRouter({ products, forumTopics }) {
+function createSitemapRouter({ products }) {
   const router = express.Router();
 
   router.get("/sitemap", async (request, response) => {
@@ -14,7 +15,7 @@ function createSitemapRouter({ products, forumTopics }) {
         currentUser: request.currentUser,
         products,
         blogPosts,
-        forumTopics,
+        forumTopics: await listForumTopics(request.app.locals.database),
       }),
     });
   });

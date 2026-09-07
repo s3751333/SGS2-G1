@@ -38,6 +38,7 @@
 ### Tấn Tài Phạm - s3751333
 
 - `routes/adminRoutes.js`, `routes/forumRoutes.js`
+- `repositories/forumRepository.js`
 - `views/forum-main.ejs`, `views/forum-new-topic.ejs`, `views/forum-topic.ejs`, `views/forum-edit-reply.ejs`
 - `views/admin-users.ejs`
 - `public/js/forum-delete.js`, `public/js/forum-form.js`, `public/js/forum-list.js`, `public/js/forum-reply.js`
@@ -64,7 +65,7 @@
 
 - `app.js` - Express configuration, middleware, and router integration
 - `index.js` - database connection and server startup/shutdown
-- `data.js` - shared in-memory sample data
+- `data.js` - database seed samples and remaining prototype module data
 - `package.json`, `package-lock.json` - project configuration and dependencies
 - `views/partials/footer.ejs` - shared footer
 - `public/css/default.css`, `public/css/components.css` - shared styles
@@ -106,7 +107,7 @@ Before running the application, install:
 
 No separate local database installation is required. Assessment 3 uses MongoDB
 Atlas for user accounts, sessions, password resets, blog posts, and blog
-comments, so these records remain available after the Node.js process restarts.
+comments, forum topics, and forum replies, so these records remain available after the Node.js process restarts.
 The remaining team modules still use their existing sample data until their
 database migrations are completed.
 
@@ -141,8 +142,9 @@ Create the database indexes and insert the development test users once:
 npm run db:seed
 ```
 
-The seed is safe to run again. Existing test users are kept, and only missing
-sample accounts are inserted. Usernames and email addresses have case-insensitive
+The seed is safe to run again. Existing users and posts are kept, and only missing
+sample records are inserted. For an existing database whose accounts and blogs are
+already seeded, run `npm run db:seed -- --forum` to seed only forum samples. Usernames and email addresses have case-insensitive
 unique indexes in MongoDB.
 
 ## Running the Application
@@ -199,7 +201,7 @@ Node.js process restarts. Login sessions are stored persistently in MongoDB.
 
 Open `http://localhost:3000/sitemap` to view the generated website overview.
 The sitemap router loads current blog posts from MongoDB and receives the
-product and non-deleted forum-topic lists from their existing modules. Public
+product list from its existing module and non-deleted forum topics from MongoDB. Public
 content therefore appears without manually adding links to `sitemap.ejs`.
 Administrator links are shown only to a signed-in administrator.
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const { requireLogin } = require("../middleware/auth");
+const { findForumRecord, listForumTopics, listForumReplies, createForumRecord, updateForumRecord, getForumAuthors } = require("../repositories/forumRepository");
 
 const forumCategories = {
   english: "English Books",
@@ -14,20 +15,8 @@ const forumImages = [
   { value: "img/catan_bg.jpg", label: "Board games" },
 ];
 
-function createForumRouter({ users, forumTopics, forumReplies }) {
+function createForumRouter() {
   const router = express.Router();
-
-  function findForumTopic(topicId) {
-    return forumTopics.find((topic) => topic.id === Number(topicId) && !topic.deleted) || null;
-  }
-
-  function findForumReply(replyId) {
-    return forumReplies.find((reply) => reply.id === Number(replyId) && !reply.deleted) || null;
-  }
-
-  function getNextId(records) {
-    return records.length > 0 ? Math.max(...records.map((record) => record.id)) + 1 : 1;
-  }
 
   function getForumFormData(body) {
     return {
@@ -41,7 +30,7 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
   function validateForumPost(formData) {
     const errors = {};
 
-    if (!forumCategories[formData.category]) {
+    if (!Object.hasOwn(forumCategories, formData.category)) {
       errors.category = "Please select a valid category.";
     }
 
@@ -72,7 +61,7 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     };
   }
 
-  function validateForumReply(formData, topicId) {
+  async function validateForumReply(database, formData, topicId) {
     const errors = {};
 
     if (formData.title.length < 3 || formData.title.length > 100) {
@@ -90,7 +79,7 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     if (!formData.parentReplyIdIsValid || (formData.parentReplyId !== null && formData.parentReplyId < 1)) {
       errors.parentReplyId = "The selected parent reply is not valid.";
     } else if (formData.parentReplyId !== null) {
-      const parentReply = findForumReply(formData.parentReplyId);
+      const parentReply = await findForumRecord(database, "forumReplies", formData.parentReplyId);
 
       if (!parentReply || parentReply.topicId !== Number(topicId)) {
         errors.parentReplyId = "The selected parent reply is not valid.";
@@ -108,72 +97,43 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     }).format(new Date(value));
   }
 
-  function getForumTopicView(topic) {
-    const replies = forumReplies.filter((reply) => reply.topicId === topic.id && !reply.deleted);
-    const lastActivity = replies.reduce(
-      (latest, reply) => reply.createdAt > latest ? reply.createdAt : latest,
-      topic.createdAt,
-    );
-    const author = users.find((user) => user.id === topic.authorId);
-    const replySearchText = replies.map((reply) => {
-      const replyAuthor = users.find((user) => user.id === reply.authorId);
-      return [reply.title, reply.content, replyAuthor ? replyAuthor.fullName : ""].join(" ");
-    }).join(" ");
-
+  async function getForumTopicView(database, topic) {
+    const replies = await listForumReplies(database, topic.id);
+    const authors = await getForumAuthors(database, [topic, ...replies]);
+    const lastActivity = replies.reduce((latest, reply) => reply.createdAt > latest ? reply.createdAt : latest, topic.createdAt);
     return {
       ...topic,
-      author: author ? author.fullName : "Unknown user",
+      createdAt: topic.createdAt.toISOString(),
+      author: authors.get(topic.authorId) || "Unknown user",
       categoryLabel: forumCategories[topic.category],
       createdLabel: formatForumDate(topic.createdAt),
-      lastActivity,
+      lastActivity: lastActivity.toISOString(),
       replyCount: replies.length,
-      searchText: [topic.title, topic.content, author ? author.fullName : "", forumCategories[topic.category], replySearchText]
-        .join(" ")
-        .toLowerCase(),
+      searchText: [topic.title, topic.content, authors.get(topic.authorId), forumCategories[topic.category],
+        ...replies.flatMap((reply) => [reply.title, reply.content, authors.get(reply.authorId)])].join(" ").toLowerCase(),
     };
   }
 
-  function getForumReplyView(reply) {
-    const author = users.find((user) => user.id === reply.authorId);
-    const parentReply = reply.parentReplyId ? findForumReply(reply.parentReplyId) : null;
-    const parentAuthor = parentReply
-      ? users.find((user) => user.id === parentReply.authorId)
-      : null;
-
-    return {
-      ...reply,
-      author: author ? author.fullName : "Unknown user",
-      createdLabel: formatForumDate(reply.createdAt),
-      parentAuthor: parentAuthor ? parentAuthor.fullName : "",
-    };
-  }
-
-  function getForumReplyViews(topicId) {
-    const replies = forumReplies.filter((reply) => reply.topicId === topicId && !reply.deleted);
-    const replyIds = new Set(replies.map((reply) => reply.id));
-    const repliesByParent = new Map();
-
-    replies.forEach((reply) => {
-      const parentId = replyIds.has(reply.parentReplyId) ? reply.parentReplyId : null;
-      const siblings = repliesByParent.get(parentId) || [];
-      siblings.push(reply);
-      repliesByParent.set(parentId, siblings);
-    });
-
-    const orderedReplies = [];
-
-    function addReplies(parentId, depth) {
-      const children = repliesByParent.get(parentId) || [];
-      children
-        .sort((replyA, replyB) => replyA.createdAt.localeCompare(replyB.createdAt))
-        .forEach((reply) => {
-          orderedReplies.push({ ...getForumReplyView(reply), depth });
-          addReplies(reply.id, depth + 1);
-        });
+  async function getForumReplyViews(database, topicId) {
+    const replies = await listForumReplies(database, topicId);
+    const authors = await getForumAuthors(database, replies);
+    const byId = new Map(replies.map((reply) => [reply.id, reply]));
+    const byParent = new Map();
+    for (const reply of replies) {
+      const parentId = byId.has(reply.parentReplyId) ? reply.parentReplyId : null;
+      if (!byParent.has(parentId)) byParent.set(parentId, []);
+      byParent.get(parentId).push(reply);
     }
-
-    addReplies(null, 0);
-    return orderedReplies;
+    const ordered = [];
+    const pending = (byParent.get(null) || []).map((reply) => ({ reply, depth: 0 })).reverse();
+    while (pending.length) {
+      const { reply, depth } = pending.pop();
+      const parent = byId.get(reply.parentReplyId);
+      ordered.push({ ...reply, depth, author: authors.get(reply.authorId) || "Unknown user",
+        createdLabel: formatForumDate(reply.createdAt), parentAuthor: parent ? authors.get(parent.authorId) || "Unknown user" : "" });
+      for (const child of [...(byParent.get(reply.id) || [])].reverse()) pending.push({ reply: child, depth: depth + 1 });
+    }
+    return ordered;
   }
 
   function renderTopicForm(response, options) {
@@ -190,8 +150,9 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     });
   }
 
-  function renderForumTopic(response, topic, options = {}) {
-    const replies = getForumReplyViews(topic.id);
+  async function renderForumTopic(response, topic, options = {}) {
+    const database = response.app.locals.database;
+    const replies = await getForumReplyViews(database, topic.id);
 
     response.status(options.status || 200).render("forum-topic", {
       activePage: "forum",
@@ -200,20 +161,20 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
       formData: options.formData || {},
       forumImages,
       replies,
-      topic: getForumTopicView(topic),
+      topic: await getForumTopicView(response.app.locals.database, topic),
     });
   }
 
-  router.get("/forum-main", (request, response) => {
+  router.get("/forum-main", async (request, response) => {
     response.render("forum-main", {
       activePage: "forum",
       currentUser: response.locals.currentUser,
       forumCategories,
-      topics: forumTopics.filter((topic) => !topic.deleted).map(getForumTopicView),
+      topics: await Promise.all((await listForumTopics(request.app.locals.database)).map((topic) => getForumTopicView(request.app.locals.database, topic))),
     });
   });
 
-  router.get("/forum-new-topic", requireLogin, (request, response) => {
+  router.get("/forum-new-topic", requireLogin, async (request, response) => {
     renderTopicForm(response, {
       formAction: "/forum-new-topic",
       formMode: "create",
@@ -222,7 +183,7 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     });
   });
 
-  router.post("/forum-new-topic", requireLogin, (request, response) => {
+  router.post("/forum-new-topic", requireLogin, async (request, response) => {
     const formData = getForumFormData(request.body);
     const errors = validateForumPost(formData);
 
@@ -239,37 +200,33 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
       return;
     }
 
-    const topic = {
-      id: getNextId(forumTopics),
+    const topic = await createForumRecord(request.app.locals.database, "forumTopics", {
       authorId: request.currentUser.id,
       category: formData.category,
       title: formData.title,
       content: formData.content,
       image: formData.image,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       views: 0,
       deleted: false,
-    };
-
-    forumTopics.push(topic);
+    });
     response.redirect(`/forum-topic/${topic.id}`);
   });
 
-  router.get("/forum-topic/:topicId", (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
+  router.get("/forum-topic/:topicId", async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
 
     if (!topic) {
       next();
       return;
     }
 
+    await request.app.locals.database.collection("forumTopics").updateOne({ _id: topic.id, deleted: false }, { $inc: { views: 1 } });
     topic.views += 1;
-    renderForumTopic(response, topic);
+    await renderForumTopic(response, topic);
   });
 
-  router.post("/forum-topic/:topicId/replies", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
+  router.post("/forum-topic/:topicId/replies", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
 
     if (!topic) {
       next();
@@ -277,31 +234,28 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     }
 
     const formData = getReplyFormData(request.body);
-    const errors = validateForumReply(formData, topic.id);
+    const errors = await validateForumReply(request.app.locals.database, formData, topic.id);
 
     if (Object.keys(errors).length > 0) {
-      renderForumTopic(response, topic, { errors, formData, status: 400 });
+      await renderForumTopic(response, topic, { errors, formData, status: 400 });
       return;
     }
 
-    forumReplies.push({
-      id: getNextId(forumReplies),
+    await createForumRecord(request.app.locals.database, "forumReplies", {
       topicId: topic.id,
       parentReplyId: formData.parentReplyId,
       authorId: request.currentUser.id,
       title: formData.title,
       content: formData.content,
       image: formData.image,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       deleted: false,
     });
 
     response.redirect(`/forum-topic/${topic.id}#replies`);
   });
 
-  router.get("/forum-topic/:topicId/edit", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
+  router.get("/forum-topic/:topicId/edit", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
 
     if (!topic) {
       next();
@@ -322,8 +276,8 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     });
   });
 
-  router.post("/forum-topic/:topicId/edit", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
+  router.post("/forum-topic/:topicId/edit", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
 
     if (!topic) {
       next();
@@ -351,16 +305,12 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
       return;
     }
 
-    topic.category = formData.category;
-    topic.title = formData.title;
-    topic.content = formData.content;
-    topic.image = formData.image;
-    topic.updatedAt = new Date().toISOString();
+    await updateForumRecord(request.app.locals.database, "forumTopics", topic, request.currentUser.id, formData);
     response.redirect(`/forum-topic/${topic.id}`);
   });
 
-  router.post("/forum-topic/:topicId/delete", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
+  router.post("/forum-topic/:topicId/delete", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
 
     if (!topic) {
       next();
@@ -372,14 +322,13 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
       return;
     }
 
-    topic.deleted = true;
-    topic.updatedAt = new Date().toISOString();
+    await updateForumRecord(request.app.locals.database, "forumTopics", topic, request.currentUser.id, { deleted: true, deletedAt: new Date() });
     response.redirect("/forum-main");
   });
 
-  router.get("/forum-topic/:topicId/replies/:replyId/edit", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
-    const reply = findForumReply(request.params.replyId);
+  router.get("/forum-topic/:topicId/replies/:replyId/edit", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
+    const reply = await findForumRecord(request.app.locals.database, "forumReplies", request.params.replyId);
 
     if (!topic || !reply || reply.topicId !== topic.id) {
       next();
@@ -396,13 +345,13 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
       errors: {},
       formData: reply,
       forumImages,
-      topic: getForumTopicView(topic),
+      topic: await getForumTopicView(response.app.locals.database, topic),
     });
   });
 
-  router.post("/forum-topic/:topicId/replies/:replyId/edit", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
-    const reply = findForumReply(request.params.replyId);
+  router.post("/forum-topic/:topicId/replies/:replyId/edit", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
+    const reply = await findForumRecord(request.app.locals.database, "forumReplies", request.params.replyId);
 
     if (!topic || !reply || reply.topicId !== topic.id) {
       next();
@@ -418,7 +367,7 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
     // The parent cannot be changed from the edit form, so validate only editable fields.
     formData.parentReplyId = null;
     formData.parentReplyIdIsValid = true;
-    const errors = validateForumReply(formData, topic.id);
+    const errors = await validateForumReply(request.app.locals.database, formData, topic.id);
 
     if (Object.keys(errors).length > 0) {
       response.status(400).render("forum-edit-reply", {
@@ -426,21 +375,19 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
         errors,
         formData: { ...formData, id: reply.id },
         forumImages,
-        topic: getForumTopicView(topic),
+        topic: await getForumTopicView(response.app.locals.database, topic),
       });
       return;
     }
 
-    reply.title = formData.title;
-    reply.content = formData.content;
-    reply.image = formData.image;
-    reply.updatedAt = new Date().toISOString();
+    await updateForumRecord(request.app.locals.database, "forumReplies", reply, request.currentUser.id,
+      { title: formData.title, content: formData.content, image: formData.image });
     response.redirect(`/forum-topic/${topic.id}#reply-${reply.id}`);
   });
 
-  router.post("/forum-topic/:topicId/replies/:replyId/delete", requireLogin, (request, response, next) => {
-    const topic = findForumTopic(request.params.topicId);
-    const reply = findForumReply(request.params.replyId);
+  router.post("/forum-topic/:topicId/replies/:replyId/delete", requireLogin, async (request, response, next) => {
+    const topic = await findForumRecord(request.app.locals.database, "forumTopics", request.params.topicId);
+    const reply = await findForumRecord(request.app.locals.database, "forumReplies", request.params.replyId);
 
     if (!topic || !reply || reply.topicId !== topic.id) {
       next();
@@ -452,8 +399,7 @@ function createForumRouter({ users, forumTopics, forumReplies }) {
       return;
     }
 
-    reply.deleted = true;
-    reply.updatedAt = new Date().toISOString();
+    await updateForumRecord(request.app.locals.database, "forumReplies", reply, request.currentUser.id, { deleted: true, deletedAt: new Date() });
     response.redirect(`/forum-topic/${topic.id}#replies`);
   });
 

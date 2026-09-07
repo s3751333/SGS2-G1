@@ -12,9 +12,6 @@ const { createProfileRouter } = require("./routes/profileRoutes");
 const { createSitemapRouter } = require("./routes/sitemapRoutes");
 const { createCartService } = require("./services/cartService");
 const {
-  users,
-  forumTopics,
-  forumReplies,
   products,
   reviews,
   wishlistItems,
@@ -39,8 +36,8 @@ function createApp(database) {
   app.use(createAuthRouter());
   app.use(createBlogRouter());
   app.use(createProfileRouter());
-  app.use(createSitemapRouter({ products, forumTopics }));
-  app.use(createForumRouter({ users, forumTopics, forumReplies }));
+  app.use(createSitemapRouter({ products }));
+  app.use(createForumRouter());
   app.use(createCartRouter({ products, cartService }));
   app.use(createProductRouter({
     products,
