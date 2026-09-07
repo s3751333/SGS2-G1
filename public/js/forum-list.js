@@ -8,6 +8,9 @@ const topicList = document.querySelector("#topic-list");
 const topics = [...topicList.querySelectorAll(".topic-row")];
 const forumStatus = document.querySelector("#forum-status");
 const emptyState = document.querySelector("#forum-empty");
+const dateBasis = document.querySelector("#date-basis");
+const dateFrom = document.querySelector("#date-from");
+const dateTo = document.querySelector("#date-to");
 
 function updateTopics() {
   const search = searchInput.value.trim().toLowerCase();
@@ -15,7 +18,10 @@ function updateTopics() {
   const visibleTopics = topics.filter((topic) => {
     const matchesSearch = topic.dataset.search.includes(search);
     const matchesCategory = category === "all" || topic.dataset.category === category;
-    topic.hidden = !(matchesSearch && matchesCategory);
+    const postDate = new Date(topic.dataset[dateBasis.value]);
+    const localDate = [postDate.getFullYear(), String(postDate.getMonth() + 1).padStart(2, "0"), String(postDate.getDate()).padStart(2, "0")].join("-");
+    const matchesDate = (!dateFrom.value || localDate >= dateFrom.value) && (!dateTo.value || localDate <= dateTo.value);
+    topic.hidden = !(matchesSearch && matchesCategory && matchesDate);
     return !topic.hidden;
   });
 
@@ -43,6 +49,7 @@ controls.addEventListener("submit", (event) => {
 searchInput.addEventListener("input", updateTopics);
 categoryFilter.addEventListener("change", updateTopics);
 sortOrder.addEventListener("change", updateTopics);
+[dateBasis, dateFrom, dateTo].forEach((control) => control.addEventListener("change", updateTopics));
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     categoryFilter.value = button.dataset.category;
@@ -53,3 +60,4 @@ resetButton.addEventListener("click", () => {
   controls.reset();
   updateTopics();
 });
+updateTopics();
