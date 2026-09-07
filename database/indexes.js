@@ -1,4 +1,10 @@
 async function ensureDatabaseIndexes(database) {
+  await database.collection("forumTopics").createIndex(
+    { deleted: 1, createdAt: -1 }, { name: "visible_topics_by_date" },
+  );
+  await database.collection("forumReplies").createIndex(
+    { topicId: 1, deleted: 1, createdAt: 1 }, { name: "replies_by_topic" },
+  );
   const users = database.collection("users");
   const sessions = database.collection("sessions");
   const passwordResetTokens = database.collection("passwordResetTokens");

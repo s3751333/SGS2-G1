@@ -1,6 +1,6 @@
 require("dotenv").config({ quiet: true });
 
-const { blogPosts: sampleBlogPosts, users: sampleUsers } = require("../data");
+const { blogPosts: sampleBlogPosts, users: sampleUsers, forumTopics, forumReplies } = require("../data");
 const { closeDatabase, connectDatabase } = require("./connection");
 const { ensureDatabaseIndexes } = require("./indexes");
 
@@ -109,8 +109,23 @@ async function seedBlog(database) {
 async function seedDatabase() {
   const database = await connectDatabase();
   await ensureDatabaseIndexes(database);
-  await seedUsers(database);
-  await seedBlog(database);
+  if (!process.argv.includes("--forum")) {
+    await seedUsers(database);
+    await seedBlog(database);
+  }
+  for (const [name, records] of [["forumTopics", forumTopics], ["forumReplies", forumReplies]]) {
+    const documents = records.map(({ id, ...record }) => ({
+      _id: id, ...record, createdAt: new Date(record.createdAt), updatedAt: new Date(record.updatedAt),
+    }));
+    const result = await database.collection(name).bulkWrite(documents.map((document) => ({
+      updateOne: { filter: { _id: document._id }, update: { $setOnInsert: document }, upsert: true },
+    })));
+    const latest = await database.collection(name).find().sort({ _id: -1 }).limit(1).next();
+    await database.collection("counters").updateOne(
+      { _id: name }, { $max: { value: latest._id } }, { upsert: true },
+    );
+    console.log(`${name}: ${result.upsertedCount} inserted, ${result.matchedCount} already existed.`);
+  }
 }
 
 seedDatabase()
