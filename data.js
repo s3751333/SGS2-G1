@@ -306,11 +306,6 @@ const forumReplies = [
   },
 ];
 
-// Canonical product catalogue (server-side source of truth for Assessment 2).
-// IDs and prices for the first six items match public/js/store.js so the
-// existing client-side cart keeps working without changes. Two extra items
-// referenced by the old static wishlist mockup (Norwegian Wood, Atomic
-// Habits) have been added here as real catalogue entries.
 const products = [
   {
     id: "harry-potter",

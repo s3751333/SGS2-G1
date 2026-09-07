@@ -1,10 +1,10 @@
-const crypto = require("node:crypto");
 const express = require("express");
 const { requireApiLogin } = require("../middleware/auth");
+const { publicOrder, findOrder, listOrders } = require("../repositories/orderRepository");
+const { createOrderService } = require("../services/orderService");
+const { ShopError } = require("../utils/shopError");
 
-const MAX_CART_QUANTITY = 99;
-
-function getCheckoutData(body) {
+function getCheckoutData(body = {}) {
   return {
     customer: {
       fullName: String(body.customer?.fullName || body.fullName || "").trim(),
@@ -35,207 +35,62 @@ function validateCheckout(data) {
   return errors;
 }
 
-function getValidQuantity(value) {
-  const quantity = Number(value);
-  return Number.isInteger(quantity) && quantity >= 1 && quantity <= MAX_CART_QUANTITY
-    ? quantity
-    : null;
-}
 
-function getPublicOrder(order) {
-  const { userId, ...publicOrder } = order;
-  return publicOrder;
-}
-
-function createCartRouter({ products, cartService }) {
+function createCartRouter({ database, cartService }) {
   const router = express.Router();
-  const orders = [];
+  const orderService = createOrderService(database);
 
-  router.get("/api/cart", requireApiLogin, (request, response) => {
-    response.json(cartService.serializeCart(request.currentUser.id));
+  router.get("/api/cart", requireApiLogin, async (request, response) => {
+    response.json(await cartService.serializeCart(request.currentUser.id));
+  });
+  router.post("/api/cart/items", requireApiLogin, async (request, response) => {
+    response.status(201).json(await cartService.addItem(request.currentUser.id, String(request.body?.productId || ""), request.body?.quantity));
+  });
+  router.patch("/api/cart/items/:productId", requireApiLogin, async (request, response) => {
+    response.json(await cartService.updateQuantity(request.currentUser.id, request.params.productId, request.body?.quantity));
+  });
+  router.delete("/api/cart/items/:productId", requireApiLogin, async (request, response) => {
+    response.json(await cartService.removeItem(request.currentUser.id, request.params.productId));
+  });
+  router.delete("/api/cart", requireApiLogin, async (request, response) => {
+    response.json(await cartService.clearCart(request.currentUser.id));
+  });
+  router.get("/api/orders", requireApiLogin, async (request, response) => {
+    response.json({ orders: await listOrders(database, request.currentUser.id) });
+  });
+  router.get("/api/orders/:orderId", requireApiLogin, async (request, response) => {
+    const order = await findOrder(database, request.currentUser.id, request.params.orderId);
+    if (!order) throw new ShopError(404, "Order not found.");
+    response.json({ order: publicOrder(order) });
   });
 
-  router.post("/api/cart/items", requireApiLogin, (request, response) => {
-    const productId = String(request.body.productId || "");
-    const quantity = getValidQuantity(request.body.quantity);
-    const product = products.find((item) => item.id === productId);
-
-    if (!product) {
-      response.status(404).json({ message: "Product not found." });
-      return;
-    }
-    if (quantity === null) {
-      response.status(400).json({ message: `Quantity must be a whole number between 1 and ${MAX_CART_QUANTITY}.` });
-      return;
-    }
-
-    const cart = cartService.getUserCart(request.currentUser.id);
-    const existingItem = cart.find((item) => item.productId === productId);
-    const nextQuantity = (existingItem?.quantity || 0) + quantity;
-    const allowedQuantity = Math.min(MAX_CART_QUANTITY, Math.max(0, Number(product.stock) || 0));
-
-    if (nextQuantity > allowedQuantity) {
-      response.status(409).json({ message: `Only ${allowedQuantity} unit(s) of ${product.name} are available.` });
-      return;
-    }
-
-    if (existingItem) existingItem.quantity = nextQuantity;
-    else cart.push({ productId, quantity });
-    response.status(201).json(cartService.serializeCart(request.currentUser.id));
-  });
-
-  router.patch("/api/cart/items/:productId", requireApiLogin, (request, response) => {
-    const cart = cartService.getUserCart(request.currentUser.id);
-    const item = cart.find((entry) => entry.productId === request.params.productId);
-    const quantity = getValidQuantity(request.body.quantity);
-    const product = products.find((entry) => entry.id === request.params.productId);
-
-    if (!item || !product) {
-      response.status(404).json({ message: "This product is not in your cart." });
-      return;
-    }
-    if (quantity === null) {
-      response.status(400).json({ message: `Quantity must be a whole number between 1 and ${MAX_CART_QUANTITY}.` });
-      return;
-    }
-    if (quantity > product.stock) {
-      response.status(409).json({ message: `Only ${product.stock} unit(s) of ${product.name} are available.` });
-      return;
-    }
-
-    item.quantity = quantity;
-    response.json(cartService.serializeCart(request.currentUser.id));
-  });
-
-  router.delete("/api/cart/items/:productId", requireApiLogin, (request, response) => {
-    const cart = cartService.getUserCart(request.currentUser.id);
-    const itemIndex = cart.findIndex((item) => item.productId === request.params.productId);
-
-    if (itemIndex === -1) {
-      response.status(404).json({ message: "This product is not in your cart." });
-      return;
-    }
-
-    cart.splice(itemIndex, 1);
-    response.json(cartService.serializeCart(request.currentUser.id));
-  });
-
-  router.delete("/api/cart", requireApiLogin, (request, response) => {
-    cartService.clearCart(request.currentUser.id);
-    response.json(cartService.serializeCart(request.currentUser.id));
-  });
-
-  router.get("/api/orders", requireApiLogin, (request, response) => {
-    response.json({
-      orders: orders
-        .filter((order) => order.userId === request.currentUser.id)
-        .map(getPublicOrder),
-    });
-  });
-
-  router.get("/api/orders/:orderId", requireApiLogin, (request, response) => {
-    const order = orders.find((item) => item.id === request.params.orderId && item.userId === request.currentUser.id);
-
-    if (!order) {
-      response.status(404).json({ message: "Order not found." });
-      return;
-    }
-
-    response.json({ order: getPublicOrder(order) });
-  });
-
-  function createOrder(request, response) {
-    const cart = cartService.serializeCart(request.currentUser.id);
-
-    if (!cart.items.length) {
-      response.status(400).json({ message: "Your cart is empty." });
-      return;
-    }
-
-    const unavailableItem = cart.items.find(({ product, quantity }) => quantity > product.stock);
-    if (unavailableItem) {
-      response.status(409).json({
-        message: `Only ${unavailableItem.product.stock} unit(s) of ${unavailableItem.product.name} are available.`,
-      });
-      return;
-    }
-
+  async function createOrder(request, response) {
     const checkoutData = getCheckoutData(request.body);
     const errors = validateCheckout(checkoutData);
-
-    if (Object.keys(errors).length) {
-      response.status(400).json({ message: "Please correct the checkout information.", errors });
-      return;
+    if (Object.keys(errors).length) throw new ShopError(400, "Please correct the checkout information.", errors);
+    const requestKey = request.get("Idempotency-Key");
+    if (requestKey !== undefined && !/^[a-zA-Z0-9_-]{8,128}$/.test(requestKey)) {
+      throw new ShopError(400, "Invalid checkout request key.");
     }
-
-    const order = {
-      id: `BN-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
-      userId: request.currentUser.id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      customer: checkoutData.customer,
-      payment: checkoutData.payment,
-      items: cart.items.map(({ product, quantity, lineTotal }) => ({
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity,
-        lineTotal,
-      })),
-      subtotal: cart.subtotal,
-      shipping: cart.shipping,
-      total: cart.total,
-      status: "confirmed",
-    };
-
-    orders.push(order);
-    cartService.clearCart(request.currentUser.id);
-    response.status(201).json({ order: getPublicOrder(order) });
+    const order = await orderService.checkout(request.currentUser.id, checkoutData, requestKey);
+    response.status(201).json({ order });
   }
-
   router.post("/api/orders", requireApiLogin, createOrder);
   router.post("/checkout", requireApiLogin, createOrder);
 
-  router.patch("/api/orders/:orderId", requireApiLogin, (request, response) => {
-    const order = orders.find((item) => item.id === request.params.orderId && item.userId === request.currentUser.id);
-
-    if (!order) {
-      response.status(404).json({ message: "Order not found." });
-      return;
-    }
-    if (order.status !== "confirmed") {
-      response.status(409).json({ message: "Only confirmed orders can be updated." });
-      return;
-    }
-
+  router.patch("/api/orders/:orderId", requireApiLogin, async (request, response) => {
+    const order = await findOrder(database, request.currentUser.id, request.params.orderId);
+    if (!order) throw new ShopError(404, "Order not found.");
     const checkoutData = getCheckoutData({
-      customer: { ...order.customer, ...(request.body.customer || {}) },
-      payment: request.body.payment ?? order.payment,
+      customer: { ...order.customer, ...(request.body?.customer || {}) },
+      payment: request.body?.payment ?? order.payment,
     });
     const errors = validateCheckout(checkoutData);
-
-    if (Object.keys(errors).length) {
-      response.status(400).json({ message: "Please correct the order information.", errors });
-      return;
-    }
-
-    order.customer = checkoutData.customer;
-    order.payment = checkoutData.payment;
-    order.updatedAt = new Date().toISOString();
-    response.json({ order: getPublicOrder(order) });
+    if (Object.keys(errors).length) throw new ShopError(400, "Please correct the order information.", errors);
+    response.json({ order: await orderService.updateOrder(request.currentUser.id, order._id, checkoutData) });
   });
-
-  router.delete("/api/orders/:orderId", requireApiLogin, (request, response) => {
-    const orderIndex = orders.findIndex(
-      (item) => item.id === request.params.orderId && item.userId === request.currentUser.id,
-    );
-
-    if (orderIndex === -1) {
-      response.status(404).json({ message: "Order not found." });
-      return;
-    }
-
-    orders.splice(orderIndex, 1);
+  router.delete("/api/orders/:orderId", requireApiLogin, async (request, response) => {
+    await orderService.cancelOrder(request.currentUser.id, request.params.orderId);
     response.status(204).end();
   });
 

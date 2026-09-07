@@ -30,11 +30,11 @@
         <section class="home-section" aria-labelledby="explore-heading">
             <h2 id="explore-heading">Explore our website</h2>
             <div class="category-grid">
-                <a class="category-card" href="products#books">
+                <a class="category-card" href="/products?category=fiction">
                     <h3>Books</h3>
                     <p>Browse stories, learning resources and best sellers.</p>
                 </a>
-                <a class="category-card" href="products#board-games">
+                <a class="category-card" href="/products?category=board-games">
                     <h3>Board Games</h3>
                     <p>Find games for families, friends and strategy fans.</p>
                 </a>
@@ -53,7 +53,20 @@
                 </div>
                 <a href="/products">View all products</a>
             </div>
-            <div class="featured-products" id="home-featured-products"></div>
+            <div class="featured-products" id="home-featured-products">
+                <% featuredProducts.forEach((product) => { %>
+                    <article class="featured-product">
+                        <img src="<%= product.image %>" alt="<%= product.name %>">
+                        <div>
+                            <span><%= product.category === "board-games" ? "Board game" : "Book" %></span>
+                            <h3><a href="/product-detail/<%= encodeURIComponent(product.id) %>"><%= product.name %></a></h3>
+                            <p><%= new Intl.NumberFormat("vi-VN").format(product.price) %> VND</p>
+                            <button type="button" data-home-add="<%= product.id %>" <%= product.stock <= 0 ? "disabled" : "" %>><%= product.stock <= 0 ? "Out of stock" : "Add to Cart" %></button>
+                        </div>
+                    </article>
+                <% }); %>
+                <% if (!featuredProducts.length) { %><p>No featured products are available yet.</p><% } %>
+            </div>
         </section>
     </main>
     <%- include("partials/footer") %>

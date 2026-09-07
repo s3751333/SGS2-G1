@@ -11,8 +11,8 @@ const { createProductRouter } = require("./routes/productRoutes");
 const { createProfileRouter } = require("./routes/profileRoutes");
 const { createSitemapRouter } = require("./routes/sitemapRoutes");
 const { createCartService } = require("./services/cartService");
+const { ShopError } = require("./utils/shopError");
 const {
-  products,
   reviews,
   wishlistItems,
   getNextReviewId,
@@ -21,7 +21,7 @@ const {
 
 function createApp(database) {
   const app = express();
-  const cartService = createCartService(products);
+  const cartService = createCartService(database);
 
   app.locals.database = database;
   app.set("view engine", "ejs");
@@ -36,11 +36,11 @@ function createApp(database) {
   app.use(createAuthRouter());
   app.use(createBlogRouter());
   app.use(createProfileRouter());
-  app.use(createSitemapRouter({ products }));
+  app.use(createSitemapRouter());
   app.use(createForumRouter());
-  app.use(createCartRouter({ products, cartService }));
+  app.use(createCartRouter({ database, cartService }));
   app.use(createProductRouter({
-    products,
+    database,
     reviews,
     wishlistItems,
     getNextReviewId,
@@ -51,6 +51,19 @@ function createApp(database) {
 
   app.use((request, response) => {
     response.status(404).send("Page not found");
+  });
+
+  app.use((error, request, response, next) => {
+    if (response.headersSent) return next(error);
+    const expected = error instanceof ShopError;
+    const status = expected ? error.status : error.status === 400 ? 400 : 500;
+    const message = expected ? error.message : status === 400 ? "Invalid request body." : "Something went wrong. Please try again.";
+    if (!expected && status === 500) console.error(error);
+    if (request.path.startsWith("/api/") || request.path === "/checkout" || request.accepts(["html", "json"]) === "json") {
+      response.status(status).json({ message, errors: expected ? error.errors : {} });
+    } else {
+      response.status(status).send(message);
+    }
   });
 
   return app;

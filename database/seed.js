@@ -3,6 +3,7 @@ require("dotenv").config({ quiet: true });
 const { blogPosts: sampleBlogPosts, users: sampleUsers, forumTopics, forumReplies } = require("../data");
 const { closeDatabase, connectDatabase } = require("./connection");
 const { ensureDatabaseIndexes } = require("./indexes");
+const { seedProducts } = require("./seedProducts");
 
 function createUserSeedDocument(user) {
   const { id, ...userData } = user;
@@ -106,10 +107,14 @@ async function seedBlog(database) {
   console.log(`Blog comments ready: ${commentResult.upsertedCount} inserted, ${commentResult.matchedCount} already existed.`);
 }
 
-async function seedDatabase() {
-  const database = await connectDatabase();
+async function seedDatabase(database, args = []) {
   await ensureDatabaseIndexes(database);
-  if (!process.argv.includes("--forum")) {
+  if (!args.includes("--forum")) {
+    const result = await seedProducts(database);
+    console.log(`Products: ${result.upsertedCount} inserted, ${result.matchedCount} already existed.`);
+  }
+  if (args.includes("--shop")) return;
+  if (!args.includes("--forum")) {
     await seedUsers(database);
     await seedBlog(database);
   }
@@ -128,9 +133,12 @@ async function seedDatabase() {
   }
 }
 
-seedDatabase()
+if (require.main === module) connectDatabase()
+  .then((database) => seedDatabase(database, process.argv.slice(2)))
   .catch((error) => {
     console.error(`Database seed failed: ${error.message}`);
     process.exitCode = 1;
   })
   .finally(closeDatabase);
+
+module.exports = { seedDatabase };
