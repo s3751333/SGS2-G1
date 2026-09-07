@@ -23,9 +23,7 @@
             <p>Update the title, message and image of your reply.</p>
             <p id="reply-form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length ? 'Please correct the highlighted fields.' : '' %></p>
 
-            <form id="reply-form" method="post"
-                data-draft-key="booknookForumReply:edit:<%= topic.id %>:<%= formData.id %>"
-                data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
+            <form id="reply-form" method="post" novalidate>
                 <div class="form-field">
                     <label for="reply-title">Reply title</label>
                     <input id="reply-title" name="title" type="text" minlength="3" maxlength="100"

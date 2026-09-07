@@ -23,9 +23,7 @@
             <p>Choose a subject and explain what you would like the community to discuss.</p>
             <p id="form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length ? 'Please correct the highlighted fields.' : '' %></p>
 
-            <form id="topic-form" action="<%= formAction %>" method="post"
-                data-draft-key="booknookForumTopic:<%= formMode %>:<%= formAction %>"
-                data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
+            <form id="topic-form" action="<%= formAction %>" method="post" novalidate>
                 <div class="form-field">
                     <label for="topic-category">Category</label>
                     <select id="topic-category" name="category" required>
@@ -66,7 +64,7 @@
 
                 <div class="form-actions">
                     <a class="secondary-button" href="<%= formMode === 'edit' ? formAction.replace('/edit', '') : '/forum-main' %>">Cancel</a>
-                    <button id="clear-topic-draft" class="secondary-button" type="button"><%= formMode === 'edit' ? 'Reset form' : 'Clear draft' %></button>
+                    <button id="clear-topic-draft" class="secondary-button" type="button">Reset form</button>
                     <button class="button" type="submit"><%= submitLabel %></button>
                 </div>
             </form>

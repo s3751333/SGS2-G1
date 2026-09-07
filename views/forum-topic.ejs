@@ -78,8 +78,8 @@
                 <h2 id="reply-form-heading">Add your reply</h2>
                 <p id="replying-to" class="replying-to" hidden></p>
                 <p id="reply-form-message" class="form-message" role="alert" aria-live="polite"><%= Object.keys(errors).length ? 'Please correct the highlighted fields.' : '' %></p>
-                <form id="reply-form" action="/forum-topic/<%= topic.id %>/replies" method="post"
-                    data-draft-key="booknookForumReply:<%= topic.id %>" data-load-draft="<%= Object.keys(errors).length === 0 %>" novalidate>
+                <form id="reply-form" action="/forum-topic/<%= topic.id %>/replies" method="post" novalidate>
+                    <p class="field-error" role="alert"><%= errors.parentReplyId || '' %></p>
                     <input id="parent-reply-id" name="parentReplyId" type="hidden" value="<%= formData.parentReplyId || '' %>">
                     <div class="form-field">
                         <label for="reply-title">Reply title</label>
@@ -106,7 +106,7 @@
                         <p id="reply-image-error" class="field-error" aria-live="polite"><%= errors.image || '' %></p>
                     </div>
                     <div class="form-actions">
-                        <button id="clear-reply-draft" class="secondary-button" type="button">Clear draft</button>
+                        <button id="clear-reply-draft" class="secondary-button" type="button">Reset form</button>
                         <button class="button" type="submit">Post reply</button>
                     </div>
                 </form>

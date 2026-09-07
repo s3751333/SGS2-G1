@@ -5,7 +5,6 @@ const topicMessage = document.querySelector("#topic-message");
 const topicImage = document.querySelector("#topic-image");
 const formMessage = document.querySelector("#form-message");
 const clearDraftButton = document.querySelector("#clear-topic-draft");
-const draftKey = topicForm.dataset.draftKey;
 const originalValues = {
   category: topicCategory.value,
   title: topicTitle.value,
@@ -44,15 +43,6 @@ function updateCounts() {
   document.querySelector("#message-count").textContent = topicMessage.value.length;
 }
 
-function getValues() {
-  return {
-    category: topicCategory.value,
-    title: topicTitle.value,
-    content: topicMessage.value,
-    image: topicImage.value,
-  };
-}
-
 function setValues(values) {
   topicCategory.value = values.category || "";
   topicTitle.value = values.title || "";
@@ -61,24 +51,14 @@ function setValues(values) {
   updateCounts();
 }
 
-function saveDraft() {
-  localStorage.setItem(draftKey, JSON.stringify(getValues()));
-}
-
-if (topicForm.dataset.loadDraft === "true") {
-  const savedDraft = localStorage.getItem(draftKey);
-  if (savedDraft) setValues(JSON.parse(savedDraft));
-}
-
 updateCounts();
-topicCategory.addEventListener("change", () => { validateCategory(); saveDraft(); });
-topicTitle.addEventListener("input", () => { updateCounts(); validateTitle(); saveDraft(); });
-topicMessage.addEventListener("input", () => { updateCounts(); validateMessage(); saveDraft(); });
-topicImage.addEventListener("change", () => { validateImage(); saveDraft(); });
+topicCategory.addEventListener("change", () => { validateCategory(); });
+topicTitle.addEventListener("input", () => { updateCounts(); validateTitle(); });
+topicMessage.addEventListener("input", () => { updateCounts(); validateMessage(); });
+topicImage.addEventListener("change", () => { validateImage(); });
 clearDraftButton.addEventListener("click", () => {
-  localStorage.removeItem(draftKey);
   setValues(originalValues);
-  formMessage.textContent = "Draft cleared.";
+  formMessage.textContent = "Form reset.";
 });
 
 topicForm.addEventListener("submit", (event) => {
@@ -88,5 +68,4 @@ topicForm.addEventListener("submit", (event) => {
     formMessage.textContent = "Please correct the form errors.";
     return;
   }
-  localStorage.removeItem(draftKey);
 });
