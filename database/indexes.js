@@ -1,4 +1,11 @@
 async function ensureDatabaseIndexes(database) {
+  await database.collection("carts").createIndex({ userId: 1 }, { name: "unique_cart_user", unique: true });
+  await database.collection("orders").createIndex({ userId: 1, createdAt: -1 }, { name: "orders_by_user" });
+  await database.collection("orders").createIndex(
+    { userId: 1, requestKey: 1 },
+    { name: "unique_checkout_request", unique: true, partialFilterExpression: { requestKey: { $type: "string" } } },
+  );
+  await database.collection("products").createIndex({ category: 1, displayOrder: 1 }, { name: "products_by_category" });
   await database.collection("forumTopics").createIndex(
     { deleted: 1, createdAt: -1 }, { name: "visible_topics_by_date" },
   );

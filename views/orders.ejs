@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNook | My Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/orders.css">
+  </head>
+  <body>
+    <%- include("partials/navbar", { activePage }) %>
+    <main class="checkout-page">
+      <h1>My Orders</h1>
+      <p id="orders-message" role="status" aria-live="polite"></p>
+      <p id="orders-empty" <%= orders.length ? "hidden" : "" %>>You have no orders yet. <a href="/products">Browse products</a></p>
+      <div id="orders-list">
+        <% orders.forEach((order) => { %>
+          <article class="form-section order-card" data-order-id="<%= order.id %>">
+            <h2><%= order.id %></h2>
+            <p><time datetime="<%= order.createdAt.toISOString() %>"><%= order.createdAt.toLocaleString("en-GB", { timeZone: "Asia/Ho_Chi_Minh" }) %> (Vietnam time)</time> · <%= order.status %></p>
+            <ul>
+              <% order.items.forEach((item) => { %>
+                <li><%= item.name %> × <%= item.quantity %> — <%= new Intl.NumberFormat("vi-VN").format(item.lineTotal) %> VND</li>
+              <% }); %>
+            </ul>
+            <p><strong>Total: <%= new Intl.NumberFormat("vi-VN").format(order.total) %> VND</strong></p>
+            <p>Payment: <%= order.payment === "bank" ? "Bank transfer" : "Cash on delivery" %> · <%= order.paymentStatus %></p>
+            <% if (order.status === "confirmed") { %>
+              <details>
+                <summary>Edit delivery and payment</summary>
+                <form class="order-edit-form">
+                  <div class="form-grid">
+                    <% const fields = [["fullName", "Full name", 2, 80], ["email", "Email", 1, 120], ["phone", "Phone", 9, 30], ["address", "Address", 5, 150], ["city", "City / Province", 2, 60], ["district", "District", 2, 60]]; %>
+                    <% fields.forEach(([name, label, min, max]) => { %>
+                      <label><%= label %><input name="<%= name %>" type="<%= name === "email" ? "email" : name === "phone" ? "tel" : "text" %>" value="<%= order.customer[name] %>" minlength="<%= min %>" maxlength="<%= max %>" required></label>
+                    <% }); %>
+                    <label class="full-field">Order note<textarea name="note" maxlength="300"><%= order.customer.note %></textarea></label>
+                    <label>Payment method<select name="payment"><option value="cod" <%= order.payment === "cod" ? "selected" : "" %>>Cash on delivery</option><option value="bank" <%= order.payment === "bank" ? "selected" : "" %>>Bank transfer</option></select></label>
+                  </div>
+                  <button class="checkout-button" type="submit">Save changes</button>
+                </form>
+              </details>
+              <button type="button" class="cancel-order">Cancel order</button>
+            <% } %>
+          </article>
+        <% }); %>
+      </div>
+    </main>
+    <%- include("partials/footer") %>
+    <script src="/js/store.js" defer></script>
+    <script src="/js/navbar.js" defer></script>
+    <script src="/js/orders.js" defer></script>
+  </body>
+</html>

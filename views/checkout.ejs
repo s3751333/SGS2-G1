@@ -12,6 +12,7 @@
     <%- include("partials/navbar", { activePage }) %>
     <main class="checkout-page">
       <h1>Checkout</h1>
+      <p id="checkout-error" class="secure-note" role="alert" hidden></p>
       <section id="checkout-empty" class="checkout-message" hidden>
         <i class="fas fa-basket-shopping" aria-hidden="true"></i>
         <h2>There is nothing to check out</h2>
@@ -23,24 +24,24 @@
         <h2>Order placed successfully</h2>
         <p>Your order number is <strong data-order-id></strong>.</p>
         <p>Total: <strong data-order-total></strong></p>
-        <p>A confirmation has been prepared for <strong data-order-email></strong>.</p>
-        <p data-bank-message hidden>Please transfer to BookNook Bank, account 0123456789, using your order number as the payment reference.</p>
+        <p>Contact email: <strong data-order-email></strong></p>
+        <p data-bank-message hidden>Demo bank transfer selected. Your order is saved as awaiting payment; no real transfer is processed in this demo.</p>
         <a href="/products">Continue Shopping</a>
+        <a href="/orders">View My Orders</a>
       </section>
       <div id="checkout-content" class="checkout-layout">
         <form id="checkout-form" class="checkout-form" action="/checkout" method="post">
-          <p id="checkout-error" class="secure-note" role="alert" hidden></p>
           <section class="form-section">
             <h2>Shipping Information</h2>
             <div class="form-grid">
               <label class="full-field">Full name
-                <input type="text" name="fullName" autocomplete="name" minlength="2" maxlength="80" required>
+                <input type="text" name="fullName" autocomplete="name" minlength="2" maxlength="80" value="<%= currentUser.fullName %>" required>
               </label>
               <label>Email
-                <input type="email" name="email" autocomplete="email" maxlength="120" required>
+                <input type="email" name="email" autocomplete="email" maxlength="120" value="<%= currentUser.email %>" required>
               </label>
               <label>Phone number
-                <input type="tel" name="phone" autocomplete="tel" pattern="[0-9+ ]{9,15}" title="Use 9 to 15 digits; spaces and + are allowed." required>
+                <input type="tel" name="phone" autocomplete="tel" maxlength="30" title="Use 9 to 15 digits; spaces and + are allowed." required>
               </label>
               <label class="full-field">Address
                 <input type="text" name="address" autocomplete="street-address" minlength="5" maxlength="150" required>
@@ -64,12 +65,11 @@
             </label>
             <label class="payment-option">
               <input type="radio" name="payment" value="bank">
-              <span><strong>Bank transfer</strong><small>Transfer details will be shown after ordering</small></span>
+              <span><strong>Bank transfer (demo)</strong><small>Save an order awaiting payment</small></span>
             </label>
             <div id="bank-details" class="bank-details" hidden>
-              <strong>BookNook Bank</strong>
-              <span>Account number: 0123456789</span>
-              <small>Your order number will be used as the payment reference.</small>
+              <strong>Demo bank transfer</strong>
+              <small>This demo records your payment preference. It does not collect a payment.</small>
             </div>
           </section>
         </form>
@@ -80,7 +80,7 @@
           <div class="summary-row"><span>Subtotal</span><strong id="checkout-subtotal">0 VND</strong></div>
           <div class="summary-row"><span>Shipping</span><strong>Free</strong></div>
           <div class="summary-row total"><span>Total</span><strong id="checkout-total">0 VND</strong></div>
-          <button id="place-order-button" class="checkout-button" type="submit" form="checkout-form">Place Order</button>
+          <button id="place-order-button" class="checkout-button" type="submit" form="checkout-form" disabled>Place Order</button>
           <p class="secure-note">Your information is used only to process this order.</p>
         </aside>
       </div>

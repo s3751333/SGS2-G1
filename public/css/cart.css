@@ -50,6 +50,17 @@
 
 .item-info p { margin-bottom: 8px; }
 
+.item-stock {
+    color: #5d6873;
+    font-size: 14px;
+}
+
+#clear-cart-button {
+    display: block;
+    margin: 14px auto 0;
+    text-align: center;
+}
+
 .remove-link {
     padding: 0;
     border: 0;

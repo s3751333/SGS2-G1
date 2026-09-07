@@ -1,0 +1,11 @@
+@import url(checkout.css);
+
+.order-card { margin: 20px 0; }
+.order-card h2 { overflow-wrap: anywhere; font-size: 1.15rem; }
+.order-card p, .order-card ul { margin: 12px 0; }
+.order-card ul { padding-left: 24px; }
+.order-card summary { cursor: pointer; margin: 16px 0; }
+.order-edit-form { display: grid; gap: 18px; }
+.order-edit-form select { padding: 10px; font: inherit; }
+.cancel-order { margin-top: 18px; padding: 10px 16px; color: #a32121; background: white; border: 1px solid #a32121; border-radius: 6px; cursor: pointer; }
+#orders-message { white-space: pre-line; }

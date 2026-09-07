@@ -1,10 +1,12 @@
 const express = require("express");
 const { requireLogin } = require("../middleware/auth");
 
+const { findProductById, listProducts } = require("../repositories/productRepository");
+
 const productCategories = ["fiction", "reference", "self-help", "board-games"];
 
 function createProductRouter({
-  products,
+  database,
   reviews,
   wishlistItems,
   getNextReviewId,
@@ -14,7 +16,7 @@ function createProductRouter({
   const router = express.Router();
 
   function getProductById(productId) {
-    return products.find((product) => product.id === productId) || null;
+    return findProductById(database, productId);
   }
 
   function getReviewsForProduct(productId) {
@@ -94,10 +96,11 @@ function createProductRouter({
     return sorted;
   }
 
-  function getWishlistForUser(userId) {
+  async function getWishlistForUser(userId) {
+    const products = await listProducts(database);
     return wishlistItems
       .filter((item) => item.userId === userId)
-      .map((item) => ({ ...item, product: getProductById(item.productId) }))
+      .map((item) => ({ ...item, product: products.find((product) => product.id === item.productId) || null }))
       .filter((item) => item.product !== null);
   }
 
@@ -123,10 +126,11 @@ function createProductRouter({
     return sorted;
   }
 
-  router.get("/products", (request, response) => {
+  router.get("/products", async (request, response) => {
     const query = String(request.query.q || "").trim();
     const category = String(request.query.category || "all");
     const sort = String(request.query.sort || "recent");
+    const products = await listProducts(database);
     const filtered = products
       .filter((product) => category === "all" || product.category === category)
       .filter((product) => matchesProductSearch(product, query));
@@ -144,8 +148,8 @@ function createProductRouter({
     });
   });
 
-  router.get("/product-detail/:id", (request, response, next) => {
-    const product = getProductById(request.params.id);
+  router.get("/product-detail/:id", async (request, response, next) => {
+    const product = await getProductById(request.params.id);
 
     if (!product) {
       next();
@@ -173,8 +177,8 @@ function createProductRouter({
     });
   });
 
-  router.post("/product-detail/:id/reviews", requireLogin, (request, response, next) => {
-    const product = getProductById(request.params.id);
+  router.post("/product-detail/:id/reviews", requireLogin, async (request, response, next) => {
+    const product = await getProductById(request.params.id);
 
     if (!product) {
       next();
@@ -226,8 +230,8 @@ function createProductRouter({
     response.redirect(`/product-detail/${product.id}#reviews`);
   });
 
-  router.post("/product-detail/:id/reviews/:reviewId/delete", requireLogin, (request, response, next) => {
-    const product = getProductById(request.params.id);
+  router.post("/product-detail/:id/reviews/:reviewId/delete", requireLogin, async (request, response, next) => {
+    const product = await getProductById(request.params.id);
 
     if (!product) {
       next();
@@ -251,8 +255,8 @@ function createProductRouter({
     response.redirect(`/product-detail/${product.id}#reviews`);
   });
 
-  router.post("/product-detail/:id/reviews/:reviewId/helpful", (request, response, next) => {
-    const product = getProductById(request.params.id);
+  router.post("/product-detail/:id/reviews/:reviewId/helpful", async (request, response, next) => {
+    const product = await getProductById(request.params.id);
 
     if (!product) {
       next();
@@ -271,9 +275,9 @@ function createProductRouter({
     response.json({ helpfulCount: review.helpfulCount });
   });
 
-  router.get("/wishlist", requireLogin, (request, response) => {
+  router.get("/wishlist", requireLogin, async (request, response) => {
     const sort = String(request.query.sort || "recent");
-    const items = sortWishlist(getWishlistForUser(request.currentUser.id), sort).map((item) => ({
+    const items = sortWishlist(await getWishlistForUser(request.currentUser.id), sort).map((item) => ({
       ...item,
       othersCount: countOtherCollectors(item.productId, request.currentUser.id),
     }));
@@ -286,9 +290,9 @@ function createProductRouter({
     });
   });
 
-  router.post("/wishlist", requireLogin, (request, response) => {
+  router.post("/wishlist", requireLogin, async (request, response) => {
     const productId = String(request.body.productId || "");
-    const product = getProductById(productId);
+    const product = await getProductById(productId);
 
     if (!product) {
       response.status(404).json({ error: "Product not found." });
@@ -309,7 +313,7 @@ function createProductRouter({
       });
     }
 
-    const count = getWishlistForUser(request.currentUser.id).length;
+    const count = (await getWishlistForUser(request.currentUser.id)).length;
 
     if (request.headers.accept && request.headers.accept.includes("application/json")) {
       response.json({ saved: true, count });
@@ -319,7 +323,7 @@ function createProductRouter({
     response.redirect(request.get("Referer") || "/products");
   });
 
-  router.delete("/wishlist/:productId", requireLogin, (request, response) => {
+  router.delete("/wishlist/:productId", requireLogin, async (request, response) => {
     const productId = request.params.productId;
     const index = wishlistItems.findIndex(
       (item) => item.userId === request.currentUser.id && item.productId === productId,
@@ -331,12 +335,11 @@ function createProductRouter({
     }
 
     wishlistItems.splice(index, 1);
-    response.json({ saved: false, count: getWishlistForUser(request.currentUser.id).length });
+    response.json({ saved: false, count: (await getWishlistForUser(request.currentUser.id)).length });
   });
 
-  router.post("/wishlist/:productId/move-to-cart", requireLogin, (request, response) => {
+  router.post("/wishlist/:productId/move-to-cart", requireLogin, async (request, response) => {
     const productId = request.params.productId;
-    const product = getProductById(productId);
     const index = wishlistItems.findIndex(
       (item) => item.userId === request.currentUser.id && item.productId === productId,
     );
@@ -346,24 +349,14 @@ function createProductRouter({
       return;
     }
 
-    const cart = cartService.getUserCart(request.currentUser.id);
-    const cartItem = cart.find((item) => item.productId === productId);
-    const nextQuantity = (cartItem?.quantity || 0) + 1;
-
-    if (!product || nextQuantity > product.stock) {
-      response.status(409).json({ error: "This product is currently out of stock." });
-      return;
-    }
-
-    if (cartItem) cartItem.quantity = nextQuantity;
-    else cart.push({ productId, quantity: 1 });
-
-    wishlistItems[index].purchased = true;
-    wishlistItems.splice(index, 1);
+    const wishlistEntry = wishlistItems[index];
+    const cart = await cartService.addItem(request.currentUser.id, productId, 1);
+    const currentIndex = wishlistItems.indexOf(wishlistEntry);
+    if (currentIndex !== -1) wishlistItems.splice(currentIndex, 1);
     response.json({
       moved: true,
-      count: getWishlistForUser(request.currentUser.id).length,
-      cart: cartService.serializeCart(request.currentUser.id),
+      count: (await getWishlistForUser(request.currentUser.id)).length,
+      cart,
     });
   });
 

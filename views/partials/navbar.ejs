@@ -11,6 +11,7 @@
             <li><a href="/blogs" class="nav-link" <%- activePage === "blog" ? 'aria-current="page"' : "" %>>Blog</a></li>
             <li><a href="/products" class="nav-link" <%- activePage === "shop" ? 'aria-current="page"' : "" %>>Shop</a></li>
             <li><a href="/forum-main" class="nav-link" <%- activePage === "forum" ? 'aria-current="page"' : "" %>>Forum</a></li>
+            <% if (currentUser) { %><li><a href="/orders" class="nav-link" <%- activePage === "orders" ? 'aria-current="page"' : "" %>>My Orders</a></li><% } %>
         </ul>
         <div class="right-menu">
             <% if (currentUser) { %>

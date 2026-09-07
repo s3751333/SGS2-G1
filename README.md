@@ -48,10 +48,12 @@
 ### Ayden Le - s4123086
 
 - `routes/cartRoutes.js`, `routes/pageRoutes.js`
-- `services/cartService.js`
-- `views/index.ejs`, `views/cart.ejs`, `views/checkout.ejs`
+- `services/cartService.js`, `services/orderService.js`
+- `repositories/cartRepository.js`, `repositories/orderRepository.js`, `repositories/productRepository.js`
+- `database/seedProducts.js`
+- `views/index.ejs`, `views/cart.ejs`, `views/checkout.ejs`, `views/orders.ejs`
 - `views/partials/navbar.ejs`
-- `public/js/home.js`, `public/js/navbar.js`, `public/js/store.js`, `public/js/cart.js`, `public/js/checkout.js`
+- `public/js/home.js`, `public/js/navbar.js`, `public/js/store.js`, `public/js/cart.js`, `public/js/checkout.js`, `public/js/orders.js`
 - `public/css/home.css`, `public/css/navbar.css`, `public/css/cart.css`, `public/css/checkout.css`
 
 ### Khoa Pham Dang Nguyen - s4132855
@@ -102,14 +104,14 @@ SGS2-G1/
 
 Before running the application, install:
 
-- [Node.js](https://nodejs.org/) version 20 or newer
+- [Node.js](https://nodejs.org/) version 20.19 or newer (Node 22 recommended)
 - npm, which is included with Node.js
 
 No separate local database installation is required. Assessment 3 uses MongoDB
 Atlas for user accounts, sessions, password resets, blog posts, and blog
-comments, forum topics, and forum replies, so these records remain available after the Node.js process restarts.
-The remaining team modules still use their existing sample data until their
-database migrations are completed.
+comments, forum topics, forum replies, products, carts, and orders, so these records remain available after the Node.js process restarts.
+Reviews and wishlist entries still use their existing sample data. Moving a
+wishlist item into the cart writes to MongoDB.
 
 After downloading or extracting the repository, open a terminal in the
 `SGS2-G1` project folder and install the dependencies:
@@ -121,6 +123,21 @@ npm install
 This installs Express, EJS, dotenv, and the official MongoDB Node.js driver from
 `package.json`. Do not install these packages manually unless `npm install`
 reports an error.
+
+To run immediately without an Atlas account or `.env`, use:
+
+```bash
+npm run dev:local
+```
+
+Open `http://localhost:3000`. This development command downloads a local MongoDB
+binary if needed, starts a single-node replica set, creates indexes, and seeds
+the sample accounts/content. Data is saved in `.local/mongodb` between restarts.
+It binds to localhost and does not connect to Atlas. Stop with Ctrl+C before
+starting another local instance. Development dependencies include a project-local
+Node 22 runtime, used automatically by npm scripts on this machine.
+
+For Atlas, follow the `.env` setup below instead.
 
 Create the local environment file from the supplied example:
 
@@ -146,6 +163,9 @@ The seed is safe to run again. Existing users and posts are kept, and only missi
 sample records are inserted. For an existing database whose accounts and blogs are
 already seeded, run `npm run db:seed -- --forum` to seed only forum samples. Usernames and email addresses have case-insensitive
 unique indexes in MongoDB.
+
+Run `npm run db:seed -- --shop` to insert only missing product samples and create
+indexes. Re-seeding does not overwrite prices, stock, existing carts, or orders.
 
 ## Running the Application
 
@@ -192,16 +212,37 @@ Product prices, stock checks, and checkout totals are handled by the server.
 | `POST` | `/api/cart/items` | Add a product to the signed-in user's cart |
 | `PATCH`, `DELETE` | `/api/cart/items/:productId` | Update or remove a cart item |
 | `GET`, `POST` | `/api/orders` | Retrieve owned orders or check out the current cart |
-| `GET`, `PATCH`, `DELETE` | `/api/orders/:orderId` | Retrieve, update, or delete an owned order |
+| `GET`, `PATCH`, `DELETE` | `/api/orders/:orderId` | Retrieve, update, or cancel an owned order |
 
-Carts and orders currently use the existing in-memory module and reset when the
-Node.js process restarts. Login sessions are stored persistently in MongoDB.
+Carts, orders, product prices/stock, and login sessions are stored in MongoDB.
+Checkout uses a transaction to deduct stock, insert an order with a price snapshot,
+and clear the cart. Cancellation restores stock and soft-deletes the order in a
+transaction. MongoDB Atlas or a replica set is required for these transactions.
+Orders can be viewed, edited, and cancelled at `/orders` (My Orders in navigation).
+The home page, product pages, wishlist display, and checkout use the same product
+collection. COD and bank transfer record a pending payment; there is no payment
+gateway or email delivery integration. The bank-transfer option is explicitly a demo.
+
+Clients can send an `Idempotency-Key` header (8–128 letters, digits, `_` or `-`)
+when checking out. Reusing it returns the original order without charging stock
+again. The checkout UI reuses its key when retrying a failed network request.
+
+Run the integration tests against an isolated local MongoDB replica set:
+
+```bash
+npm test
+npm run test:browser
+```
+
+Browser tests use Microsoft Edge when installed at its default Windows location.
+On other machines, run `npx playwright install chromium` first. Tests do not use
+`.env`, Atlas, or `.local/mongodb`. Browser screenshots are written to `output/`.
 
 ### Dynamic Sitemap
 
 Open `http://localhost:3000/sitemap` to view the generated website overview.
 The sitemap router loads current blog posts from MongoDB and receives the
-product list from its existing module and non-deleted forum topics from MongoDB. Public
+product list and non-deleted forum topics from MongoDB. Public
 content therefore appears without manually adding links to `sitemap.ejs`.
 Administrator links are shown only to a signed-in administrator.
 

@@ -21,8 +21,8 @@
       const row = document.createElement("div");
       row.className = "checkout-product";
       row.innerHTML = `
-        <img src="${product.image}" alt="${product.name}">
-        <span>${product.name}<small>Quantity: ${quantity}</small></span>
+        <img src="${store.escapeHtml(product.image)}" alt="${store.escapeHtml(product.name)}">
+        <span>${store.escapeHtml(product.name)}<small>Quantity: ${quantity}</small></span>
         <strong>${store.formatCurrency(lineTotal)}</strong>`;
       productsContainer.append(row);
     });
@@ -32,7 +32,12 @@
     totalElement.textContent = store.formatCurrency(subtotal);
     layout.hidden = items.length === 0;
     emptyState.hidden = items.length > 0;
-    submitButton.disabled = items.length === 0;
+    const unavailable = items.some((item) => !item.available);
+    submitButton.disabled = items.length === 0 || unavailable;
+    if (unavailable) {
+      errorMessage.textContent = "Some items are unavailable. Please update your cart before checking out.";
+      errorMessage.hidden = false;
+    }
   }
 
   form.addEventListener("change", (event) => {
