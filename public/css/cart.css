@@ -89,6 +89,8 @@
 }
 
 .quantity-input {
+    -moz-appearance: textfield;
+    appearance: textfield;
     width: 60px;
     height: 36px;
     padding: 4px;
@@ -96,6 +98,12 @@
     border-radius: 6px;
     font: inherit;
     text-align: center;
+}
+
+.quantity-input::-webkit-inner-spin-button,
+.quantity-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .quantity-input:focus-visible {
