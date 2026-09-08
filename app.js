@@ -42,7 +42,7 @@ function createApp(database) {
   app.use(createProfileRouter());
   app.use(createSitemapRouter());
   app.use(createForumRouter());
-  app.use(createCartRouter({ database, cartService }));
+  app.use(createCartRouter());
   app.use(createProductRouter({
     database,
     reviews,
