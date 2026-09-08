@@ -88,6 +88,27 @@
     cursor: pointer;
 }
 
+.quantity-input {
+    width: 60px;
+    height: 36px;
+    padding: 4px;
+    border: 1px solid #9aa5ae;
+    border-radius: 6px;
+    font: inherit;
+    text-align: center;
+}
+
+.quantity-input:focus-visible {
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+}
+
+.quantity button:disabled,
+.quantity-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .item-total {
     min-width: 110px;
     text-align: right;
