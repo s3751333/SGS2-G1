@@ -5,7 +5,7 @@ async function ensureDatabaseIndexes(database) {
     { userId: 1, requestKey: 1 },
     { name: "unique_checkout_request", unique: true, partialFilterExpression: { requestKey: { $type: "string" } } },
   );
-  await database.collection("products").createIndex({ category: 1, displayOrder: 1 }, { name: "products_by_category" });
+  await database.collection("products").createIndex({ category: 1, displayOrder: 1 }, { name: "products_by_category_display_order" });
   await database.collection("forumTopics").createIndex(
     { deleted: 1, createdAt: -1 }, { name: "visible_topics_by_date" },
   );

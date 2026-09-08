@@ -24,6 +24,10 @@ function createApp(database) {
   const cartService = createCartService(database);
 
   app.locals.database = database;
+  app.get("/health", (request, response) => {
+    response.set("Cache-Control", "no-store");
+    response.json({ status: "ok", revision: process.env.APP_REVISION || "development" });
+  });
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "views"));
 

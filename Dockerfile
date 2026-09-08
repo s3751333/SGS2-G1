@@ -12,5 +12,8 @@ RUN mkdir -p /app/public/uploads/blog \
     && chown -R node:node /app/public/uploads/blog
 
 USER node
+ARG APP_REVISION=development
+ENV APP_REVISION=$APP_REVISION
+LABEL org.opencontainers.image.revision=$APP_REVISION
 EXPOSE 3000
 CMD ["node", "index.js"]

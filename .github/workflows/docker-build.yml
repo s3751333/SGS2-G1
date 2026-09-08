@@ -21,7 +21,7 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
     env:
       DOCKER_BUILD_RECORD_UPLOAD: false
-      IMAGE_NAME: johnnyp20/sgs2-g1
+      IMAGE_NAME: docker.io/johnnyp20/sgs2-g1
 
     steps:
       - name: Checkout repository
@@ -45,6 +45,8 @@ jobs:
           file: Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            APP_REVISION=${{ github.sha }}
           cache-from: type=gha,scope=sgs2-g1
           cache-to: type=gha,mode=min,scope=sgs2-g1,ignore-error=true
           tags: |
@@ -134,7 +136,9 @@ jobs:
 
           const assertNoConfigurationError = async (response) => {
             const body = await response.text().catch(() => "");
-            if (body.toLowerCase().includes("configuration not found")) throw new Error();
+            if (/configuration not found|pull access denied|unauthorized|authentication required|error response from daemon/i.test(body)) {
+              throw new Error("Unraid could not pull or start the application image.");
+            }
           };
 
           try {
@@ -169,12 +173,30 @@ jobs:
                 const location = response.headers.get("location") || "";
                 if (new URL(location, updateUrl).pathname === "/login") throw new Error();
               }
-              if (response.status >= 400) throw new Error();
+              if (response.status >= 300) throw new Error("Unraid update request failed.");
               await assertNoConfigurationError(response);
             } finally {
               clearTimeout(timeout);
             }
-          } catch {
+            let verified = false;
+            for (let attempt = 0; attempt < 30; attempt += 1) {
+              try {
+                const health = await fetch(`https://demo.3aa.uk/health?revision=${process.env.EXPECTED_REVISION}`, {
+                  headers: { "cache-control": "no-cache" },
+                  signal: AbortSignal.timeout(5000),
+                });
+                const result = health.ok ? await health.json() : null;
+                if (result?.status === "ok" && result.revision === process.env.EXPECTED_REVISION) {
+                  verified = true;
+                  break;
+                }
+              } catch {}
+              await new Promise((resolve) => setTimeout(resolve, 5000));
+            }
+            if (!verified) throw new Error("The live application is not running the expected Git revision.");
+            console.log(`Verified live revision ${process.env.EXPECTED_REVISION}`);
+          } catch (error) {
+            console.error(error.message);
             process.exit(1);
           }
           EOF
@@ -186,9 +208,11 @@ jobs:
           UNRAID_BASE_URL: https://unraid.3aa.uk
           UNRAID_USERNAME: ${{ secrets.UNRAID_USERNAME }}
           UNRAID_PASSWORD: ${{ secrets.UNRAID_PASSWORD }}
+          EXPECTED_REVISION: ${{ github.sha }}
         run: |
           docker run --rm \
             -e UNRAID_BASE_URL \
             -e UNRAID_USERNAME \
             -e UNRAID_PASSWORD \
+            -e EXPECTED_REVISION \
             sgs2-g1-unraid-updater:${{ github.sha }}
