@@ -1,6 +1,7 @@
 const express = require("express");
 const { requireApiLogin } = require("../middleware/auth");
 const { publicOrder, findOrder, listOrders } = require("../repositories/orderRepository");
+const { createCartService } = require("../services/cartService");
 const { createOrderService } = require("../services/orderService");
 const { ShopError } = require("../utils/shopError");
 
@@ -36,30 +37,34 @@ function validateCheckout(data) {
 }
 
 
-function createCartRouter({ database, cartService }) {
+function createCartRouter() {
   const router = express.Router();
-  const orderService = createOrderService(database);
 
   router.get("/api/cart", requireApiLogin, async (request, response) => {
+    const cartService = createCartService(request.app.locals.database);
     response.json(await cartService.serializeCart(request.currentUser.id));
   });
   router.post("/api/cart/items", requireApiLogin, async (request, response) => {
+    const cartService = createCartService(request.app.locals.database);
     response.status(201).json(await cartService.addItem(request.currentUser.id, String(request.body?.productId || ""), request.body?.quantity));
   });
   router.patch("/api/cart/items/:productId", requireApiLogin, async (request, response) => {
+    const cartService = createCartService(request.app.locals.database);
     response.json(await cartService.updateQuantity(request.currentUser.id, request.params.productId, request.body?.quantity));
   });
   router.delete("/api/cart/items/:productId", requireApiLogin, async (request, response) => {
+    const cartService = createCartService(request.app.locals.database);
     response.json(await cartService.removeItem(request.currentUser.id, request.params.productId));
   });
   router.delete("/api/cart", requireApiLogin, async (request, response) => {
+    const cartService = createCartService(request.app.locals.database);
     response.json(await cartService.clearCart(request.currentUser.id));
   });
   router.get("/api/orders", requireApiLogin, async (request, response) => {
-    response.json({ orders: await listOrders(database, request.currentUser.id) });
+    response.json({ orders: await listOrders(request.app.locals.database, request.currentUser.id) });
   });
   router.get("/api/orders/:orderId", requireApiLogin, async (request, response) => {
-    const order = await findOrder(database, request.currentUser.id, request.params.orderId);
+    const order = await findOrder(request.app.locals.database, request.currentUser.id, request.params.orderId);
     if (!order) throw new ShopError(404, "Order not found.");
     response.json({ order: publicOrder(order) });
   });
@@ -72,6 +77,7 @@ function createCartRouter({ database, cartService }) {
     if (requestKey !== undefined && !/^[a-zA-Z0-9_-]{8,128}$/.test(requestKey)) {
       throw new ShopError(400, "Invalid checkout request key.");
     }
+    const orderService = createOrderService(request.app.locals.database);
     const order = await orderService.checkout(request.currentUser.id, checkoutData, requestKey);
     response.status(201).json({ order });
   }
@@ -79,6 +85,8 @@ function createCartRouter({ database, cartService }) {
   router.post("/checkout", requireApiLogin, createOrder);
 
   router.patch("/api/orders/:orderId", requireApiLogin, async (request, response) => {
+    const database = request.app.locals.database;
+    const orderService = createOrderService(database);
     const order = await findOrder(database, request.currentUser.id, request.params.orderId);
     if (!order) throw new ShopError(404, "Order not found.");
     const checkoutData = getCheckoutData({
@@ -90,6 +98,7 @@ function createCartRouter({ database, cartService }) {
     response.json({ order: await orderService.updateOrder(request.currentUser.id, order._id, checkoutData) });
   });
   router.delete("/api/orders/:orderId", requireApiLogin, async (request, response) => {
+    const orderService = createOrderService(request.app.locals.database);
     await orderService.cancelOrder(request.currentUser.id, request.params.orderId);
     response.status(204).end();
   });
