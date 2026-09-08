@@ -117,6 +117,11 @@
     return `${new Intl.NumberFormat("vi-VN").format(value)} VND`;
   }
 
+  function escapeHtml(value) {
+    const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    return String(value ?? "").replace(/[&<>"']/g, (character) => entities[character]);
+  }
+
   const ready = loadCart();
   window.BookNookStore = {
     products,
@@ -124,6 +129,7 @@
     addItem,
     clearCart,
     createOrder,
+    escapeHtml,
     formatCurrency,
     getCart: () => cart.items.map(({ productId, quantity }) => ({ productId, quantity })),
     getCartDetails: () => cart.items,
