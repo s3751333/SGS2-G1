@@ -71,6 +71,7 @@ a {
     margin-bottom: 34px;
     padding: 18px;
     display: flex;
+    flex-wrap: wrap;
     align-items: end;
     gap: 14px;
     background-color: #ffffff;
@@ -84,11 +85,21 @@ a {
 }
 
 .forum-tools .form-field {
-    flex: 1 1 160px;
+    flex: 1 0 auto;
+    min-inline-size: 12rem;
 }
 
 .forum-tools .search-field {
-    flex: 2 1 240px;
+    flex: 2 0 16rem;
+}
+
+.forum-tools label {
+    white-space: nowrap;
+}
+
+.forum-tools select {
+    min-inline-size: max-content;
+    padding-inline-end: 2rem;
 }
 
 .form-field {
@@ -438,6 +449,7 @@ textarea:focus {
 @media (max-width: 700px) {
     .forum-tools .form-field {
         flex: auto;
+        min-inline-size: 0;
     }
     .page-heading,
     .forum-tools,
