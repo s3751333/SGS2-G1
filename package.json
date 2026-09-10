@@ -1,15 +1,12 @@
 {
-  "name": "booknook-a2-prototype",
+  "name": "booknook-full-stack-application",
   "version": "2.0.0",
   "private": true,
-  "description": "COSC3060 Assessment 2 web application prototype",
+  "description": "COSC3060 Assessment 3 BookNook full-stack web application",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "db:seed": "node database/seed.js",
-    "dev:local": "node scripts/dev-local.js",
-    "test": "node --test tests/*.test.js",
-    "test:browser": "node --test tests/shop.browser.js"
+    "db:seed": "node database/seed.js"
   },
   "engines": {
     "node": ">=20.19"
