@@ -44,7 +44,7 @@
                     data-product-id="<%= item.productId %>"
                     data-price="<%= item.product.price %>"
                     data-name="<%= item.product.name %>"
-                    data-added-at="<%= item.addedAt %>"
+                    data-added-at="<%= item.addedAt.toISOString() %>"
                 >
                     <button type="button" class="remove-btn" data-wishlist-action="remove" aria-label="Remove <%= item.product.name %> from wishlist"><i class="fas fa-xmark"></i></button>
                     <img src="<%= item.product.image %>" alt="Cover of <%= item.product.name %>">

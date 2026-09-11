@@ -71,6 +71,28 @@ async function ensureDatabaseIndexes(database) {
     { authorId: 1, createdAt: -1 },
     { name: "comments_by_author" },
   );
+
+  const reviews = database.collection("reviews");
+  const wishlistItems = database.collection("wishlistItems");
+
+  // Names below match indexes already present in the shared database
+  // (created independently as part of the team's MongoDB rollout) rather
+  // than the names originally chosen here, to avoid an "index already
+  // exists with a different name" conflict. The key patterns and
+  // uniqueness rules are unchanged.
+  await reviews.createIndex(
+    { productId: 1, userId: 1 },
+    { name: "one_review_per_member", unique: true, partialFilterExpression: { userId: { $type: "number" } } },
+  );
+  await reviews.createIndex({ productId: 1, createdAt: -1 }, { name: "reviews_by_product" });
+  await reviews.createIndex({ productId: 1, helpfulCount: -1 }, { name: "reviews_by_product_helpful" });
+
+  await wishlistItems.createIndex(
+    { userId: 1, productId: 1 },
+    { name: "unique_wishlist_product", unique: true },
+  );
+  await wishlistItems.createIndex({ userId: 1, addedAt: -1 }, { name: "wishlist_by_user" });
+  await wishlistItems.createIndex({ productId: 1 }, { name: "wishlist_by_product" });
 }
 
 module.exports = { ensureDatabaseIndexes };

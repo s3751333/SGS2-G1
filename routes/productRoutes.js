@@ -1,30 +1,40 @@
 const express = require("express");
 const { requireLogin } = require("../middleware/auth");
+const {
+  getUploadedReviewImagePath,
+  handleReviewImageUpload,
+  removeUploadedReviewImage,
+} = require("../middleware/reviewImageUpload");
 
 const { findProductById, listProducts } = require("../repositories/productRepository");
+const {
+  createReview,
+  deleteReview,
+  findReviewById,
+  findReviewByUserAndProduct,
+  incrementHelpfulCount,
+  listReviewsForProduct,
+  updateReview,
+} = require("../repositories/reviewRepository");
+const {
+  countOtherWishlistItems,
+  createWishlistItem,
+  deleteWishlistItem,
+  findWishlistItem,
+  listWishlistItemsForUser,
+} = require("../repositories/wishlistRepository");
 
 const productCategories = ["fiction", "reference", "self-help", "board-games"];
+const DUPLICATE_KEY_ERROR = 11000;
 
-function createProductRouter({
-  database,
-  reviews,
-  wishlistItems,
-  getNextReviewId,
-  getNextWishlistItemId,
-  cartService,
-}) {
+function createProductRouter({ database, cartService }) {
   const router = express.Router();
 
   function getProductById(productId) {
     return findProductById(database, productId);
   }
 
-  function getReviewsForProduct(productId) {
-    return reviews.filter((review) => review.productId === productId);
-  }
-
-  function getRatingSummary(productId) {
-    const productReviews = getReviewsForProduct(productId);
+  function getRatingSummary(productReviews) {
     const count = productReviews.length;
     const breakdown = [5, 4, 3, 2, 1].map((stars) => {
       const starCount = productReviews.filter((review) => review.rating === stars).length;
@@ -39,6 +49,10 @@ function createProductRouter({
       : 0;
 
     return { average: Math.round(average * 10) / 10, count, breakdown };
+  }
+
+  async function getRatingSummaryForProduct(productId) {
+    return getRatingSummary(await listReviewsForProduct(database, productId));
   }
 
   function sortReviews(productReviews, sortKey) {
@@ -80,7 +94,7 @@ function createProductRouter({
     return haystack.includes(query.toLowerCase());
   }
 
-  function sortProducts(productList, sortKey) {
+  function sortProducts(productList, ratingByProductId, sortKey) {
     const sorted = [...productList];
 
     if (sortKey === "price-low") {
@@ -90,24 +104,22 @@ function createProductRouter({
     } else if (sortKey === "name") {
       sorted.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortKey === "rating") {
-      sorted.sort((a, b) => getRatingSummary(b.id).average - getRatingSummary(a.id).average);
+      sorted.sort((a, b) => ratingByProductId.get(b.id).average - ratingByProductId.get(a.id).average);
     }
 
     return sorted;
   }
 
   async function getWishlistForUser(userId) {
-    const products = await listProducts(database);
-    return wishlistItems
-      .filter((item) => item.userId === userId)
-      .map((item) => ({ ...item, product: products.find((product) => product.id === item.productId) || null }))
-      .filter((item) => item.product !== null);
-  }
+    const [items, products] = await Promise.all([
+      listWishlistItemsForUser(database, userId),
+      listProducts(database),
+    ]);
+    const productById = new Map(products.map((product) => [product.id, product]));
 
-  function countOtherCollectors(productId, currentUserId) {
-    return wishlistItems.filter(
-      (item) => item.productId === productId && item.userId !== currentUserId,
-    ).length;
+    return items
+      .map((item) => ({ ...item, product: productById.get(item.productId) || null }))
+      .filter((item) => item.product !== null);
   }
 
   function sortWishlist(items, sortKey) {
@@ -134,12 +146,15 @@ function createProductRouter({
     const filtered = products
       .filter((product) => category === "all" || product.category === category)
       .filter((product) => matchesProductSearch(product, query));
-    const sorted = sortProducts(filtered, sort);
+
+    const ratings = await Promise.all(filtered.map(async (product) => [product.id, await getRatingSummaryForProduct(product.id)]));
+    const ratingByProductId = new Map(ratings);
+    const sorted = sortProducts(filtered, ratingByProductId, sort);
 
     response.render("products", {
       activePage: "shop",
       currentUser: response.locals.currentUser,
-      products: sorted.map((product) => ({ ...product, rating: getRatingSummary(product.id) })),
+      products: sorted.map((product) => ({ ...product, rating: ratingByProductId.get(product.id) })),
       productCategories,
       query,
       category,
@@ -158,10 +173,11 @@ function createProductRouter({
 
     const currentUser = response.locals.currentUser;
     const sort = String(request.query.sort || "recent");
-    const productReviews = sortReviews(getReviewsForProduct(product.id), sort)
+    const allReviews = await listReviewsForProduct(database, product.id);
+    const productReviews = sortReviews(allReviews, sort)
       .map((review) => ({ ...review, isOwnReview: currentUser ? review.userId === currentUser.id : false }));
     const wishlistEntry = currentUser
-      ? wishlistItems.find((item) => item.userId === currentUser.id && item.productId === product.id)
+      ? await findWishlistItem(database, currentUser.id, product.id)
       : null;
 
     response.render("product-detail", {
@@ -169,7 +185,7 @@ function createProductRouter({
       currentUser,
       product,
       reviews: productReviews,
-      rating: getRatingSummary(product.id),
+      rating: getRatingSummary(allReviews),
       reviewSort: sort,
       isInWishlist: Boolean(wishlistEntry),
       reviewErrors: {},
@@ -177,7 +193,11 @@ function createProductRouter({
     });
   });
 
-  router.post("/product-detail/:id/reviews", requireLogin, async (request, response, next) => {
+  function getReviewSummary(body) {
+    return body.length > 150 ? `${body.slice(0, 150).trim()}…` : body;
+  }
+
+  router.get("/product-detail/:id/reviews", async (request, response, next) => {
     const product = await getProductById(request.params.id);
 
     if (!product) {
@@ -185,28 +205,81 @@ function createProductRouter({
       return;
     }
 
-    const alreadyReviewed = reviews.some(
-      (review) => review.productId === product.id && review.userId === request.currentUser.id,
-    );
+    const sort = String(request.query.sort || "recent");
+    const currentUser = response.locals.currentUser;
+    const allReviews = await listReviewsForProduct(database, product.id);
+    const productReviews = sortReviews(allReviews, sort).map((review) => ({
+      ...review,
+      summary: getReviewSummary(review.body),
+      isOwnReview: currentUser ? review.userId === currentUser.id : false,
+    }));
+
+    response.render("reviews-list", {
+      activePage: "shop",
+      currentUser,
+      product,
+      reviews: productReviews,
+      rating: getRatingSummary(allReviews),
+      reviewSort: sort,
+    });
+  });
+
+  router.get("/product-detail/:id/reviews/:reviewId", async (request, response, next) => {
+    const product = await getProductById(request.params.id);
+
+    if (!product) {
+      next();
+      return;
+    }
+
+    const review = await findReviewById(database, request.params.reviewId, product.id);
+
+    if (!review) {
+      next();
+      return;
+    }
+
+    const currentUser = response.locals.currentUser;
+
+    response.render("review-detail", {
+      activePage: "shop",
+      currentUser,
+      product,
+      review: { ...review, isOwnReview: currentUser ? review.userId === currentUser.id : false },
+    });
+  });
+
+  router.post("/product-detail/:id/reviews", requireLogin, handleReviewImageUpload, async (request, response, next) => {
+    const product = await getProductById(request.params.id);
+
+    if (!product) {
+      next();
+      return;
+    }
+
+    const alreadyReviewed = await findReviewByUserAndProduct(database, product.id, request.currentUser.id);
     const { errors, rating, title, body } = getReviewFormData(request.body);
 
     if (alreadyReviewed) {
-      errors.duplicate = "You have already reviewed this product. Delete your existing review to write a new one.";
+      errors.duplicate = "You have already reviewed this product. Edit or delete your existing review instead.";
+    }
+
+    if (request.reviewImageUploadError) {
+      errors.image = request.reviewImageUploadError;
     }
 
     if (Object.keys(errors).length > 0) {
-      const productReviews = sortReviews(getReviewsForProduct(product.id), "recent")
+      const allReviews = await listReviewsForProduct(database, product.id);
+      const productReviews = sortReviews(allReviews, "recent")
         .map((review) => ({ ...review, isOwnReview: review.userId === request.currentUser.id }));
-      const wishlistEntry = wishlistItems.find(
-        (item) => item.userId === request.currentUser.id && item.productId === product.id,
-      );
+      const wishlistEntry = await findWishlistItem(database, request.currentUser.id, product.id);
 
       response.status(400).render("product-detail", {
         activePage: "shop",
         currentUser: request.currentUser,
         product,
         reviews: productReviews,
-        rating: getRatingSummary(product.id),
+        rating: getRatingSummary(allReviews),
         reviewSort: "recent",
         isInWishlist: Boolean(wishlistEntry),
         reviewErrors: errors,
@@ -215,18 +288,104 @@ function createProductRouter({
       return;
     }
 
-    reviews.push({
-      id: getNextReviewId(),
-      productId: product.id,
-      userId: request.currentUser.id,
-      authorName: request.currentUser.fullName,
-      rating,
-      title,
-      body,
-      createdAt: new Date().toISOString(),
-      helpfulCount: 0,
-    });
+    try {
+      await createReview(database, {
+        productId: product.id,
+        userId: request.currentUser.id,
+        authorName: request.currentUser.fullName,
+        rating,
+        title,
+        body,
+        image: getUploadedReviewImagePath(request),
+      });
+    } catch (error) {
+      // A duplicate slipping past the check above (e.g. a double-submit) is
+      // caught here too, since productId+userId has a unique index.
+      if (error.code !== DUPLICATE_KEY_ERROR) throw error;
+    }
 
+    response.redirect(`/product-detail/${product.id}#reviews`);
+  });
+
+  router.get("/product-detail/:id/reviews/:reviewId/edit", requireLogin, async (request, response, next) => {
+    const product = await getProductById(request.params.id);
+    if (!product) {
+      next();
+      return;
+    }
+
+    const review = await findReviewById(database, request.params.reviewId, product.id);
+    if (!review) {
+      next();
+      return;
+    }
+
+    if (review.userId !== request.currentUser.id) {
+      response.status(403).send("You can only edit your own review.");
+      return;
+    }
+
+    response.render("review-edit", {
+      activePage: "shop",
+      currentUser: request.currentUser,
+      product,
+      review,
+      errors: {},
+      formData: { rating: String(review.rating), title: review.title, body: review.body },
+    });
+  });
+
+  router.post("/product-detail/:id/reviews/:reviewId/edit", requireLogin, handleReviewImageUpload, async (request, response, next) => {
+    const product = await getProductById(request.params.id);
+    if (!product) {
+      next();
+      return;
+    }
+
+    const review = await findReviewById(database, request.params.reviewId, product.id);
+    if (!review) {
+      next();
+      return;
+    }
+
+    if (review.userId !== request.currentUser.id) {
+      response.status(403).send("You can only edit your own review.");
+      return;
+    }
+
+    const { errors, rating, title, body } = getReviewFormData(request.body);
+
+    if (request.reviewImageUploadError) {
+      errors.image = request.reviewImageUploadError;
+    }
+
+    if (Object.keys(errors).length > 0) {
+      response.status(400).render("review-edit", {
+        activePage: "shop",
+        currentUser: request.currentUser,
+        product,
+        review,
+        errors,
+        formData: { rating: String(request.body.rating || ""), title, body },
+      });
+      return;
+    }
+
+    const uploadedImagePath = getUploadedReviewImagePath(request);
+    const removePhoto = request.body.removeImage === "on" && !uploadedImagePath;
+    const changes = { rating, title, body };
+
+    if (uploadedImagePath) {
+      changes.image = uploadedImagePath;
+    } else if (removePhoto) {
+      changes.image = "";
+    }
+
+    if ((uploadedImagePath || removePhoto) && review.image) {
+      await removeUploadedReviewImage(review.image);
+    }
+
+    await updateReview(database, review.id, product.id, request.currentUser.id, changes);
     response.redirect(`/product-detail/${product.id}#reviews`);
   });
 
@@ -238,20 +397,20 @@ function createProductRouter({
       return;
     }
 
-    const reviewId = Number(request.params.reviewId);
-    const reviewIndex = reviews.findIndex((review) => review.id === reviewId && review.productId === product.id);
+    const review = await findReviewById(database, request.params.reviewId, product.id);
 
-    if (reviewIndex === -1) {
+    if (!review) {
       next();
       return;
     }
 
-    if (reviews[reviewIndex].userId !== request.currentUser.id) {
+    if (review.userId !== request.currentUser.id) {
       response.status(403).send("You can only delete your own review.");
       return;
     }
 
-    reviews.splice(reviewIndex, 1);
+    await deleteReview(database, review.id, product.id, request.currentUser.id);
+    if (review.image) await removeUploadedReviewImage(review.image);
     response.redirect(`/product-detail/${product.id}#reviews`);
   });
 
@@ -263,29 +422,28 @@ function createProductRouter({
       return;
     }
 
-    const reviewId = Number(request.params.reviewId);
-    const review = reviews.find((item) => item.id === reviewId && item.productId === product.id);
+    const review = await incrementHelpfulCount(database, request.params.reviewId, product.id);
 
     if (!review) {
       response.status(404).json({ error: "Review not found." });
       return;
     }
 
-    review.helpfulCount += 1;
     response.json({ helpfulCount: review.helpfulCount });
   });
 
   router.get("/wishlist", requireLogin, async (request, response) => {
     const sort = String(request.query.sort || "recent");
-    const items = sortWishlist(await getWishlistForUser(request.currentUser.id), sort).map((item) => ({
+    const items = sortWishlist(await getWishlistForUser(request.currentUser.id), sort);
+    const withCollectorCounts = await Promise.all(items.map(async (item) => ({
       ...item,
-      othersCount: countOtherCollectors(item.productId, request.currentUser.id),
-    }));
+      othersCount: await countOtherWishlistItems(database, item.productId, request.currentUser.id),
+    })));
 
     response.render("wishlist", {
       activePage: "",
       currentUser: request.currentUser,
-      items,
+      items: withCollectorCounts,
       sort,
     });
   });
@@ -299,21 +457,17 @@ function createProductRouter({
       return;
     }
 
-    const alreadySaved = wishlistItems.some(
-      (item) => item.userId === request.currentUser.id && item.productId === productId,
-    );
+    const alreadySaved = await findWishlistItem(database, request.currentUser.id, productId);
 
     if (!alreadySaved) {
-      wishlistItems.push({
-        id: getNextWishlistItemId(),
-        userId: request.currentUser.id,
-        productId,
-        addedAt: new Date().toISOString(),
-        purchased: false,
-      });
+      try {
+        await createWishlistItem(database, request.currentUser.id, productId);
+      } catch (error) {
+        if (error.code !== DUPLICATE_KEY_ERROR) throw error;
+      }
     }
 
-    const count = (await getWishlistForUser(request.currentUser.id)).length;
+    const count = (await listWishlistItemsForUser(database, request.currentUser.id)).length;
 
     if (request.headers.accept && request.headers.accept.includes("application/json")) {
       response.json({ saved: true, count });
@@ -324,38 +478,31 @@ function createProductRouter({
   });
 
   router.delete("/wishlist/:productId", requireLogin, async (request, response) => {
-    const productId = request.params.productId;
-    const index = wishlistItems.findIndex(
-      (item) => item.userId === request.currentUser.id && item.productId === productId,
-    );
+    const removed = await deleteWishlistItem(database, request.currentUser.id, request.params.productId);
 
-    if (index === -1) {
+    if (!removed) {
       response.status(404).json({ error: "Item is not in your wishlist." });
       return;
     }
 
-    wishlistItems.splice(index, 1);
-    response.json({ saved: false, count: (await getWishlistForUser(request.currentUser.id)).length });
+    response.json({ saved: false, count: (await listWishlistItemsForUser(database, request.currentUser.id)).length });
   });
 
   router.post("/wishlist/:productId/move-to-cart", requireLogin, async (request, response) => {
     const productId = request.params.productId;
-    const index = wishlistItems.findIndex(
-      (item) => item.userId === request.currentUser.id && item.productId === productId,
-    );
+    const wishlistEntry = await findWishlistItem(database, request.currentUser.id, productId);
 
-    if (index === -1) {
+    if (!wishlistEntry) {
       response.status(404).json({ error: "Item is not in your wishlist." });
       return;
     }
 
-    const wishlistEntry = wishlistItems[index];
     const cart = await cartService.addItem(request.currentUser.id, productId, 1);
-    const currentIndex = wishlistItems.indexOf(wishlistEntry);
-    if (currentIndex !== -1) wishlistItems.splice(currentIndex, 1);
+    await deleteWishlistItem(database, request.currentUser.id, productId);
+
     response.json({
       moved: true,
-      count: (await getWishlistForUser(request.currentUser.id)).length,
+      count: (await listWishlistItemsForUser(database, request.currentUser.id)).length,
       cart,
     });
   });

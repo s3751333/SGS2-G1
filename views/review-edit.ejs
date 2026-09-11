@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Edit your review on BookNook.">
+    <title>BookNook | Edit Review</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/product-detail.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="page-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a> / <a href="/products">Shop</a> / <a href="/product-detail/<%= product.id %>#reviews"><%= product.name %></a> / Edit review
+        </nav>
+
+        <div class="review-form-card" aria-labelledby="review-form-heading">
+            <h1 id="review-form-heading">Edit Your Review</h1>
+            <p>Update your rating, title, or review for <%= product.name %>.</p>
+            <% if (errors.duplicate) { %>
+                <p class="form-error"><%= errors.duplicate %></p>
+            <% } %>
+            <form id="review-form" action="/product-detail/<%= product.id %>/reviews/<%= review.id %>/edit" method="post" enctype="multipart/form-data" novalidate>
+                <div>
+                    <label for="review-image">Photo (optional)</label>
+                    <% if (review.image) { %>
+                        <img class="review-image-preview" src="/<%= review.image %>" alt="Current review photo">
+                        <label class="remove-photo-option">
+                            <input type="checkbox" name="removeImage">
+                            Remove this photo
+                        </label>
+                    <% } %>
+                    <input type="file" id="review-image" name="imageFile" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <p class="field-error" data-error-for="image"><%= errors.image || "" %></p>
+                </div>
+                <div>
+                    <span id="rating-label">Your rating</span>
+                    <div class="star-picker" role="radiogroup" aria-labelledby="rating-label">
+                        <input type="radio" id="rating-5" name="rating" value="5" <%= formData.rating === "5" ? "checked" : "" %>>
+                        <label for="rating-5" title="5 stars">&#9733;</label>
+                        <input type="radio" id="rating-4" name="rating" value="4" <%= formData.rating === "4" ? "checked" : "" %>>
+                        <label for="rating-4" title="4 stars">&#9733;</label>
+                        <input type="radio" id="rating-3" name="rating" value="3" <%= formData.rating === "3" ? "checked" : "" %>>
+                        <label for="rating-3" title="3 stars">&#9733;</label>
+                        <input type="radio" id="rating-2" name="rating" value="2" <%= formData.rating === "2" ? "checked" : "" %>>
+                        <label for="rating-2" title="2 stars">&#9733;</label>
+                        <input type="radio" id="rating-1" name="rating" value="1" <%= formData.rating === "1" ? "checked" : "" %>>
+                        <label for="rating-1" title="1 star">&#9733;</label>
+                    </div>
+                    <p class="field-error" data-error-for="rating"><%= errors.rating || "" %></p>
+                </div>
+                <div>
+                    <label for="review-title">Review title</label>
+                    <input type="text" id="review-title" name="title" value="<%= formData.title %>" maxlength="120" required>
+                    <p class="field-error" data-error-for="title"><%= errors.title || "" %></p>
+                </div>
+                <div>
+                    <label for="review-body">Your review</label>
+                    <textarea id="review-body" name="body" rows="5" maxlength="1000" required><%= formData.body %></textarea>
+                    <p class="field-error" data-error-for="body"><%= errors.body || "" %></p>
+                </div>
+                <div class="form-actions">
+                    <a href="/product-detail/<%= product.id %>#reviews" class="secondary-button">Cancel</a>
+                    <button class="button" type="submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <%- include("partials/footer") %>
+
+    <script src="/js/product-detail.js" defer></script>
+</body>
+
+</html>

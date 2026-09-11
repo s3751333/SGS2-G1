@@ -32,7 +32,7 @@
                     <% if (rating.count > 0) { %>
                         <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(Math.round(rating.average)) + "&#9734;".repeat(5 - Math.round(rating.average)) %></span>
                         <span><%= rating.average %> out of 5</span>
-                        <a href="#reviews"><%= rating.count %> review<%= rating.count === 1 ? "" : "s" %></a>
+                        <a href="/product-detail/<%= product.id %>/reviews"><%= rating.count %> review<%= rating.count === 1 ? "" : "s" %></a>
                     <% } else { %>
                         <span>No reviews yet</span>
                         <a href="#write-review">Be the first to review</a>
@@ -126,12 +126,16 @@
                         </div>
                         <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(review.rating) + "&#9734;".repeat(5 - review.rating) %></span>
                         <h3 class="review-title"><%= review.title %></h3>
+                        <% if (review.image) { %>
+                            <img class="review-image-thumb" src="/<%= review.image %>" alt="Photo shared with this review">
+                        <% } %>
                         <p class="review-body"><%= review.body %></p>
                         <div class="review-footer">
                             <button type="button" class="helpful-btn" data-helpful-button data-product-id="<%= product.id %>" data-review-id="<%= review.id %>">
                                 <i class="far fa-thumbs-up"></i> Helpful (<span data-helpful-count><%= review.helpfulCount %></span>)
                             </button>
                             <% if (review.isOwnReview) { %>
+                                <a href="/product-detail/<%= product.id %>/reviews/<%= review.id %>/edit" class="edit-review-btn"><i class="far fa-pen-to-square"></i> Edit</a>
                                 <form action="/product-detail/<%= product.id %>/reviews/<%= review.id %>/delete" method="post" data-confirm-delete="Delete your review?">
                                     <button type="submit" class="delete-review-btn"><i class="far fa-trash-can"></i> Delete</button>
                                 </form>
@@ -148,7 +152,12 @@
                     <% if (reviewErrors.duplicate) { %>
                         <p class="form-error"><%= reviewErrors.duplicate %></p>
                     <% } %>
-                    <form id="review-form" action="/product-detail/<%= product.id %>/reviews" method="post" novalidate>
+                    <form id="review-form" action="/product-detail/<%= product.id %>/reviews" method="post" enctype="multipart/form-data" novalidate>
+                        <div>
+                            <label for="review-image">Photo (optional)</label>
+                            <input type="file" id="review-image" name="imageFile" accept="image/jpeg,image/png,image/gif,image/webp">
+                            <p class="field-error" data-error-for="image"><%= reviewErrors.image || "" %></p>
+                        </div>
                         <div>
                             <span id="rating-label">Your rating</span>
                             <div class="star-picker" role="radiogroup" aria-labelledby="rating-label">

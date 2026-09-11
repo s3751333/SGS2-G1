@@ -1,4 +1,11 @@
+const dns = require("node:dns");
 const { MongoClient } = require("mongodb");
+
+// Node's built-in DNS resolver sometimes fails to pick up a machine's
+// configured DNS servers when looking up mongodb+srv:// records, even when
+// the OS-level resolver (e.g. nslookup) works fine. Pointing Node directly
+// at a public DNS server avoids that class of "querySrv ECONNREFUSED" error.
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 let client;
 let database;

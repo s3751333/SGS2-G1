@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= review.title %> — a review of <%= product.name %> on BookNook.">
+    <title>BookNook | <%= review.title %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/product-detail.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="page-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a> / <a href="/products">Shop</a> / <a href="/product-detail/<%= product.id %>"><%= product.name %></a> / <a href="/product-detail/<%= product.id %>/reviews">Reviews</a> / <%= review.title %>
+        </nav>
+
+        <article class="review-detail-card">
+            <div class="review-header">
+                <div>
+                    <span class="reviewer-name"><%= review.authorName %></span>
+                    <% if (review.userId) { %>
+                        <span class="verified-badge"><i class="fas fa-circle-check"></i> Verified Member</span>
+                    <% } %>
+                </div>
+                <span class="review-date"><%= new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) %></span>
+            </div>
+            <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(review.rating) + "&#9734;".repeat(5 - review.rating) %></span>
+            <h1 class="review-title"><%= review.title %></h1>
+            <% if (review.image) { %>
+                <img class="review-image-thumb" src="/<%= review.image %>" alt="Photo shared with this review">
+            <% } %>
+            <p class="review-body"><%= review.body %></p>
+            <div class="review-footer">
+                <button type="button" class="helpful-btn" data-helpful-button data-product-id="<%= product.id %>" data-review-id="<%= review.id %>">
+                    <i class="far fa-thumbs-up"></i> Helpful (<span data-helpful-count><%= review.helpfulCount %></span>)
+                </button>
+                <% if (review.isOwnReview) { %>
+                    <a href="/product-detail/<%= product.id %>/reviews/<%= review.id %>/edit" class="edit-review-btn"><i class="far fa-pen-to-square"></i> Edit</a>
+                    <form action="/product-detail/<%= product.id %>/reviews/<%= review.id %>/delete" method="post" data-confirm-delete="Delete your review?">
+                        <button type="submit" class="delete-review-btn"><i class="far fa-trash-can"></i> Delete</button>
+                    </form>
+                <% } %>
+            </div>
+            <a href="/product-detail/<%= product.id %>/reviews" class="secondary-button back-to-reviews">&larr; Back to all reviews</a>
+        </article>
+    </main>
+
+    <%- include("partials/footer") %>
+
+    <script src="/js/navbar.js" defer></script>
+    <script src="/js/product-detail.js" defer></script>
+</body>
+
+</html>

@@ -1,573 +1,92 @@
-// DEVELOPMENT-ONLY TEST CREDENTIALS
-// Security answer order: favourite animal / favourite book / favourite colour
-// Admin: admin@booknook.test | Password: Admin123! | Answers: dog / the hobbit / blue
-// Linh:  linh@booknook.test  | Password: Linh123!  | Answers: cat / the little prince / green
-// Alex:  alex@booknook.test  | Password: Alex123!  | Answers: panda / dune / red (locked account)
-// Mai:   mai@booknook.test   | Password: Mai12345! | Answers: rabbit / norwegian wood / purple
-// The user records below still contain only salted scrypt hashes.
-const users = [
-  {
-    id: 1,
-    fullName: "Booknook Admin",
-    username: "admin",
-    email: "admin@booknook.test",
-    introduction: "I enjoy books and web development.",
-    passwordHash: "13245f9bef8969a05aa40749ea737507:f0de63ca54c88a50a3824da916022506abf3f28e96d2d1b0b04a37433a3557bdf7f7e84ebcbd27f8e0433829f72108403f5d118587bf1348971ab41ff0728edb",
-    securityAnswerHashes: [
-      "4ee42a1b32e6bbd07d54cb31569830e9:4020de46500929f7df35dee527c41ab8858473c8e536a53d553bfed786fa560383b4487e3baea45fb059e313ee0d6fc3cda22f1a5977d7b9b744208dd01cf8d9",
-      "6b6e0f776f2ffcc3103bacdf51ccdfd7:020913cd1e5dcf530a9a59d6496757a14dc48289aef1d8b4ebcfb9c759fd7fbd4ad9aa73c4c4c304dd226eb28673540fa63f14056c0a314f093d7b0bb81b5060",
-      "904394a87ae55aa814d926f25dbbc19c:2003d42f696c07ae7039a3ee308e39674a73e0c797202de50379eef1e7bd6d8e7a1190956eb89e64108b9811a6d436e5baa9f9b1758840680e92f1ae15ead0cf",
-    ],
-    role: "admin",
-    status: "active",
-  },
-  {
-    id: 2,
-    fullName: "Linh Nguyen",
-    username: "linhnguyen",
-    email: "linh@booknook.test",
-    introduction: "I enjoy classic stories and language learning.",
-    passwordHash: "3ecd9f34e21a8dc4bff7cf1e5c77b23f:03e4daa40fff9b36e70d391aec15affd3ece814df4d72f0591dfe1260073f3ca8c9a25071e67602c40c062a50d62248fa1966d66915ddd30ec76aa28dcc0237d",
-    securityAnswerHashes: [
-      "6b0719e08b2f13749e70c29c68237bf6:af818f43b840e0d83172b0511adfeea649f49d489fe37c09935fa1bf109d63eb69aa7c154a8eb82d7e90446032409c35ef6407c6e7792ceaf2412a50384d4524",
-      "2669fa2771aa8a5a5a3e8fee8d869cca:4df5c4bc4d96c61ff4826962552baedd0882ce35c517bbf8916420769a16d896144db4044c462e1d8f60541b70320c6f6ede37da6532333b1365be5acf672028",
-      "ae062b53b2ab2db856141cdacbe37d4e:340e734e9099621b8b7a3a9b7625e9cebc4770f7a933ab6f028612bed4a53492a8758c344f22a1856bd4ca014215417274aad849bcdb7cbad812d920f5456ca5",
-    ],
-    role: "member",
-    status: "active",
-  },
-  {
-    id: 3,
-    fullName: "Alex Pham",
-    username: "alexpham",
-    email: "alex@booknook.test",
-    introduction: "I like cooperative board games.",
-    passwordHash: "c2e5e845d2d02f902e8b067324c865d6:5cd82076a9418c151873286dd05dd4aae4a992e203adccdcd60fccfdf24948895e047e122bf3b722c9cb5f42f6289ae68707a7d30029486252195b118174cf89",
-    securityAnswerHashes: [
-      "0dd1f668eaa2f8ae1bfe5d0d5d217a53:3e2c1554602ba935f085290123d69daab44ace7753ab48da21b803c37af37e0336f5f88151da5d1f30831ef54a1549bb63aed2f7a85559430054ec69625372cc",
-      "2c18e3754e968b3e8cfec45f5754069a:fac9a03e009326c4968c3652ee22e3ce6cca25cefeb9755e418cba6edab47a6862099db482d25c58547ef8b977dec753a555793b23624c4f0a904fd6d95814d1",
-      "e6fbf0bfb3139435ef94f76241710ac4:1e5282fed7b8495123f2f079af45057e3f92c872659ba640d85d3026088760760379264032041df2f353fde1a4c58f3ffcb123b1801b16a1c015c6ebc2894295",
-    ],
-    role: "member",
-    status: "locked",
-  },
-  {
-    id: 4,
-    fullName: "Mai Hoang",
-    username: "maihoang",
-    email: "mai@booknook.test",
-    introduction: "I read Vietnamese history and fiction.",
-    passwordHash: "7c4ada82f59a041fe0b45cdee67ffc96:bcf973c5391b596535bbdde930d4b242faf41798bd0b19e0192b9ac524b35ebe244e567765cc856cee391facf7db9a66fd9e3a9ecd2d8e883e436bc143934745",
-    securityAnswerHashes: [
-      "7e3c642d3ce23f461fdeca56120271cf:d7af96e2ebf74fd41c5a3eedad8452e07f43bd2de04af218881a84dd88e7f3659c353987caad10bf894db7f90b420ed81508bb07d47302c3f81161b741ac469f",
-      "f9f4fb12429dc66bf665e292cc77615e:842b271286fc5747b7c71f4dfffa085a028eee1d997edd951aef0bfc77b0b7ebe49d0799da7ffef4b335771797e6bedee0d0090880c4ef4ba4045b543d767314",
-      "1fbc0a811ad7a5557d8f395fd0474379:ca3211c17272aa496a1b318564b8200af140f13742ffcddd0c26a73da28cfab426285cda6c505c993a61b72bf44c5c8c4ff837665eb84b07d04e9d3ef688ff52",
-    ],
-    role: "member",
-    status: "active",
-  },
-];
+async function ensureDatabaseIndexes(database) {
+  await database.collection("carts").createIndex({ userId: 1 }, { name: "unique_cart_user", unique: true });
+  await database.collection("orders").createIndex({ userId: 1, createdAt: -1 }, { name: "orders_by_user" });
+  await database.collection("orders").createIndex(
+    { userId: 1, requestKey: 1 },
+    { name: "unique_checkout_request", unique: true, partialFilterExpression: { requestKey: { $type: "string" } } },
+  );
+  await database.collection("products").createIndex({ category: 1, displayOrder: 1 }, { name: "products_by_category_display_order" });
+  await database.collection("forumTopics").createIndex(
+    { deleted: 1, createdAt: -1 }, { name: "visible_topics_by_date" },
+  );
+  await database.collection("forumReplies").createIndex(
+    { topicId: 1, deleted: 1, createdAt: 1 }, { name: "replies_by_topic" },
+  );
+  const users = database.collection("users");
+  const sessions = database.collection("sessions");
+  const passwordResetTokens = database.collection("passwordResetTokens");
+  const blogPosts = database.collection("blogPosts");
+  const blogComments = database.collection("blogComments");
 
-const blogPosts = [
-  {
-    id: 1,
-    authorId: 1,
-    title: "Top 5 Programming Languages to Learn in 2026",
-    date: "2026-07-01",
-    category: "programming",
-    tags: ["JavaScript", "Python", "Careers"],
-    summary: "Explore five programming languages that are useful for modern software development.",
-    content: [
-      "Software development continues to change through cloud platforms, automation, and artificial intelligence. Learning languages with strong communities and practical applications helps new developers build useful projects.",
-      "JavaScript and TypeScript remain important for modern web applications, while Python is widely used for automation, data analysis, and artificial intelligence.",
-      "Go and Rust are also useful choices for systems where performance and reliability are important. The best language to learn depends on the type of projects a developer wants to build.",
-    ],
-    image: "img/book.jpg",
-    comments: [
-      {
-        id: 1,
-        author: "Laura",
-        date: "2026-07-16",
-        text: "Great article! JavaScript is definitely not going anywhere.",
-      },
-      {
-        id: 2,
-        author: "Tom",
-        date: "2026-07-17",
-        text: "Rust is also worth exploring for performance-heavy applications.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    authorId: 1,
-    title: "Getting Started with Mobile App Development",
-    date: "2026-06-18",
-    category: "mobile",
-    tags: ["Mobile", "Apps", "Development"],
-    summary: "A beginner-friendly introduction to planning and building mobile applications.",
-    content: [
-      "Mobile applications support communication, shopping, banking, education, and entertainment. Beginners should start with a small project and focus on a clear user interface before adding complex features.",
-      "Native Android applications commonly use Kotlin, while native iOS applications generally use Swift. Cross-platform tools such as Flutter and React Native can support both platforms from one codebase.",
-      "Before publication, applications should be tested on different screen sizes and devices. Regular updates and user feedback help improve the product after release.",
-    ],
-    image: "img/mobileapp.jpg",
-    comments: [
-      {
-        id: 1,
-        author: "Noah",
-        date: "2026-06-20",
-        text: "Flutter has been my favourite framework for building reusable interfaces.",
-      },
-      {
-        id: 2,
-        author: "Grace",
-        date: "2026-06-21",
-        text: "This article gave me a useful starting point for my first mobile app.",
-      },
-    ],
-  },
-  {
-    id: 3,
-    authorId: 1,
-    title: "How Open Source Projects Improve Your Skills",
-    date: "2026-07-09",
-    category: "programming",
-    tags: ["Open Source", "GitHub", "Teamwork"],
-    summary: "Learn how open source contribution provides practical programming and teamwork experience.",
-    content: [
-      "Open source projects allow developers to work on real software with contributors from different backgrounds. Reading existing code, fixing small issues, and discussing changes are valuable professional skills.",
-      "A first contribution does not need to be a major feature. Beginners can improve documentation, reproduce a reported bug, or add a simple automated test.",
-      "Consistent contributions improve communication, teamwork, and confidence while building a portfolio that demonstrates practical experience.",
-    ],
-    image: "img/opensource.jpg",
-    comments: [
-      {
-        id: 1,
-        author: "David",
-        date: "2026-07-11",
-        text: "Contributing on GitHub helped me understand code reviews and team workflows.",
-      },
-      {
-        id: 2,
-        author: "Megan",
-        date: "2026-07-12",
-        text: "Open source is a great way to learn from more experienced developers.",
-      },
-    ],
-  },
-  {
-    id: 4,
-    authorId: 1,
-    title: "Why Cloud Computing Continues to Grow",
-    date: "2026-05-02",
-    category: "cloud",
-    tags: ["Cloud", "Infrastructure", "Web"],
-    summary: "Understand why organisations continue moving applications and infrastructure to cloud services.",
-    content: [
-      "Cloud computing gives organisations access to computing resources without maintaining large amounts of physical hardware. It can improve flexibility, collaboration, and the speed of deployment.",
-      "Cloud platforms allow resources to increase or decrease according to demand. This is useful for services that experience seasonal traffic or rapid growth.",
-      "Organisations must still consider data protection, availability, and vendor dependency when planning a move to cloud services.",
-    ],
-    image: "img/cloudcomputing.jpg",
-    comments: [
-      {
-        id: 1,
-        author: "Ryan",
-        date: "2026-05-04",
-        text: "Cloud services have changed how our team deploys web applications.",
-      },
-      {
-        id: 2,
-        author: "Linda",
-        date: "2026-05-05",
-        text: "Scalability is one of the strongest reasons for moving services to the cloud.",
-      },
-    ],
-  },
-  {
-    id: 5,
-    authorId: 1,
-    title: "Cybersecurity Tips Everyone Should Know",
-    date: "2026-04-10",
-    category: "cybersecurity",
-    tags: ["Security", "Privacy", "Passwords"],
-    summary: "Simple habits that help protect accounts, personal information, and devices.",
-    content: [
-      "Cybersecurity threats continue to evolve, but strong unique passwords, software updates, multi-factor authentication, and careful link checking can reduce common risks.",
-      "Reusing the same password across several websites allows one compromised account to place many other accounts at risk.",
-      "Users should remain cautious when opening unexpected emails, attachments, or links. Messages that create urgency or request passwords may be phishing attempts.",
-    ],
-    image: "img/security.jpg",
-    comments: [
-      {
-        id: 1,
-        author: "Chris",
-        date: "2026-04-12",
-        text: "Everyone should enable two-factor authentication for important accounts.",
-      },
-      {
-        id: 2,
-        author: "Anna",
-        date: "2026-04-13",
-        text: "Password reuse is still a very common problem among internet users.",
-      },
-    ],
-  },
-];
+  await users.createIndex(
+    { username: 1 },
+    {
+      collation: { locale: "en", strength: 2 },
+      name: "unique_username",
+      unique: true,
+    },
+  );
 
-const forumTopics = [
-  {
-    id: 1,
-    authorId: 2,
-    category: "english",
-    title: "Which translation of The Little Prince should I read?",
-    content: "I want to read The Little Prince in English for the first time. I found translations by Katherine Woods and Richard Howard. Which version is easier for an intermediate English learner?",
-    image: "img/little_prince.jpg",
-    createdAt: "2026-07-18T09:00:00.000Z",
-    updatedAt: "2026-07-18T09:00:00.000Z",
-    views: 31,
-    deleted: false,
-  },
-  {
-    id: 2,
-    authorId: 4,
-    category: "vietnamese",
-    title: "Recommend a Vietnamese history book for beginners",
-    content: "I would like an accessible introduction to Vietnamese history. Which book gives a clear overview without assuming too much background knowledge?",
-    image: "img/book.jpg",
-    createdAt: "2026-07-17T08:30:00.000Z",
-    updatedAt: "2026-07-17T08:30:00.000Z",
-    views: 42,
-    deleted: false,
-  },
-  {
-    id: 3,
-    authorId: 3,
-    category: "board-games",
-    title: "Best cooperative board game for four new players?",
-    content: "Our group is new to modern board games and wants to play cooperatively. We need a game that teaches quickly and finishes in about one hour.",
-    image: "img/catan_bg.jpg",
-    createdAt: "2026-07-16T12:20:00.000Z",
-    updatedAt: "2026-07-16T12:20:00.000Z",
-    views: 57,
-    deleted: false,
-  },
-];
+  await users.createIndex(
+    { email: 1 },
+    {
+      collation: { locale: "en", strength: 2 },
+      name: "unique_email",
+      unique: true,
+    },
+  );
 
-const forumReplies = [
-  {
-    id: 1,
-    topicId: 1,
-    parentReplyId: null,
-    authorId: 3,
-    title: "The modern translation is clearer",
-    content: "Richard Howard's translation uses more modern English. I found it clearer when I first read the story.",
-    image: "img/book.jpg",
-    createdAt: "2026-07-18T10:15:00.000Z",
-    updatedAt: "2026-07-18T10:15:00.000Z",
-    deleted: false,
-  },
-  {
-    id: 2,
-    topicId: 1,
-    parentReplyId: 1,
-    authorId: 2,
-    title: "Thanks for the recommendation",
-    content: "Thank you. Modern wording sounds better for my first reading.",
-    image: "img/little_prince.jpg",
-    createdAt: "2026-07-18T11:02:00.000Z",
-    updatedAt: "2026-07-18T11:02:00.000Z",
-    deleted: false,
-  },
-  {
-    id: 3,
-    topicId: 1,
-    parentReplyId: null,
-    authorId: 4,
-    title: "Compare a sample chapter",
-    content: "Katherine Woods has a more classic style. You could read one chapter from each version before choosing.",
-    image: "img/eng_use.jpg",
-    createdAt: "2026-07-18T14:40:00.000Z",
-    updatedAt: "2026-07-18T14:40:00.000Z",
-    deleted: false,
-  },
-  {
-    id: 4,
-    topicId: 1,
-    parentReplyId: null,
-    authorId: 1,
-    title: "A direct style for learners",
-    content: "I also recommend Richard Howard for a learner. The sentences feel direct, but the meaning is still beautiful.",
-    image: "img/book.jpg",
-    createdAt: "2026-07-19T09:20:00.000Z",
-    updatedAt: "2026-07-19T09:20:00.000Z",
-    deleted: false,
-  },
-];
+  await users.createIndex({ role: 1, status: 1 }, { name: "role_and_status" });
+  await sessions.createIndex({ userId: 1 }, { name: "session_user" });
+  await sessions.createIndex(
+    { expiresAt: 1 },
+    { expireAfterSeconds: 0, name: "expire_sessions" },
+  );
+  await passwordResetTokens.createIndex({ userId: 1 }, { name: "reset_user" });
+  await passwordResetTokens.createIndex(
+    { expiresAt: 1 },
+    { expireAfterSeconds: 0, name: "expire_password_resets" },
+  );
+  await blogPosts.createIndex(
+    { deleted: 1, createdAt: -1 },
+    { name: "published_posts_by_date" },
+  );
+  await blogPosts.createIndex(
+    { authorId: 1, createdAt: -1 },
+    { name: "posts_by_author" },
+  );
+  await blogPosts.createIndex(
+    { category: 1, createdAt: -1 },
+    { name: "posts_by_category" },
+  );
+  await blogPosts.createIndex(
+    { title: "text", summary: "text", tags: "text", content: "text" },
+    { name: "blog_search" },
+  );
+  await blogComments.createIndex(
+    { postId: 1, deleted: 1, createdAt: 1 },
+    { name: "comments_by_post" },
+  );
+  await blogComments.createIndex(
+    { authorId: 1, createdAt: -1 },
+    { name: "comments_by_author" },
+  );
 
-const products = [
-  {
-    id: "harry-potter",
-    name: "Harry Potter and the Sorcerer's Stone",
-    metaLabel: "Author",
-    meta: "J. K. Rowling",
-    price: 150000,
-    category: "fiction",
-    tag: "Fantasy",
-    image: "/img/harry_potter.jpg",
-    description:
-      "The book that launched a phenomenon: an orphaned boy discovers on his eleventh birthday that he is a wizard, and is whisked away to Hogwarts School of Witchcraft and Wizardry.",
-    stock: 24,
-    specs: [
-      { label: "ISBN", value: "978-0-7475-3269-9" },
-      { label: "Publisher", value: "Bloomsbury, 1997 Edition" },
-      { label: "Language", value: "English" },
-      { label: "Format", value: "Paperback" },
-      { label: "Pages", value: "223" },
-      { label: "Genre", value: "Fantasy, Young Adult" },
-    ],
-  },
-  {
-    id: "little-prince",
-    name: "The Little Prince",
-    metaLabel: "Author",
-    meta: "Antoine de Saint-Exupéry",
-    price: 100000,
-    category: "fiction",
-    tag: "Fiction",
-    image: "/img/little_prince.jpg",
-    description:
-      "A poetic tale of a young prince who leaves his tiny home planet to journey across the universe, meeting a fox, a rose, and a stranded pilot along the way. This edition uses Richard Howard's modern English translation.",
-    stock: 24,
-    specs: [
-      { label: "ISBN", value: "978-0-15-601219-5" },
-      { label: "Publisher", value: "Harvest Books, 2000 Edition" },
-      { label: "Language", value: "English" },
-      { label: "Format", value: "Paperback" },
-      { label: "Pages", value: "96" },
-      { label: "Genre", value: "Classic Fiction, Fable" },
-    ],
-  },
-  {
-    id: "english-grammar",
-    name: "English Grammar in Use",
-    metaLabel: "Author",
-    meta: "Raymond Murphy",
-    price: 180000,
-    category: "reference",
-    tag: "Reference",
-    image: "/img/eng_use.jpg",
-    description:
-      "A self-study reference and practice book for intermediate learners of English, with clear explanations and exercises on facing pages.",
-    stock: 40,
-    specs: [
-      { label: "ISBN", value: "978-1-108-45765-4" },
-      { label: "Publisher", value: "Cambridge University Press" },
-      { label: "Language", value: "English" },
-      { label: "Format", value: "Paperback" },
-      { label: "Pages", value: "380" },
-      { label: "Genre", value: "Reference, Education" },
-    ],
-  },
-  {
-    id: "catan",
-    name: "Catan",
-    metaLabel: "Players",
-    meta: "3–4",
-    price: 200000,
-    category: "board-games",
-    tag: "Board Games",
-    image: "/img/catan_bg.jpg",
-    description:
-      "Trade, build, and settle a newly discovered island in this classic strategy board game. Collect resources, build roads and settlements, and out-trade your opponents.",
-    stock: 12,
-    specs: [
-      { label: "Players", value: "3–4" },
-      { label: "Playtime", value: "60–90 minutes" },
-      { label: "Ages", value: "10+" },
-      { label: "Publisher", value: "Catan Studio" },
-      { label: "Genre", value: "Strategy, Trading" },
-    ],
-  },
-  {
-    id: "monopoly",
-    name: "Monopoly",
-    metaLabel: "Players",
-    meta: "2–8",
-    price: 350000,
-    category: "board-games",
-    tag: "Board Games",
-    image: "/img/monopoly.jpg",
-    description:
-      "The classic property-trading board game. Buy, sell, and develop real estate to bankrupt your opponents and become the wealthiest player.",
-    stock: 18,
-    specs: [
-      { label: "Players", value: "2–8" },
-      { label: "Playtime", value: "60–180 minutes" },
-      { label: "Ages", value: "8+" },
-      { label: "Publisher", value: "Hasbro" },
-      { label: "Genre", value: "Family, Trading" },
-    ],
-  },
-  {
-    id: "uno",
-    name: "Uno",
-    metaLabel: "Players",
-    meta: "2–10",
-    price: 100000,
-    category: "board-games",
-    tag: "Board Games",
-    image: "/img/uno.jpg",
-    description:
-      "The classic fast-paced card game. Match colours and numbers, deploy Wild and action cards, and be the first to empty your hand.",
-    stock: 50,
-    specs: [
-      { label: "Players", value: "2–10" },
-      { label: "Playtime", value: "15–30 minutes" },
-      { label: "Ages", value: "7+" },
-      { label: "Publisher", value: "Mattel Games" },
-      { label: "Genre", value: "Family, Card Game" },
-    ],
-  },
-  {
-    id: "norwegian-wood",
-    name: "Norwegian Wood",
-    metaLabel: "Author",
-    meta: "Haruki Murakami",
-    price: 135000,
-    category: "fiction",
-    tag: "Fiction",
-    image: "/img/norwey_wood.jpg",
-    description:
-      "A nostalgic story of loss and burgeoning sexuality, told through the eyes of a young man reflecting on his student years in 1960s Tokyo.",
-    stock: 16,
-    specs: [
-      { label: "ISBN", value: "978-0-09-952804-2" },
-      { label: "Publisher", value: "Vintage, 2003 Edition" },
-      { label: "Language", value: "English (translated)" },
-      { label: "Format", value: "Paperback" },
-      { label: "Pages", value: "389" },
-      { label: "Genre", value: "Literary Fiction, Romance" },
-    ],
-  },
-  {
-    id: "atomic-habits",
-    name: "Atomic Habits",
-    metaLabel: "Author",
-    meta: "James Clear",
-    price: 175000,
-    category: "self-help",
-    tag: "Self-Help",
-    image: "/img/atomic_book.webp",
-    description:
-      "A practical, evidence-based guide to building good habits and breaking bad ones, one small change at a time.",
-    stock: 30,
-    specs: [
-      { label: "ISBN", value: "978-1-84-488331-8" },
-      { label: "Publisher", value: "Random House Business" },
-      { label: "Language", value: "English" },
-      { label: "Format", value: "Paperback" },
-      { label: "Pages", value: "320" },
-      { label: "Genre", value: "Self-Help, Productivity" },
-    ],
-  },
-];
+  const reviews = database.collection("reviews");
+  const wishlistItems = database.collection("wishlistItems");
 
-// Reviews are linked to a product and, when written by a signed-in member,
-// to that member's userId (enables the ownership checks required by A2).
-// Seed reviews use userId: null with a plain authorName since they predate
-// the account system and cannot be edited or deleted by anyone.
-const reviews = [
-  {
-    id: 1,
-    productId: "little-prince",
-    userId: 2,
-    authorName: "Linh Nguyen",
-    rating: 5,
-    title: "A beautiful, quick read",
-    body: "I finished this in one afternoon and it stayed with me for days. The Howard translation reads very naturally in English, which made it easy for me as a second-language reader.",
-    createdAt: "2026-07-18T10:00:00.000Z",
-    helpfulCount: 32,
-  },
-  {
-    id: 2,
-    productId: "little-prince",
-    userId: null,
-    authorName: "Daniel Lee",
-    rating: 4,
-    title: "Lovely edition, small print",
-    body: "The story itself is timeless and the illustrations are printed nicely. My only complaint is that the text is a little small for reading before bed. Still a great gift book.",
-    createdAt: "2026-07-14T10:00:00.000Z",
-    helpfulCount: 11,
-  },
-  {
-    id: 3,
-    productId: "little-prince",
-    userId: 4,
-    authorName: "Mai Hoang",
-    rating: 5,
-    title: "Re-read it as an adult and cried",
-    body: "I read this as a kid and picked it up again this year. Hits completely differently as an adult. Delivery was fast and the cover arrived in perfect condition.",
-    createdAt: "2026-07-02T10:00:00.000Z",
-    helpfulCount: 8,
-  },
-  {
-    id: 4,
-    productId: "harry-potter",
-    userId: null,
-    authorName: "Noah Tran",
-    rating: 5,
-    title: "The one that started it all",
-    body: "Still holds up decades later. Great starting point if you have never read the series.",
-    createdAt: "2026-06-20T10:00:00.000Z",
-    helpfulCount: 19,
-  },
-  {
-    id: 5,
-    productId: "catan",
-    userId: 3,
-    authorName: "Alex Pham",
-    rating: 4,
-    title: "Great for game night",
-    body: "Takes a round to learn but our group was hooked after that. Just wish the box insert was better organised.",
-    createdAt: "2026-07-05T10:00:00.000Z",
-    helpfulCount: 6,
-  },
-];
+  await reviews.createIndex(
+    { productId: 1, userId: 1 },
+    { name: "unique_review_per_user_product", unique: true, partialFilterExpression: { userId: { $type: "number" } } },
+  );
+  await reviews.createIndex({ productId: 1, createdAt: -1 }, { name: "reviews_by_product_date" });
+  await reviews.createIndex({ productId: 1, helpfulCount: -1 }, { name: "reviews_by_product_helpful" });
 
-// One row per saved product per user; addedAt supports "recently added"
-// sorting and purchased tracks the move-to-cart / purchased workflow.
-const wishlistItems = [
-  { id: 1, userId: 2, productId: "little-prince", addedAt: "2026-07-10T09:00:00.000Z", purchased: false },
-  { id: 2, userId: 2, productId: "catan", addedAt: "2026-07-12T09:00:00.000Z", purchased: false },
-  { id: 3, userId: 4, productId: "little-prince", addedAt: "2026-07-08T09:00:00.000Z", purchased: false },
-  { id: 4, userId: 3, productId: "little-prince", addedAt: "2026-07-15T09:00:00.000Z", purchased: false },
-];
-
-let nextReviewId = reviews.length
-  ? Math.max(...reviews.map((review) => review.id)) + 1
-  : 1;
-let nextWishlistItemId = wishlistItems.length
-  ? Math.max(...wishlistItems.map((item) => item.id)) + 1
-  : 1;
-
-function getNextReviewId() {
-  return nextReviewId++;
+  await wishlistItems.createIndex(
+    { userId: 1, productId: 1 },
+    { name: "unique_wishlist_entry", unique: true },
+  );
+  await wishlistItems.createIndex({ productId: 1 }, { name: "wishlist_by_product" });
 }
 
-function getNextWishlistItemId() {
-  return nextWishlistItemId++;
-}
-
-module.exports = {
-  users,
-  blogPosts,
-  forumTopics,
-  forumReplies,
-  products,
-  reviews,
-  wishlistItems,
-  getNextReviewId,
-  getNextWishlistItemId,
-};
+module.exports = { ensureDatabaseIndexes };

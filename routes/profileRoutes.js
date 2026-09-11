@@ -1,6 +1,11 @@
 const express = require("express");
 const { requireLogin } = require("../middleware/auth");
 const {
+  getUploadedProfileImagePath,
+  handleProfileImageUpload,
+  removeUploadedProfileImage,
+} = require("../middleware/profileImageUpload");
+const {
   findUserByEmail,
   findUserById,
   updateUser,
@@ -76,13 +81,17 @@ function createProfileRouter() {
     renderProfile(response, { currentUser: request.currentUser });
   });
 
-  router.post("/profile", requireLogin, async (request, response) => {
+  router.post("/profile", requireLogin, handleProfileImageUpload, async (request, response) => {
     const database = request.app.locals.database;
     const formData = getProfileFormData(request.body);
     const existingUser = await findUserByEmail(database, formData.email);
 
     if (existingUser && existingUser.id !== request.currentUser.id) {
       formData.errors.email = "That email address is already in use by another account.";
+    }
+
+    if (request.profileImageUploadError) {
+      formData.errors.avatarImage = request.profileImageUploadError;
     }
 
     if (Object.keys(formData.errors).length > 0) {
@@ -100,12 +109,26 @@ function createProfileRouter() {
       return;
     }
 
-    const user = await updateUser(database, request.currentUser.id, {
+    const uploadedImagePath = getUploadedProfileImagePath(request);
+    const removePhoto = request.body.removeAvatarImage === "on" && !uploadedImagePath;
+    const changes = {
       avatarColor: formData.avatarColor,
       email: formData.email,
       fullName: formData.fullName,
       introduction: formData.introduction,
-    });
+    };
+
+    if (uploadedImagePath) {
+      changes.avatarImage = uploadedImagePath;
+    } else if (removePhoto) {
+      changes.avatarImage = "";
+    }
+
+    if ((uploadedImagePath || removePhoto) && request.currentUser.avatarImage) {
+      await removeUploadedProfileImage(request.currentUser.avatarImage);
+    }
+
+    const user = await updateUser(database, request.currentUser.id, changes);
 
     renderProfile(response, { currentUser: user, profileSaved: true });
   });

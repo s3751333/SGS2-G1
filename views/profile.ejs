@@ -26,7 +26,9 @@
         <div class="profile-layout">
             <aside class="profile-card">
                 <div class="avatar-wrap">
-                    <% if (currentUser.avatarColor) { %>
+                    <% if (currentUser.avatarImage) { %>
+                        <img class="avatar-placeholder avatar-photo" src="/<%= currentUser.avatarImage %>" alt="<%= currentUser.fullName %>'s profile photo">
+                    <% } else if (currentUser.avatarColor) { %>
                         <div class="avatar-placeholder" style="background-color: <%= currentUser.avatarColor %>; color: #ffffff; border-style: solid;" aria-label="Profile avatar initials">
                             <%= currentUser.fullName.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase() %>
                         </div>
@@ -55,9 +57,21 @@
                         <p class="form-success" role="status">Your profile has been updated.</p>
                     <% } %>
 
-                    <form id="profile-form" action="/profile" method="post" novalidate>
+                    <form id="profile-form" action="/profile" method="post" enctype="multipart/form-data" novalidate>
                         <div class="full-field">
-                            <span>Avatar colour</span>
+                            <label for="avatar-file">Profile picture</label>
+                            <input type="file" id="avatar-file" name="avatarFile" accept="image/jpeg,image/png,image/gif,image/webp">
+                            <p class="field-error" data-error-for="avatarImage"><%= profileErrors.avatarImage || "" %></p>
+                            <% if (currentUser.avatarImage) { %>
+                                <label class="remove-photo-option">
+                                    <input type="checkbox" name="removeAvatarImage">
+                                    Remove current photo and use a colour avatar instead
+                                </label>
+                            <% } %>
+                        </div>
+
+                        <div class="full-field">
+                            <span>Avatar colour <% if (currentUser.avatarImage) { %>(used if you remove your photo)<% } %></span>
                             <div class="avatar-picker" role="radiogroup" aria-label="Avatar colour">
                                 <% avatarColors.forEach((color, index) => { %>
                                     <input type="radio" id="avatar-<%= index %>" name="avatarColor" value="<%= color %>" <%= (currentUser.avatarColor || avatarColors[0]) === color ? "checked" : "" %>>

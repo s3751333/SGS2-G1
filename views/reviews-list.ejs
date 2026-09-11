@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Read all customer reviews for <%= product.name %> on BookNook.">
+    <title>BookNook | Reviews for <%= product.name %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/product-detail.css">
+</head>
+
+<body>
+    <%- include("partials/navbar", { activePage }) %>
+
+    <main class="page-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a> / <a href="/products">Shop</a> / <a href="/product-detail/<%= product.id %>"><%= product.name %></a> / Reviews
+        </nav>
+
+        <div class="page-heading">
+            <h1>Reviews for <%= product.name %></h1>
+            <p><%= rating.count %> review<%= rating.count === 1 ? "" : "s" %> &middot; <%= rating.average %> average rating</p>
+        </div>
+
+        <div class="review-tools">
+            <label for="review-sort">Sort by</label>
+            <select id="review-sort" data-review-sort>
+                <option value="recent" <%= reviewSort === "recent" ? "selected" : "" %>>Newest first</option>
+                <option value="helpful" <%= reviewSort === "helpful" ? "selected" : "" %>>Most helpful</option>
+            </select>
+            <a href="/product-detail/<%= product.id %>#write-review" class="secondary-button">Write a Review</a>
+        </div>
+
+        <div class="review-preview-list">
+            <% if (reviews.length === 0) { %>
+                <p class="no-reviews">No reviews yet for this product.</p>
+            <% } %>
+            <% reviews.forEach((review) => { %>
+                <a class="review-preview-card" href="/product-detail/<%= product.id %>/reviews/<%= review.id %>">
+                    <% if (review.image) { %>
+                        <img class="review-preview-thumb" src="/<%= review.image %>" alt="">
+                    <% } else { %>
+                        <div class="review-preview-thumb review-preview-thumb-placeholder"><i class="far fa-image"></i></div>
+                    <% } %>
+                    <div class="review-preview-body">
+                        <span class="stars" aria-hidden="true"><%- "&#9733;".repeat(review.rating) + "&#9734;".repeat(5 - review.rating) %></span>
+                        <h3><%= review.title %></h3>
+                        <p><%= review.summary %></p>
+                        <p class="review-preview-meta">
+                            By <%= review.authorName %> &middot;
+                            <%= new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) %>
+                        </p>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    </main>
+
+    <%- include("partials/footer") %>
+
+    <script src="/js/navbar.js" defer></script>
+    <script>
+        document.querySelector("[data-review-sort]").addEventListener("change", (event) => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("sort", event.target.value);
+            window.location.href = url.toString();
+        });
+    </script>
+</body>
+
+</html>

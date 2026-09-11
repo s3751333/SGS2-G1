@@ -64,7 +64,10 @@
 ### Khoa Pham Dang Nguyen - s4132855
 
 - `routes/productRoutes.js`, `routes/profileRoutes.js`
+- `repositories/reviewRepository.js`, `repositories/wishlistRepository.js`
+- `middleware/profileImageUpload.js`, `middleware/reviewImageUpload.js`
 - `views/products.ejs`, `views/product-detail.ejs`, `views/wishlist.ejs`, `views/profile.ejs`
+- `views/review-edit.ejs`, `views/reviews-list.ejs`, `views/review-detail.ejs`
 - `public/js/products.js`, `public/js/product-detail.js`, `public/js/wishlist.js`, `public/js/profile.js`
 - `public/css/products.css`, `public/css/product-detail.css`, `public/css/wishlist.css`, `public/css/profile.css`
 
@@ -113,10 +116,10 @@ Before running the application, install:
 - npm, which is included with Node.js
 
 Assessment 3 uses MongoDB Atlas for user accounts, sessions, password resets,
-blog posts and comments, forum topics and replies, products, carts, and orders.
-These records remain available after the Node.js process restarts. Reviews and
-wishlist entries still use their existing sample data. Moving a wishlist item
-into the cart writes to MongoDB.
+blog posts and comments, forum topics and replies, products, carts, orders,
+reviews, and wishlist entries. These records remain available after the
+Node.js process restarts. Moving a wishlist item into the cart writes to
+MongoDB.
 
 After downloading or extracting the repository, open a terminal in the
 `SGS2-G1` project folder and install the dependencies:
@@ -142,6 +145,15 @@ name. The application shows a clear startup error if a required setting is
 missing or the database cannot be reached. In MongoDB Atlas, the database user
 must have read and write access, and the server's IP address must be allowed in
 Network Access.
+
+If `npm run db:seed` or `npm start` fails with an error like
+`querySrv ECONNREFUSED _mongodb._tcp.<cluster>`, this is usually not a
+problem with the connection string itself: run `nslookup -type=SRV
+_mongodb._tcp.<your-cluster-host>` in a terminal to check whether the same
+lookup succeeds outside of Node.js. If it does, Node's own DNS resolver is
+the likely cause rather than your network or firewall; `database/connection.js`
+already works around this by pointing Node's resolver at `8.8.8.8` and
+`8.8.4.4` before connecting.
 
 Never commit `.env` because it contains the private database username and
 password. Only `.env.example`, which contains placeholders, belongs in Git.
@@ -242,6 +254,27 @@ Administrator links are shown only to a signed-in administrator.
 | Delete a blog post | Post owner | `POST /blog-articles/blog:id/delete` | Soft-deletes the owner's post so it no longer appears publicly | Completed |
 | Add a blog comment | Signed-in user | `POST /blog-articles/blog:id/comments` | Creates a `blogComments` document related to the user and post | Completed |
 | Dynamic sitemap | Public visitor or administrator | `GET /sitemap` | Retrieves current products, blog posts, and forum topics; adds administration links only for administrators | Completed |
+
+### Khoa Pham Dang Nguyen Module Endpoints
+
+| Feature | User | URL / Endpoint | MongoDB data | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| List and search products | Public visitor | `GET /products` | Retrieves `products` and computes each item's rating summary from `reviews` | Completed |
+| View product detail | Public visitor | `GET /product-detail/:id` | Retrieves one `products` document and its `reviews` | Completed |
+| List reviews for a product | Public visitor | `GET /product-detail/:id/reviews` | Retrieves preview data (title, summary, thumbnail, date) for all `reviews` on one product | Completed |
+| View one review | Public visitor | `GET /product-detail/:id/reviews/:reviewId` | Retrieves the full content of one `reviews` document | Completed |
+| Create a review | Signed-in user | `POST /product-detail/:id/reviews` | Creates a `reviews` document with an uploaded image URL; a unique index blocks a second review by the same user on the same product | Completed |
+| Edit a review | Review owner | `GET` and `POST /product-detail/:id/reviews/:reviewId/edit` | Updates the owner's `reviews` document, replacing the image if a new one is uploaded | Completed |
+| Delete a review | Review owner | `POST /product-detail/:id/reviews/:reviewId/delete` | Deletes the owner's `reviews` document and its uploaded image file | Completed |
+| Mark a review helpful | Public visitor | `POST /product-detail/:id/reviews/:reviewId/helpful` | Increments the `helpfulCount` field on one `reviews` document | Completed |
+| View wishlist | Signed-in user | `GET /wishlist` | Retrieves the signed-in user's `wishlistItems` joined with `products` | Completed |
+| Add to wishlist | Signed-in user | `POST /wishlist` | Creates a `wishlistItems` document; a unique index prevents duplicate entries | Completed |
+| Remove from wishlist | Signed-in user | `DELETE /wishlist/:productId` | Deletes the signed-in user's `wishlistItems` document | Completed |
+| Move a wishlist item to cart | Signed-in user | `POST /wishlist/:productId/move-to-cart` | Adds the item to the user's cart, then deletes the `wishlistItems` document | Completed |
+| View profile | Signed-in user | `GET /profile` | Retrieves the signed-in user's `users` document | Completed |
+| Edit profile | Signed-in user | `GET` and `POST /profile` | Updates name, email, introduction, and avatar colour or an uploaded profile photo on the `users` document | Completed |
+| Change password | Signed-in user | `POST /profile/password` | Verifies the current password hash and updates it | Completed |
+| Deactivate account | Signed-in user | `POST /profile/deactivate` | Sets the `users` document status to deactivated and ends the session | Completed |
 
 ### Test Accounts
 

@@ -9,3 +9,7 @@ output/
 !.env.example
 public/uploads/blog/*
 !public/uploads/blog/.gitkeep
+public/uploads/reviews/*
+!public/uploads/reviews/.gitkeep
+public/uploads/profile/*
+!public/uploads/profile/.gitkeep

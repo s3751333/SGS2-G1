@@ -1,6 +1,6 @@
 require("dotenv").config({ quiet: true });
 
-const { blogPosts: sampleBlogPosts, users: sampleUsers, forumTopics, forumReplies } = require("../data");
+const { blogPosts: sampleBlogPosts, users: sampleUsers, forumTopics, forumReplies, reviews, wishlistItems } = require("../data");
 const { closeDatabase, connectDatabase } = require("./connection");
 const { ensureDatabaseIndexes } = require("./indexes");
 const { seedProducts } = require("./seedProducts");
@@ -131,6 +131,34 @@ async function seedDatabase(database, args = []) {
     );
     console.log(`${name}: ${result.upsertedCount} inserted, ${result.matchedCount} already existed.`);
   }
+
+  const reviewDocuments = reviews.map(({ id, createdAt, ...record }) => ({
+    _id: id, ...record, createdAt: new Date(createdAt), updatedAt: new Date(createdAt),
+  }));
+  const reviewResult = await database.collection("reviews").bulkWrite(reviewDocuments.map((document) => ({
+    updateOne: { filter: { _id: document._id }, update: { $setOnInsert: document }, upsert: true },
+  })));
+  const latestReview = await database.collection("reviews").find().sort({ _id: -1 }).limit(1).next();
+  if (latestReview) {
+    await database.collection("counters").updateOne(
+      { _id: "reviews" }, { $max: { value: latestReview._id } }, { upsert: true },
+    );
+  }
+  console.log(`reviews: ${reviewResult.upsertedCount} inserted, ${reviewResult.matchedCount} already existed.`);
+
+  const wishlistDocuments = wishlistItems.map(({ id, addedAt, ...record }) => ({
+    _id: id, ...record, addedAt: new Date(addedAt),
+  }));
+  const wishlistResult = await database.collection("wishlistItems").bulkWrite(wishlistDocuments.map((document) => ({
+    updateOne: { filter: { _id: document._id }, update: { $setOnInsert: document }, upsert: true },
+  })));
+  const latestWishlistItem = await database.collection("wishlistItems").find().sort({ _id: -1 }).limit(1).next();
+  if (latestWishlistItem) {
+    await database.collection("counters").updateOne(
+      { _id: "wishlistItems" }, { $max: { value: latestWishlistItem._id } }, { upsert: true },
+    );
+  }
+  console.log(`wishlistItems: ${wishlistResult.upsertedCount} inserted, ${wishlistResult.matchedCount} already existed.`);
 }
 
 if (require.main === module) connectDatabase()
