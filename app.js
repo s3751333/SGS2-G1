@@ -12,12 +12,6 @@ const { createProfileRouter } = require("./routes/profileRoutes");
 const { createSitemapRouter } = require("./routes/sitemapRoutes");
 const { createCartService } = require("./services/cartService");
 const { ShopError } = require("./utils/shopError");
-const {
-  reviews,
-  wishlistItems,
-  getNextReviewId,
-  getNextWishlistItemId,
-} = require("./data");
 
 function createApp(database) {
   const app = express();
@@ -45,10 +39,6 @@ function createApp(database) {
   app.use(createCartRouter());
   app.use(createProductRouter({
     database,
-    reviews,
-    wishlistItems,
-    getNextReviewId,
-    getNextWishlistItemId,
     cartService,
   }));
   app.use(createPageRouter());

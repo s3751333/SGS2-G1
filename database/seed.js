@@ -132,6 +132,8 @@ async function seedDatabase(database, args = []) {
     console.log(`${name}: ${result.upsertedCount} inserted, ${result.matchedCount} already existed.`);
   }
 
+  if (args.includes("--forum")) return;
+
   const reviewDocuments = reviews.map(({ id, createdAt, ...record }) => ({
     _id: id, ...record, createdAt: new Date(createdAt), updatedAt: new Date(createdAt),
   }));

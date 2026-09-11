@@ -75,7 +75,7 @@
 
 - `app.js` - Express configuration, middleware, and router integration
 - `index.js` - database connection and server startup/shutdown
-- `data.js` - database seed samples and remaining prototype module data
+- `data.js` - development sample records used by the database seed script
 - `package.json`, `package-lock.json` - project configuration and dependencies
 - `views/partials/footer.ejs` - shared footer
 - `public/css/default.css`, `public/css/components.css` - shared styles
@@ -101,7 +101,7 @@ SGS2-G1/
 │   ├── blog-articles/      # Individual blog article templates
 │   ├── partials/           # Shared navbar and footer templates
 │   └── *.ejs               # Main application pages
-├── data.js                 # In-memory sample data
+├── data.js                 # Development database seed data
 ├── app.js                  # Express application setup and router integration
 ├── index.js                # Database connection and server entry point
 ├── package.json            # Project scripts and dependencies

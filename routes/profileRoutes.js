@@ -84,6 +84,7 @@ function createProfileRouter() {
   router.post("/profile", requireLogin, handleProfileImageUpload, async (request, response) => {
     const database = request.app.locals.database;
     const formData = getProfileFormData(request.body);
+    const uploadedImagePath = getUploadedProfileImagePath(request);
     const existingUser = await findUserByEmail(database, formData.email);
 
     if (existingUser && existingUser.id !== request.currentUser.id) {
@@ -95,6 +96,7 @@ function createProfileRouter() {
     }
 
     if (Object.keys(formData.errors).length > 0) {
+      await removeUploadedProfileImage(uploadedImagePath);
       renderProfile(response, {
         currentUser: {
           ...request.currentUser,
@@ -109,7 +111,6 @@ function createProfileRouter() {
       return;
     }
 
-    const uploadedImagePath = getUploadedProfileImagePath(request);
     const removePhoto = request.body.removeAvatarImage === "on" && !uploadedImagePath;
     const changes = {
       avatarColor: formData.avatarColor,
@@ -124,11 +125,17 @@ function createProfileRouter() {
       changes.avatarImage = "";
     }
 
+    let user;
+    try {
+      user = await updateUser(database, request.currentUser.id, changes);
+    } catch (error) {
+      await removeUploadedProfileImage(uploadedImagePath);
+      throw error;
+    }
+
     if ((uploadedImagePath || removePhoto) && request.currentUser.avatarImage) {
       await removeUploadedProfileImage(request.currentUser.avatarImage);
     }
-
-    const user = await updateUser(database, request.currentUser.id, changes);
 
     renderProfile(response, { currentUser: user, profileSaved: true });
   });

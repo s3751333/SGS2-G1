@@ -250,9 +250,11 @@ function createProductRouter({ database, cartService }) {
   });
 
   router.post("/product-detail/:id/reviews", requireLogin, handleReviewImageUpload, async (request, response, next) => {
+    const uploadedImagePath = getUploadedReviewImagePath(request);
     const product = await getProductById(request.params.id);
 
     if (!product) {
+      await removeUploadedReviewImage(uploadedImagePath);
       next();
       return;
     }
@@ -269,6 +271,7 @@ function createProductRouter({ database, cartService }) {
     }
 
     if (Object.keys(errors).length > 0) {
+      await removeUploadedReviewImage(uploadedImagePath);
       const allReviews = await listReviewsForProduct(database, product.id);
       const productReviews = sortReviews(allReviews, "recent")
         .map((review) => ({ ...review, isOwnReview: review.userId === request.currentUser.id }));
@@ -296,9 +299,10 @@ function createProductRouter({ database, cartService }) {
         rating,
         title,
         body,
-        image: getUploadedReviewImagePath(request),
+        image: uploadedImagePath,
       });
     } catch (error) {
+      await removeUploadedReviewImage(uploadedImagePath);
       // A duplicate slipping past the check above (e.g. a double-submit) is
       // caught here too, since productId+userId has a unique index.
       if (error.code !== DUPLICATE_KEY_ERROR) throw error;
@@ -336,19 +340,23 @@ function createProductRouter({ database, cartService }) {
   });
 
   router.post("/product-detail/:id/reviews/:reviewId/edit", requireLogin, handleReviewImageUpload, async (request, response, next) => {
+    const uploadedImagePath = getUploadedReviewImagePath(request);
     const product = await getProductById(request.params.id);
     if (!product) {
+      await removeUploadedReviewImage(uploadedImagePath);
       next();
       return;
     }
 
     const review = await findReviewById(database, request.params.reviewId, product.id);
     if (!review) {
+      await removeUploadedReviewImage(uploadedImagePath);
       next();
       return;
     }
 
     if (review.userId !== request.currentUser.id) {
+      await removeUploadedReviewImage(uploadedImagePath);
       response.status(403).send("You can only edit your own review.");
       return;
     }
@@ -360,6 +368,7 @@ function createProductRouter({ database, cartService }) {
     }
 
     if (Object.keys(errors).length > 0) {
+      await removeUploadedReviewImage(uploadedImagePath);
       response.status(400).render("review-edit", {
         activePage: "shop",
         currentUser: request.currentUser,
@@ -371,7 +380,6 @@ function createProductRouter({ database, cartService }) {
       return;
     }
 
-    const uploadedImagePath = getUploadedReviewImagePath(request);
     const removePhoto = request.body.removeImage === "on" && !uploadedImagePath;
     const changes = { rating, title, body };
 
@@ -381,11 +389,24 @@ function createProductRouter({ database, cartService }) {
       changes.image = "";
     }
 
+    let updatedReview;
+    try {
+      updatedReview = await updateReview(database, review.id, product.id, request.currentUser.id, changes);
+    } catch (error) {
+      await removeUploadedReviewImage(uploadedImagePath);
+      throw error;
+    }
+
+    if (!updatedReview) {
+      await removeUploadedReviewImage(uploadedImagePath);
+      next();
+      return;
+    }
+
     if ((uploadedImagePath || removePhoto) && review.image) {
       await removeUploadedReviewImage(review.image);
     }
 
-    await updateReview(database, review.id, product.id, request.currentUser.id, changes);
     response.redirect(`/product-detail/${product.id}#reviews`);
   });
 
